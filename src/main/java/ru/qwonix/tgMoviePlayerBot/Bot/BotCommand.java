@@ -26,6 +26,11 @@ public class BotCommand {
         log.info("help by {}", user);
     }
 
+    @Command(command = "/send")
+    public void send(User user, String[] args) {
+        botFeatures.sendVideo("1743883171", "BAACAgIAAxkBAANRYs6x16Dr5lBF8u3hs5Zxxn_ttjMAAnoaAAJq-3BKVr5yOMPU2aQpBA");
+    }
+
     @Command(command = "/admin")
     public void admin(User user, String[] args) {
         if (args.length == 1) {

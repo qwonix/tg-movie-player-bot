@@ -1,7 +1,9 @@
 package ru.qwonix.tgMoviePlayerBot.Bot;
 
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -21,6 +23,19 @@ public class BotFeatures {
     public BotFeatures(Bot bot, UserService userService) {
         this.bot = bot;
         this.userService = userService;
+    }
+
+    public void sendVideo(String chatId, String fileId) {
+        try {
+            SendDocument sendDocument = SendDocument.builder()
+                    .document(new InputFile(fileId))
+                    .caption(fileId)
+                    .chatId(chatId)
+                    .build();
+            bot.execute(sendDocument);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static InlineKeyboardMarkup createKeyboard(Map<String, String> buttons) {

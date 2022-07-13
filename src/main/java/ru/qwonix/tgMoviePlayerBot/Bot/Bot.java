@@ -2,8 +2,12 @@ package ru.qwonix.tgMoviePlayerBot.Bot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Video;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.qwonix.tgMoviePlayerBot.User.User;
 import ru.qwonix.tgMoviePlayerBot.User.UserService;
 
@@ -44,6 +48,12 @@ public class Bot extends TelegramLongPollingBot {
 
     public void onUpdateReceived(Update update) {
         if (!update.hasMessage() || !update.getMessage().hasText()) {
+            if (update.getMessage().hasVideo()) {
+                Video video = update.getMessage().getVideo();
+                String fileId = video.getFileId();
+
+                botFeatures.sendVideo(String.valueOf(update.getMessage().getChatId()), fileId);
+            }
             return;
         }
 
