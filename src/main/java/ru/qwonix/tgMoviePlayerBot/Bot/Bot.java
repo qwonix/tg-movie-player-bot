@@ -2,9 +2,10 @@ package ru.qwonix.tgMoviePlayerBot.Bot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.qwonix.tgMoviePlayerBot.User.User;
-import ru.qwonix.tgMoviePlayerBot.User.UserDao;
+import ru.qwonix.tgMoviePlayerBot.User.UserService;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,15 +30,16 @@ public class Bot extends TelegramLongPollingBot {
     private final BotConfig botConfig;
     private final BotCommand botCommand;
     private final BotFeatures botFeatures;
+    private final UserService userService;
 
     public Bot(BotConfig botConfig) {
         this.botConfig = botConfig;
 
-        UserDao userDao = new UserDao();
-        BotFeatures botFeatures = new BotFeatures(this, userDao);
+        userService = new UserService();
+        BotFeatures botFeatures = new BotFeatures(this, userService);
         this.botFeatures = botFeatures;
 
-        this.botCommand = new BotCommand(userDao, botFeatures);
+        this.botCommand = new BotCommand(userService, botFeatures);
     }
 
     public void onUpdateReceived(Update update) {
@@ -45,8 +47,18 @@ public class Bot extends TelegramLongPollingBot {
             return;
         }
 
-        User user = new User();
-        user.setChatId(update.getMessage().getChatId().intValue());
+        User user = User.builder()
+                .chatId(update.getMessage().getChatId().intValue())
+                .name(update.getMessage().getFrom().getFirstName())
+                .build();
+        userService.merge(user);
+
+        if (update.hasCallbackQuery()) {
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            String data = callbackQuery.getData();
+
+            System.out.println(data); //////
+        }
 
         String userMessageText = update.getMessage().getText();
 

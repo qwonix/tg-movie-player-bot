@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.qwonix.tgMoviePlayerBot.User.User;
-import ru.qwonix.tgMoviePlayerBot.User.UserDao;
+import ru.qwonix.tgMoviePlayerBot.User.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +16,11 @@ import java.util.Map;
 public class BotFeatures {
 
     private final Bot bot;
-    private final UserDao userDAO;
+    private final UserService userService;
 
-    public BotFeatures(Bot bot, UserDao userDAO) {
+    public BotFeatures(Bot bot, UserService userService) {
         this.bot = bot;
-        this.userDAO = userDAO;
+        this.userService = userService;
     }
 
     public static InlineKeyboardMarkup createKeyboard(Map<String, String> buttons) {
@@ -30,6 +30,8 @@ public class BotFeatures {
 
         for (Map.Entry<String, String> button : buttons.entrySet()) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+
+            inlineKeyboardButton.setCallbackData("");
 
             inlineKeyboardButton.setText(button.getKey());
             inlineKeyboardButton.setUrl(button.getValue());
