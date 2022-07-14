@@ -1,4 +1,4 @@
-package ru.qwonix.tgMoviePlayerBot.series;
+package ru.qwonix.tgMoviePlayerBot.dao.series;
 
 import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class SeriesDao {
+public class SeriesDaoImpl implements SeriesDao {
     private final ConnectionBuilder connectionBuilder;
 
-    public SeriesDao(ConnectionBuilder connectionBuilder) {
+    public SeriesDaoImpl(ConnectionBuilder connectionBuilder) {
         this.connectionBuilder = connectionBuilder;
     }
 
-    private Series convert(ResultSet seriesResultSet) throws SQLException {
+    public Series convert(ResultSet seriesResultSet) throws SQLException {
         return Series.builder()
                 .id(seriesResultSet.getInt("id"))
                 .name(seriesResultSet.getString("name"))
@@ -35,8 +35,7 @@ public class SeriesDao {
                 Series series = convert(resultSet);
                 serials.add(series);
             }
-        }
-        finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
         return serials;
@@ -105,8 +104,7 @@ public class SeriesDao {
             preparedStatement.setString(3, series.getCountry());
             preparedStatement.setLong(4, id);
             preparedStatement.executeUpdate();
-        }
-        finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
     }
@@ -117,8 +115,7 @@ public class SeriesDao {
                      connection.prepareStatement("DELETE FROM series WHERE id=?")) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
-        }
-        finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
     }

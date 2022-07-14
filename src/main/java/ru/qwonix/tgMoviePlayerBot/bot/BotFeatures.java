@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.qwonix.tgMoviePlayerBot.series.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.dao.SeriesService;
 import ru.qwonix.tgMoviePlayerBot.user.User;
 import ru.qwonix.tgMoviePlayerBot.user.UserService;
 

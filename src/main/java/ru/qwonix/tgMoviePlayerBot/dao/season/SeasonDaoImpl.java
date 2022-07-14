@@ -1,8 +1,10 @@
-package ru.qwonix.tgMoviePlayerBot.series;
+package ru.qwonix.tgMoviePlayerBot.dao.season;
 
 import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
+import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDao;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -10,15 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class SeasonDao {
+public class SeasonDaoImpl implements SeasonDao {
+
     private final ConnectionBuilder connectionBuilder;
 
-    public SeasonDao(ConnectionBuilder connectionBuilder) {
+    public SeasonDaoImpl(ConnectionBuilder connectionBuilder) {
         this.connectionBuilder = connectionBuilder;
     }
 
-    private Season convert(ResultSet seasonResultSet) throws SQLException {
-        SeriesDao seriesDao = new SeriesDao(connectionBuilder);
+    public Season convert(ResultSet seasonResultSet) throws SQLException {
+        SeriesDao seriesDao = new SeriesDaoImpl(connectionBuilder);
         Optional<Series> series = seriesDao.find(seasonResultSet.getInt("series_id"));
 
         return Season.builder()
@@ -42,8 +45,7 @@ public class SeasonDao {
                 Season season = convert(resultSet);
                 seasons.add(season);
             }
-        }
-        finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
         return seasons;
@@ -62,9 +64,7 @@ public class SeasonDao {
                 Season season = convert(resultSet);
                 seasons.add(season);
             }
-        }
-
-        finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
         return seasons;
@@ -82,8 +82,7 @@ public class SeasonDao {
                 Season season = convert(resultSet);
                 return Optional.of(season);
             }
-        }
-        finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
 
@@ -104,8 +103,7 @@ public class SeasonDao {
             preparedStatement.setInt(5, season.getSeries().getId());
 
             preparedStatement.executeUpdate();
-        }
-        finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
     }
@@ -124,10 +122,9 @@ public class SeasonDao {
             preparedStatement.setLong(6, id);
 
             preparedStatement.executeUpdate();
-        }finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
-    ;
     }
 
     public void delete(long id) throws SQLException {
@@ -137,7 +134,7 @@ public class SeasonDao {
                      connection.prepareStatement("DELETE FROM season WHERE id=?")) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
-        }finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
 

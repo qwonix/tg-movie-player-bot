@@ -1,9 +1,11 @@
-package ru.qwonix.tgMoviePlayerBot.series;
+package ru.qwonix.tgMoviePlayerBot.dao.episode;
 
 import org.postgresql.util.PGInterval;
 import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.dao.season.SeasonDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
+import ru.qwonix.tgMoviePlayerBot.dao.season.SeasonDao;
 
 import java.sql.*;
 import java.time.Duration;
@@ -12,17 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class EpisodeDao {
+public class EpisodeDaoImpl implements EpisodeDao {
     private final ConnectionBuilder connectionBuilder;
 
-    public EpisodeDao(ConnectionBuilder connectionBuilder) {
+    public EpisodeDaoImpl(ConnectionBuilder connectionBuilder) {
         this.connectionBuilder = connectionBuilder;
     }
 
-    private Episode convert(ResultSet episodeResultSet) throws SQLException {
+    public Episode convert(ResultSet episodeResultSet) throws SQLException {
         PGInterval duration = (PGInterval) episodeResultSet.getObject("duration");
 
-        SeasonDao seasonDao = new SeasonDao(connectionBuilder);
+        SeasonDao seasonDao = new SeasonDaoImpl(connectionBuilder);
         Optional<Season> season = seasonDao.find(episodeResultSet.getInt("season_id"));
 
         return Episode.builder()
@@ -50,12 +52,29 @@ public class EpisodeDao {
                 Episode episode = convert(resultSet);
                 episodes.add(episode);
             }
-        }
-
-        finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
         return episodes;
+    }
+
+    public Optional<Episode> find(int id) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT * FROM episode WHERE id=?")) {
+            preparedStatement.setLong(1, id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Episode episode = convert(resultSet);
+                return Optional.of(episode);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+
+        return Optional.empty();
     }
 
     public void insert(Episode episode) throws SQLException {
@@ -76,29 +95,8 @@ public class EpisodeDao {
             preparedStatement.setString(9, episode.getFileId());
 
             preparedStatement.executeUpdate();
-        }
-        finally {
+        } finally {
             connectionBuilder.releaseConnection(connection);
         }
-    }
-
-    public Optional<Episode> find(int id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM episode WHERE id=?")) {
-            preparedStatement.setLong(1, id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Episode episode = convert(resultSet);
-                return Optional.of(episode);
-            }
-        }
-        finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-
-        return Optional.empty();
     }
 }

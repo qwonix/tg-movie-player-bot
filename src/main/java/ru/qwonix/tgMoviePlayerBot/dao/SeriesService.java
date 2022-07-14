@@ -1,10 +1,16 @@
-package ru.qwonix.tgMoviePlayerBot.series;
+package ru.qwonix.tgMoviePlayerBot.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.qwonix.tgMoviePlayerBot.config.DatabaseConfig;
 import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.dao.DaoException;
 import ru.qwonix.tgMoviePlayerBot.dao.PoolConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.dao.episode.EpisodeDao;
+import ru.qwonix.tgMoviePlayerBot.dao.episode.EpisodeDaoImpl;
+import ru.qwonix.tgMoviePlayerBot.dao.season.SeasonDao;
+import ru.qwonix.tgMoviePlayerBot.dao.season.SeasonDaoImpl;
+import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDao;
+import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
@@ -31,9 +37,9 @@ public class SeriesService {
         }
     }
 
-    private final SeriesDao seriesDao = new SeriesDao(connectionBuilder);
-    private final EpisodeDao episodeDao = new EpisodeDao(connectionBuilder);
-    private final SeasonDao seasonDao = new SeasonDao(connectionBuilder);
+    private final SeriesDao seriesDao = new SeriesDaoImpl(connectionBuilder);
+    private final EpisodeDao episodeDao = new EpisodeDaoImpl(connectionBuilder);
+    private final SeasonDao seasonDao = new SeasonDaoImpl(connectionBuilder);
 
     public boolean exists(Series series) {
         try {

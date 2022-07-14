@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
-import ru.qwonix.tgMoviePlayerBot.series.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.dao.SeriesService;
 import ru.qwonix.tgMoviePlayerBot.user.User;
 import ru.qwonix.tgMoviePlayerBot.user.UserService;
 
