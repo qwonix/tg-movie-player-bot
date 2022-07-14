@@ -1,14 +1,15 @@
-package ru.qwonix.tgMoviePlayerBot.Bot;
+package ru.qwonix.tgMoviePlayerBot.bot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Video;
-import ru.qwonix.tgMoviePlayerBot.Config.TelegramConfig;
-import ru.qwonix.tgMoviePlayerBot.Series.SeriesService;
-import ru.qwonix.tgMoviePlayerBot.User.User;
-import ru.qwonix.tgMoviePlayerBot.User.UserService;
+import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
+import ru.qwonix.tgMoviePlayerBot.entity.Episode;
+import ru.qwonix.tgMoviePlayerBot.series.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.user.User;
+import ru.qwonix.tgMoviePlayerBot.user.UserService;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,13 +42,14 @@ public class Bot extends TelegramLongPollingBot {
         BotFeatures botFeatures = new BotFeatures(this, userService, seriesService);
         this.botFeatures = botFeatures;
 
-        this.botCommand = new BotCommand(userService, botFeatures);
+        this.botCommand = new BotCommand(userService, seriesService, botFeatures);
     }
 
     public void onVideo(Update update) {
         Video video = update.getMessage().getVideo();
         String fileId = video.getFileId();
 
+        // FIXME: 14-Jul-22 проверить, содержит ли update информацию об отправлители. заменить доступ, если нет
         User user = User.builder()
                 .chatId(update.getMessage().getChatId().intValue())
                 .name(update.getMessage().getFrom().getFirstName())
@@ -59,17 +61,22 @@ public class Bot extends TelegramLongPollingBot {
         CallbackQuery callbackQuery = update.getCallbackQuery();
         String data = callbackQuery.getData();
         User user = User.builder()
-                .chatId(update.getMessage().getChatId().intValue())
-                .name(update.getMessage().getFrom().getFirstName())
+                .chatId(callbackQuery.getFrom().getId())
+                .name(callbackQuery.getFrom().getFirstName())
                 .build();
 
         log.info("user {} callback {}", user, data);
-        botFeatures.sendVideo(user, data);
+        String fileId = seriesService.findEpisode(Integer.parseInt(data))
+                .map(Episode::getFileId)
+                .orElse("");
+
+        botFeatures.sendVideo(user, fileId);
     }
 
     public void onUpdateReceived(Update update) {
         if (update.hasCallbackQuery()) {
             onCallbackQuery(update);
+            return;
         }
 
         if (!update.hasMessage() || !update.getMessage().hasText()) {
@@ -111,12 +118,11 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return TelegramConfig.getProperty(TelegramConfig.BOT_USERNAME);
+        return BotConfig.getProperty(BotConfig.BOT_USERNAME);
     }
 
     @Override
     public String getBotToken() {
-        return TelegramConfig.getProperty(TelegramConfig.BOT_TOKEN);
-
+        return BotConfig.getProperty(BotConfig.BOT_TOKEN);
     }
 }

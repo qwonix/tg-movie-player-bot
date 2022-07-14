@@ -37,5 +37,5 @@ build/
 ### Mac OS ###
 .DS_Store
 /logs.log
-/src/main/resources/telegram_bot.properties
+/src/main/resources/bot.properties
 /src/main/resources/dao.properties

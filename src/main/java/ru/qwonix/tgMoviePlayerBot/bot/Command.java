@@ -1,4 +1,4 @@
-package ru.qwonix.tgMoviePlayerBot.Bot;
+package ru.qwonix.tgMoviePlayerBot.bot;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

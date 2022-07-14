@@ -1,19 +1,19 @@
-package ru.qwonix.tgMoviePlayerBot.Config;
+package ru.qwonix.tgMoviePlayerBot.config;
 
 import java.io.InputStream;
 import java.util.Properties;
 
-public abstract class BotConfig {
-    public static final String BOT_USERNAME = "bot.username";
-    public static final String BOT_TOKEN = "bot.token";
-    public static final String ADMIN_PASSWORD = "admin.password";
+public abstract class DatabaseConfig {
+    public static final String DB_URL = "db.url";
+    public static final String DB_USER = "db.user";
+    public static final String DB_PASSWORD = "db.password";
 
     private static final Properties properties = new Properties();
 
     public synchronized static String getProperty(String name) {
         if (properties.isEmpty()) {
             try (InputStream is = DatabaseConfig.class.getClassLoader()
-                    .getResourceAsStream("bot.properties")) {
+                    .getResourceAsStream("dao.properties")) {
                 properties.load(is);
             } catch (Exception ex) {
                 ex.printStackTrace();

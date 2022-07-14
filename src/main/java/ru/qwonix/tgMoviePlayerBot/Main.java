@@ -5,7 +5,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-import ru.qwonix.tgMoviePlayerBot.Bot.Bot;
+import ru.qwonix.tgMoviePlayerBot.bot.Bot;
 
 @Slf4j
 public class Main {

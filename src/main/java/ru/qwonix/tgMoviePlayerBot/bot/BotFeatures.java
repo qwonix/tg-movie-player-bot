@@ -1,4 +1,4 @@
-package ru.qwonix.tgMoviePlayerBot.Bot;
+package ru.qwonix.tgMoviePlayerBot.bot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
@@ -7,8 +7,9 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.qwonix.tgMoviePlayerBot.User.User;
-import ru.qwonix.tgMoviePlayerBot.User.UserService;
+import ru.qwonix.tgMoviePlayerBot.series.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.user.User;
+import ru.qwonix.tgMoviePlayerBot.user.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +20,19 @@ public class BotFeatures {
 
     private final Bot bot;
     private final UserService userService;
+    private final SeriesService seriesService;
 
-    public BotFeatures(Bot bot, UserService userService) {
+    public BotFeatures(Bot bot, UserService userService, SeriesService seriesService) {
         this.bot = bot;
         this.userService = userService;
+        this.seriesService = seriesService;
     }
 
-    public void sendVideo(String chatId, String fileId) {
+    public void sendVideo(User user, String fileId) {
         try {
             SendDocument sendDocument = SendDocument.builder()
                     .document(new InputFile(fileId))
-                    .caption(fileId)
-                    .chatId(chatId)
+                    .chatId(String.valueOf(user.getChatId()))
                     .build();
             bot.execute(sendDocument);
         } catch (TelegramApiException e) {
@@ -38,7 +40,7 @@ public class BotFeatures {
         }
     }
 
-    public static InlineKeyboardMarkup createKeyboard(Map<String, String> buttons) {
+    public static InlineKeyboardMarkup createLinkKeyboard(Map<String, String> buttons) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
@@ -49,7 +51,26 @@ public class BotFeatures {
             inlineKeyboardButton.setCallbackData("");
 
             inlineKeyboardButton.setText(button.getKey());
-            inlineKeyboardButton.setUrl(button.getValue());
+            inlineKeyboardButton.setCallbackData(button.getValue());
+            rowInline.add(inlineKeyboardButton);
+        }
+        rowsInline.add(rowInline);
+        markupInline.setKeyboard(rowsInline);
+        return markupInline;
+    }
+
+    public static InlineKeyboardMarkup createCallbackKeyboard(Map<String, String> buttons) {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+
+        for (Map.Entry<String, String> button : buttons.entrySet()) {
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+
+            inlineKeyboardButton.setCallbackData("");
+
+            inlineKeyboardButton.setText(button.getKey());
+            inlineKeyboardButton.setCallbackData(button.getValue());
             rowInline.add(inlineKeyboardButton);
         }
         rowsInline.add(rowInline);
@@ -66,18 +87,26 @@ public class BotFeatures {
         try {
             bot.execute(message);
         } catch (TelegramApiException e) {
-            log.error("message sending error user-{}: {}", user, e.getMessage());
+            log.error("message sending error {}: {}", user, e.getMessage());
             e.printStackTrace();
         }
     }
 
-    private void sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
+    public void sendMarkdownText(User user, String markdownMessage) {
+        SendMessage.SendMessageBuilder message = SendMessage.builder()
+                .text(markdownMessage)
+                .parseMode("MarkdownV2");
+
+        this.sendMessage(user, message);
+    }
+
+
+    public void sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
         SendMessage message = messageBuilder.chatId(String.valueOf(user.getChatId())).build();
         try {
             bot.execute(message);
         } catch (TelegramApiException e) {
-            log.error("message sending error user-{}: {}", user.getChatId(), e.getMessage());
-            e.printStackTrace();
+            log.error("message sending error {}: {}", user.getChatId(), e.getMessage());
         }
     }
 }

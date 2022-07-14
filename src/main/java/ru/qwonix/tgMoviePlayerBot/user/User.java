@@ -1,4 +1,4 @@
-package ru.qwonix.tgMoviePlayerBot.User;
+package ru.qwonix.tgMoviePlayerBot.user;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,5 +8,6 @@ import lombok.Data;
 public class User {
     private long chatId;
     private String name;
-    private boolean isAdmin;
+    @Builder.Default
+    private boolean isAdmin = false;
 }
