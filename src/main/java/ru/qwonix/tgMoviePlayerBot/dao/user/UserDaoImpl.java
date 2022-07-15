@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public class UserDaoImpl implements UserDao {
+public class UserDaoImpl implements UserDao<User> {
     private final ConnectionBuilder connectionBuilder;
 
     public UserDaoImpl(ConnectionBuilder connectionBuilder) {

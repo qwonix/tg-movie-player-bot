@@ -20,6 +20,7 @@ public class SeasonDaoImpl implements SeasonDao {
         this.connectionBuilder = connectionBuilder;
     }
 
+    @Override
     public Season convert(ResultSet seasonResultSet) throws SQLException {
         SeriesDao seriesDao = new SeriesDaoImpl(connectionBuilder);
         Optional<Series> series = seriesDao.find(seasonResultSet.getInt("series_id"));
@@ -34,6 +35,7 @@ public class SeasonDaoImpl implements SeasonDao {
                 .build();
     }
 
+    @Override
     public List<Season> findAll() throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -51,6 +53,7 @@ public class SeasonDaoImpl implements SeasonDao {
         return seasons;
     }
 
+    @Override
     public List<Season> findAllBySeries(Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -70,6 +73,7 @@ public class SeasonDaoImpl implements SeasonDao {
         return seasons;
     }
 
+    @Override
     public Optional<Season> find(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -89,6 +93,7 @@ public class SeasonDaoImpl implements SeasonDao {
         return Optional.empty();
     }
 
+    @Override
     public void insert(Season season) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -108,6 +113,7 @@ public class SeasonDaoImpl implements SeasonDao {
         }
     }
 
+    @Override
     public void update(long id, Season season) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -127,6 +133,7 @@ public class SeasonDaoImpl implements SeasonDao {
         }
     }
 
+    @Override
     public void delete(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 

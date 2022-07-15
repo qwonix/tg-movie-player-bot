@@ -21,6 +21,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
         this.connectionBuilder = connectionBuilder;
     }
 
+    @Override
     public Episode convert(ResultSet episodeResultSet) throws SQLException {
         PGInterval duration = (PGInterval) episodeResultSet.getObject("duration");
 
@@ -41,6 +42,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
                 .build();
     }
 
+    @Override
     public List<Episode> findAll() throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -58,7 +60,8 @@ public class EpisodeDaoImpl implements EpisodeDao {
         return episodes;
     }
 
-    public Optional<Episode> find(int id) throws SQLException {
+    @Override
+    public Optional<Episode> find(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
@@ -77,6 +80,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
         return Optional.empty();
     }
 
+    @Override
     public void insert(Episode episode) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -93,6 +97,42 @@ public class EpisodeDaoImpl implements EpisodeDao {
             preparedStatement.setObject(7, episode.getDuration());
             preparedStatement.setInt(8, episode.getSeason().getId());
             preparedStatement.setString(9, episode.getFileId());
+
+            preparedStatement.executeUpdate();
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+    }
+
+    @Override
+    public void update(long id, Episode series) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("UPDATE episode " +
+                             "SET number=?, name=?, description=?, release_date=?, language=?, country=?, duration=?, season_id=?, telegram_file_id=? WHERE id=?")) {
+            preparedStatement.setInt(1, series.getNumber());
+            preparedStatement.setString(2, series.getName());
+            preparedStatement.setString(3, series.getDescription());
+            preparedStatement.setObject(4, series.getReleaseDate());
+            preparedStatement.setString(5, series.getLanguage());
+            preparedStatement.setString(6, series.getCountry());
+            preparedStatement.setObject(7, series.getDuration());
+            preparedStatement.setInt(8, series.getSeason().getId());
+            preparedStatement.setString(9, series.getFileId());
+            preparedStatement.setLong(10, id);
+
+            preparedStatement.executeUpdate();
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+    }
+
+    @Override
+    public void delete(long id) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("DELETE FROM series WHERE id=?")) {
+            preparedStatement.setLong(1, id);
 
             preparedStatement.executeUpdate();
         } finally {

@@ -15,6 +15,7 @@ public class SeriesDaoImpl implements SeriesDao {
         this.connectionBuilder = connectionBuilder;
     }
 
+    @Override
     public Series convert(ResultSet seriesResultSet) throws SQLException {
         return Series.builder()
                 .id(seriesResultSet.getInt("id"))
@@ -24,6 +25,7 @@ public class SeriesDaoImpl implements SeriesDao {
                 .build();
     }
 
+    @Override
     public List<Series> findAll() throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         List<Series> serials = new ArrayList<>();
@@ -41,6 +43,7 @@ public class SeriesDaoImpl implements SeriesDao {
         return serials;
     }
 
+    @Override
     public List<Series> findAllByName(String name) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -61,6 +64,7 @@ public class SeriesDaoImpl implements SeriesDao {
         return serials;
     }
 
+    @Override
     public Optional<Series> find(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -80,6 +84,7 @@ public class SeriesDaoImpl implements SeriesDao {
         return Optional.empty();
     }
 
+    @Override
     public void insert(Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement
@@ -95,6 +100,7 @@ public class SeriesDaoImpl implements SeriesDao {
         connectionBuilder.releaseConnection(connection);
     }
 
+    @Override
     public void update(long id, Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement =
@@ -109,6 +115,7 @@ public class SeriesDaoImpl implements SeriesDao {
         }
     }
 
+    @Override
     public void delete(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement =
