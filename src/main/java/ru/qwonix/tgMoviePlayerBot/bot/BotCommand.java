@@ -3,23 +3,20 @@ package ru.qwonix.tgMoviePlayerBot.bot;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
-import ru.qwonix.tgMoviePlayerBot.dao.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
-import ru.qwonix.tgMoviePlayerBot.user.User;
-import ru.qwonix.tgMoviePlayerBot.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 public class BotCommand {
-    private final UserService userService;
-    private final SeriesService seriesService;
+    private final DaoContext daoContext;
     private final BotFeatures botFeatures;
 
-    public BotCommand(UserService userService, SeriesService seriesService, BotFeatures botFeatures) {
-        this.userService = userService;
-        this.seriesService = seriesService;
+    public BotCommand(BotFeatures botFeatures, DaoContext daoContext) {
+        this.daoContext = daoContext;
         this.botFeatures = botFeatures;
     }
 
@@ -41,7 +38,7 @@ public class BotCommand {
     public void all(User user, String[] args) {
         Map<String, String> ep = new HashMap<>();
 
-        for (Episode episode : seriesService.findAllEpisodes()) {
+        for (Episode episode : daoContext.getSeriesService().findAllEpisodes()) {
             ep.put(episode.getName(), String.valueOf(episode.getId()));
         }
 
@@ -55,10 +52,7 @@ public class BotCommand {
 
     @Command(command = "/search")
     public void search(User user, String[] args) {
-        if (args.length == 0) {
-            botFeatures.sendText(user, "Для поиска используйте параменты после команды /search");
-            return;
-        }
+        botFeatures.sendText(user, "Введите название фильма или сериала");
 
         String desiredContent = String.join(" ", args);
     }
@@ -68,7 +62,7 @@ public class BotCommand {
         if (args.length == 1) {
             String adminPassword = BotConfig.getProperty(BotConfig.ADMIN_PASSWORD);
             if (args[0].equals(adminPassword)) {
-                user = userService.setAdmin(user);
+                user = daoContext.getUserService().setAdmin(user);
                 botFeatures.sendText(user, "Вы получили права админа! /admin для доступа в меню");
                 log.warn("became an admin: {}", user);
             } else {

@@ -6,18 +6,12 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
-import ru.qwonix.tgMoviePlayerBot.config.DatabaseConfig;
-import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
-import ru.qwonix.tgMoviePlayerBot.dao.DaoException;
-import ru.qwonix.tgMoviePlayerBot.dao.PoolConnectionBuilder;
-import ru.qwonix.tgMoviePlayerBot.dao.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
-import ru.qwonix.tgMoviePlayerBot.user.User;
-import ru.qwonix.tgMoviePlayerBot.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,37 +32,16 @@ public class Bot extends TelegramLongPollingBot {
 
     private final BotCommand botCommand;
     private final BotFeatures botFeatures;
-    private final UserService userService;
-    private final SeriesService seriesService;
-    private final ConnectionBuilder connectionBuilder;
 
-    {
-        try {
-            connectionBuilder = new PoolConnectionBuilder(
-                    DatabaseConfig.getProperty(DatabaseConfig.DB_URL),
-                    DatabaseConfig.getProperty(DatabaseConfig.DB_USER),
-                    DatabaseConfig.getProperty(DatabaseConfig.DB_PASSWORD),
-                    10
-            );
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    connectionBuilder.closeConnections();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }));
-        } catch (DaoException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private final DaoContext daoContext;
+
 
     public Bot() {
-        userService = new UserService();
-        seriesService = new SeriesService(connectionBuilder);
-        BotFeatures botFeatures = new BotFeatures(this, userService, seriesService);
-        this.botFeatures = botFeatures;
+        daoContext = new DaoContext();
 
-        this.botCommand = new BotCommand(userService, seriesService, botFeatures);
+        BotFeatures botFeatures = new BotFeatures(this, daoContext);
+        this.botFeatures = botFeatures;
+        this.botCommand = new BotCommand(botFeatures, daoContext);
     }
 
     public void onVideo(Update update) {
@@ -77,7 +50,7 @@ public class Bot extends TelegramLongPollingBot {
 
         // FIXME: 14-Jul-22 проверить, содержит ли update информацию об отправлители. заменить доступ, если нет
         User user = User.builder()
-                .chatId(update.getMessage().getChatId().intValue())
+                .chatId(update.getMessage().getChatId())
                 .name(update.getMessage().getFrom().getFirstName())
                 .build();
         botFeatures.sendVideo(user, fileId);
@@ -92,7 +65,7 @@ public class Bot extends TelegramLongPollingBot {
                 .build();
 
         log.info("user {} callback {}", user, data);
-        String fileId = seriesService.findEpisode(Integer.parseInt(data))
+        String fileId = daoContext.getSeriesService().findEpisode(Integer.parseInt(data))
                 .map(Episode::getFileId)
                 .orElse("");
 
@@ -112,11 +85,14 @@ public class Bot extends TelegramLongPollingBot {
             return;
         }
 
+        long chatId = update.getMessage().getChatId();
         User user = User.builder()
-                .chatId(update.getMessage().getChatId().intValue())
+                .chatId(chatId)
                 .name(update.getMessage().getFrom().getFirstName())
+//                .state(new SearchState())
                 .build();
-        userService.merge(user);
+
+        daoContext.getUserService().merge(user);
         String userMessageText = update.getMessage().getText();
 
         log.debug("user: {}, text: {}", user, userMessageText);

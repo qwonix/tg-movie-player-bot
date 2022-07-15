@@ -1,4 +1,3 @@
-
 package ru.qwonix.tgMoviePlayerBot.dao.user;
 
 import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
@@ -25,6 +24,7 @@ public class UserDaoImpl implements UserDao {
                 .isAdmin(userResultSet.getBoolean("is_admin"))
                 .build();
     }
+
     @Override
     public List<User> findAll() throws SQLException {
         Connection connection = connectionBuilder.getConnection();
@@ -42,6 +42,7 @@ public class UserDaoImpl implements UserDao {
         }
         return users;
     }
+
     @Override
     public Optional<User> find(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
@@ -61,6 +62,7 @@ public class UserDaoImpl implements UserDao {
 
         return Optional.empty();
     }
+
     @Override
     public void insert(User user) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
@@ -77,6 +79,7 @@ public class UserDaoImpl implements UserDao {
         }
 
     }
+
     @Override
     public void update(long id, User updatedUser) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
@@ -94,6 +97,7 @@ public class UserDaoImpl implements UserDao {
         }
 
     }
+
     @Override
     public void delete(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();

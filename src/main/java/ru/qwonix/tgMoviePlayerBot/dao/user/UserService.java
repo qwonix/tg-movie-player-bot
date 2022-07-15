@@ -1,10 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.dao.user;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.qwonix.tgMoviePlayerBot.config.DatabaseConfig;
 import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
-import ru.qwonix.tgMoviePlayerBot.dao.DaoException;
-import ru.qwonix.tgMoviePlayerBot.dao.PoolConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.sql.SQLException;
@@ -13,20 +10,13 @@ import java.sql.SQLException;
 @Slf4j
 public class UserService {
     private final ConnectionBuilder connectionBuilder;
-    {
-        try {
-            connectionBuilder = new PoolConnectionBuilder(
-                    DatabaseConfig.getProperty(DatabaseConfig.DB_URL),
-                    DatabaseConfig.getProperty(DatabaseConfig.DB_USER),
-                    DatabaseConfig.getProperty(DatabaseConfig.DB_PASSWORD),
-                    10
-            );
-        } catch (DaoException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-    private final UserDao userDao = new UserDaoImpl(connectionBuilder);
+    private final UserDao userDao;
+
+    public UserService(ConnectionBuilder connectionBuilder) {
+        this.connectionBuilder = connectionBuilder;
+        userDao = new UserDaoImpl(connectionBuilder);
+    }
 
     public User setAdmin(User user) {
         User admin = user.toBuilder().isAdmin(true).build();
@@ -34,9 +24,9 @@ public class UserService {
         return admin;
     }
 
-    public boolean exists(User user) {
+    public boolean exists(long chatId) {
         try {
-            return userDao.find(user.getChatId()).isPresent();
+            return userDao.find(chatId).isPresent();
         } catch (SQLException e) {
             log.error("sql exception {}", e.getMessage());
         }
@@ -45,7 +35,7 @@ public class UserService {
 
     public void merge(User user) {
         try {
-            if (exists(user)) {
+            if (exists(user.getChatId())) {
                 userDao.update(user.getChatId(), user);
             } else {
                 userDao.insert(user);

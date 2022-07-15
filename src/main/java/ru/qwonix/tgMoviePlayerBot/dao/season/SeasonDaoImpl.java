@@ -1,10 +1,10 @@
 package ru.qwonix.tgMoviePlayerBot.dao.season;
 
 import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDao;
 import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
-import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDao;
 
 import java.sql.*;
 import java.time.LocalDate;
