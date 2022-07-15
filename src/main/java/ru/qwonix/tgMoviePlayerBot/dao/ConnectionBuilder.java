@@ -7,4 +7,6 @@ public interface ConnectionBuilder {
     Connection getConnection() throws SQLException;
 
     void releaseConnection(Connection connection) throws SQLException;
+
+    void closeConnections() throws SQLException;
 }

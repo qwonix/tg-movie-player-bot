@@ -76,4 +76,15 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
         availableConnections.push(connection);
         log.debug("коннект запушен {}", connection);
     }
+
+    @Override
+    public void closeConnections() throws SQLException {
+        for (Connection connection : usedConnections) {
+            connection.close();
+        }
+        for (Connection connection : availableConnections) {
+            connection.close();
+        }
+        log.info("all connections have been closed");
+    }
 }

@@ -6,13 +6,18 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
-import ru.qwonix.tgMoviePlayerBot.entity.Episode;
+import ru.qwonix.tgMoviePlayerBot.config.DatabaseConfig;
+import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.dao.DaoException;
+import ru.qwonix.tgMoviePlayerBot.dao.PoolConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.dao.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.user.User;
 import ru.qwonix.tgMoviePlayerBot.user.UserService;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,10 +40,31 @@ public class Bot extends TelegramLongPollingBot {
     private final BotFeatures botFeatures;
     private final UserService userService;
     private final SeriesService seriesService;
+    private final ConnectionBuilder connectionBuilder;
+
+    {
+        try {
+            connectionBuilder = new PoolConnectionBuilder(
+                    DatabaseConfig.getProperty(DatabaseConfig.DB_URL),
+                    DatabaseConfig.getProperty(DatabaseConfig.DB_USER),
+                    DatabaseConfig.getProperty(DatabaseConfig.DB_PASSWORD),
+                    10
+            );
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    connectionBuilder.closeConnections();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
+        } catch (DaoException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Bot() {
         userService = new UserService();
-        seriesService = new SeriesService();
+        seriesService = new SeriesService(connectionBuilder);
         BotFeatures botFeatures = new BotFeatures(this, userService, seriesService);
         this.botFeatures = botFeatures;
 
@@ -100,20 +126,24 @@ public class Bot extends TelegramLongPollingBot {
         String[] commandArgs = Arrays.copyOfRange(allArgs, 1, allArgs.length);
 
         try {
-            Method method = commands.get(command);
+            Method commandMethod = commands.get(command);
 
-            if (method != null) {
-                method.invoke(botCommand, user, commandArgs);
+            if (commandMethod != null) {
+                commandMethod.invoke(botCommand, user, commandArgs);
                 return;
             }
 
-            botFeatures.sendText(user, "не понял");
+            this.onNotCommand(user, update);
 
         } catch (IllegalAccessException e) {
             log.error("reflective access exception" + e.getMessage());
         } catch (InvocationTargetException e) {
             log.error("called method-command threw an exception {}", e.getTargetException().getMessage());
         }
+    }
+
+    private void onNotCommand(User user, Update update) {
+        botFeatures.sendText(user, "не понял");
     }
 
     @Override
