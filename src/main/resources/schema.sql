@@ -7,7 +7,8 @@ create table if not exists "user"
 (
     chat_id  bigint primary key,
     "name"   varchar(64),
-    is_admin bool default false
+    is_admin bool default false,
+    state    varchar(100)
 );
 
 create table if not exists movie
@@ -52,7 +53,7 @@ create table if not exists season
 
 create table if not exists episode
 (
-    telegram_file_id char(70) primary key,
+    id               serial primary key,
     number           smallint     not null,
     "name"           varchar(200) not null,
     description      text         not null,
@@ -60,5 +61,6 @@ create table if not exists episode
     "language"       varchar(50),
     country          varchar(50),
     duration         interval,
-    season_id        int references season
+    season_id        int references season,
+    telegram_file_id char(70)
 );

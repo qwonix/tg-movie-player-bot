@@ -9,4 +9,6 @@ import java.util.List;
 public interface SeriesDao extends DefaultDao<Series> {
 
     List<Series> findAllByName(String name) throws SQLException;
+
+    List<Series> findAllByNameLike(String name) throws SQLException;
 }

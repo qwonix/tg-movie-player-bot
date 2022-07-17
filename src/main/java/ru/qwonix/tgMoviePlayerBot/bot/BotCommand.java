@@ -53,8 +53,8 @@ public class BotCommand {
     @Command(command = "/search")
     public void search(User user, String[] args) {
         botFeatures.sendText(user, "Введите название фильма или сериала");
-
-        String desiredContent = String.join(" ", args);
+        user.setState(State.SEARCH);
+        daoContext.getUserService().merge(user);
     }
 
     @Command(command = "/admin")

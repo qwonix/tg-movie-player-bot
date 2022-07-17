@@ -10,29 +10,12 @@ import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 public class Bot extends TelegramLongPollingBot {
-
-    private static final Map<String, Method> commands = new HashMap<>();
-
-    static {
-        for (Method m : BotCommand.class.getDeclaredMethods()) {
-            if (m.isAnnotationPresent(Command.class)) {
-                Command cmd = m.getAnnotation(Command.class);
-                commands.put(cmd.command(), m);
-            }
-        }
-    }
-
     private final BotCommand botCommand;
     private final BotFeatures botFeatures;
-
     private final DaoContext daoContext;
 
 
@@ -53,6 +36,21 @@ public class Bot extends TelegramLongPollingBot {
                 .chatId(update.getMessage().getChatId())
                 .name(update.getMessage().getFrom().getFirstName())
                 .build();
+
+//        Episode newEpisode = Episode.builder()
+//                .number()
+//                .name()
+//                .description()
+//                .releaseDate()
+//                .language("Русский")
+//                .country("Россия")
+//                .duration(Duration.ofSeconds(video.getDuration()))
+//                .season()
+//                .fileId(video.getFileId())
+//                .build();
+
+        log.info("user {} send video {}", user, video);
+        log.info("video fileid {}", video.getFileId());
         botFeatures.sendVideo(user, fileId);
     }
 
@@ -86,41 +84,27 @@ public class Bot extends TelegramLongPollingBot {
         }
 
         long chatId = update.getMessage().getChatId();
-        User user = User.builder()
-                .chatId(chatId)
-                .name(update.getMessage().getFrom().getFirstName())
-//                .state(new SearchState())
-                .build();
+        User user;
+        Optional<User> optionalUser = daoContext.getUserService().findUser(chatId);
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+        } else {
+            user = User.builder()
+                    .chatId(chatId)
+                    .name(update.getMessage().getFrom().getFirstName())
+                    .build();
+            daoContext.getUserService().merge(user);
+        }
 
-        daoContext.getUserService().merge(user);
         String userMessageText = update.getMessage().getText();
 
+        BotContext stateContext = new BotContext(user, update, daoContext, botFeatures, botCommand);
         log.debug("user: {}, text: {}", user, userMessageText);
 
-        String[] allArgs = userMessageText.split(" ");
-        String command = allArgs[0].toLowerCase();
-        String[] commandArgs = Arrays.copyOfRange(allArgs, 1, allArgs.length);
-
-        try {
-            Method commandMethod = commands.get(command);
-
-            if (commandMethod != null) {
-                commandMethod.invoke(botCommand, user, commandArgs);
-                return;
-            }
-
-            this.onNotCommand(user, update);
-
-        } catch (IllegalAccessException e) {
-            log.error("reflective access exception" + e.getMessage());
-        } catch (InvocationTargetException e) {
-            log.error("called method-command threw an exception {}", e.getTargetException().getMessage());
-        }
+        user.getState().enter(stateContext);
+        user.getState().nextState();
     }
 
-    private void onNotCommand(User user, Update update) {
-        botFeatures.sendText(user, "не понял");
-    }
 
     @Override
     public String getBotUsername() {

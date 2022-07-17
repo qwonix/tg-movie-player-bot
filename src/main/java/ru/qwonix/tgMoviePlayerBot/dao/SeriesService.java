@@ -35,7 +35,7 @@ public class SeriesService {
         try {
             return seriesDao.find(series.getId()).isPresent();
         } catch (SQLException e) {
-            log.error("sql exception {}", e.getMessage());
+            log.error("sql exception", e);
         }
         return false;
     }
@@ -44,7 +44,7 @@ public class SeriesService {
         try {
             return episodeDao.find(id);
         } catch (SQLException e) {
-            log.error("sql exception {}", e.getMessage());
+            log.error("sql exception", e);
         }
         return Optional.empty();
     }
@@ -53,18 +53,19 @@ public class SeriesService {
         try {
             return episodeDao.findAll();
         } catch (SQLException e) {
-            log.error("sql exception {}", e.getMessage());
+            log.error("sql exception", e);
         }
         return Collections.emptyList();
     }
 
     public List<Episode> findAllEpisodesBySerial(Series series) {
         try {
+            // TODO: 17-Jul-22 change filter to sql select exp
             return episodeDao.findAll().stream()
                     .filter(episode -> episode.getSeason().getSeries().equals(series))
                     .collect(Collectors.toList());
         } catch (SQLException e) {
-            log.error("sql exception {}", e.getMessage());
+            log.error("sql exception", e);
         }
         return Collections.emptyList();
     }
@@ -73,7 +74,7 @@ public class SeriesService {
         try {
             return seriesDao.findAll();
         } catch (SQLException e) {
-            log.error("sql exception {}", e.getMessage());
+            log.error("sql exception", e);
         }
         return Collections.emptyList();
     }
@@ -82,7 +83,16 @@ public class SeriesService {
         try {
             return seriesDao.findAllByName(name);
         } catch (SQLException e) {
-            log.error("sql exception {}", e.getMessage());
+            log.error("sql exception", e);
+        }
+        return Collections.emptyList();
+    }
+
+    public List<Series> findAllByNameLike(String name) {
+        try {
+            return seriesDao.findAllByNameLike(name);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
         }
         return Collections.emptyList();
     }
@@ -95,7 +105,7 @@ public class SeriesService {
                 seriesDao.insert(series);
             }
         } catch (SQLException e) {
-            log.error("sql exception {}", e.getMessage());
+            log.error("sql exception", e);
         }
     }
 }

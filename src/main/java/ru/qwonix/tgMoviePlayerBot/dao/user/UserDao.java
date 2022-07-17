@@ -1,7 +1,8 @@
 package ru.qwonix.tgMoviePlayerBot.dao.user;
 
 import ru.qwonix.tgMoviePlayerBot.dao.DefaultDao;
+import ru.qwonix.tgMoviePlayerBot.entity.User;
 
-public interface UserDao<T> extends DefaultDao<T> {
+public interface UserDao extends DefaultDao<User> {
 
 }

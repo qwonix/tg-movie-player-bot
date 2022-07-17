@@ -16,7 +16,6 @@ import java.util.Map;
 
 @Slf4j
 public class BotFeatures {
-
     private final Bot bot;
     private final DaoContext daoContext;
 
@@ -32,11 +31,8 @@ public class BotFeatures {
 
         for (Map.Entry<String, String> button : buttons.entrySet()) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-
-            inlineKeyboardButton.setCallbackData("");
-
             inlineKeyboardButton.setText(button.getKey());
-            inlineKeyboardButton.setCallbackData(button.getValue());
+            inlineKeyboardButton.setUrl(button.getValue());
             rowInline.add(inlineKeyboardButton);
         }
         rowsInline.add(rowInline);
@@ -47,18 +43,16 @@ public class BotFeatures {
     public static InlineKeyboardMarkup createCallbackKeyboard(Map<String, String> buttons) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<>();
 
         for (Map.Entry<String, String> button : buttons.entrySet()) {
+            List<InlineKeyboardButton> rowInline = new ArrayList<>();
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-
-            inlineKeyboardButton.setCallbackData("");
 
             inlineKeyboardButton.setText(button.getKey());
             inlineKeyboardButton.setCallbackData(button.getValue());
             rowInline.add(inlineKeyboardButton);
+            rowsInline.add(rowInline);
         }
-        rowsInline.add(rowInline);
         markupInline.setKeyboard(rowsInline);
         return markupInline;
     }
@@ -84,7 +78,7 @@ public class BotFeatures {
         try {
             bot.execute(message);
         } catch (TelegramApiException e) {
-            log.error("message sending error {}: {}", user, e.getMessage());
+            log.error("message sending error " + user, e);
             e.printStackTrace();
         }
     }
@@ -97,13 +91,21 @@ public class BotFeatures {
         this.sendMessage(user, message);
     }
 
+    public void sendMarkdownTextWithKeyBoard(User user, String markdownMessage, InlineKeyboardMarkup keyboard) {
+        SendMessage.SendMessageBuilder message = SendMessage.builder()
+                .text(markdownMessage)
+                .parseMode("MarkdownV2")
+                .replyMarkup(keyboard);
+
+        this.sendMessage(user, message);
+    }
 
     public void sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
         SendMessage message = messageBuilder.chatId(String.valueOf(user.getChatId())).build();
         try {
             bot.execute(message);
         } catch (TelegramApiException e) {
-            log.error("message sending error {}: {}", user.getChatId(), e.getMessage());
+            log.error("message sending error " + user, e);
         }
     }
 }

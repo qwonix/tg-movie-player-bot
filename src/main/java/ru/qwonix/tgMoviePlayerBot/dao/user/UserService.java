@@ -5,6 +5,7 @@ import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 
 @Slf4j
@@ -28,7 +29,7 @@ public class UserService {
         try {
             return userDao.find(chatId).isPresent();
         } catch (SQLException e) {
-            log.error("sql exception {}", e.getMessage());
+            log.error("sql exception", e);
         }
         return false;
     }
@@ -41,7 +42,17 @@ public class UserService {
                 userDao.insert(user);
             }
         } catch (SQLException e) {
-            log.error("sql exception {}", e.getMessage());
+            log.error("sql exception", e);
         }
+    }
+
+    public Optional<User> findUser(long userChatId) {
+        try {
+            return userDao.find(userChatId);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+
+        return Optional.empty();
     }
 }

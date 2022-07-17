@@ -1,5 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.dao.user;
 
+import ru.qwonix.tgMoviePlayerBot.bot.State;
 import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public class UserDaoImpl implements UserDao<User> {
+public class UserDaoImpl implements UserDao {
     private final ConnectionBuilder connectionBuilder;
 
     public UserDaoImpl(ConnectionBuilder connectionBuilder) {
@@ -22,6 +23,7 @@ public class UserDaoImpl implements UserDao<User> {
                 .chatId(userResultSet.getLong("chat_id"))
                 .name(userResultSet.getString("name"))
                 .isAdmin(userResultSet.getBoolean("is_admin"))
+                .state(State.valueOf(userResultSet.getString("state")))
                 .build();
     }
 
@@ -67,11 +69,12 @@ public class UserDaoImpl implements UserDao<User> {
     public void insert(User user) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO \"user\" VALUES(?, ?, ?)")) {
+                     connection.prepareStatement("INSERT INTO \"user\" VALUES(?, ?, ?, ?)")) {
 
             preparedStatement.setLong(1, user.getChatId());
             preparedStatement.setString(2, user.getName());
             preparedStatement.setBoolean(3, user.isAdmin());
+            preparedStatement.setString(4, user.getState().name());
 
             preparedStatement.executeUpdate();
         } finally {
@@ -85,11 +88,12 @@ public class UserDaoImpl implements UserDao<User> {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE \"user\" SET name=?, is_admin=? WHERE chat_id=?")) {
+                     connection.prepareStatement("UPDATE \"user\" SET name=?, is_admin=?, state=? WHERE chat_id=?")) {
 
             preparedStatement.setString(1, updatedUser.getName());
             preparedStatement.setBoolean(2, updatedUser.isAdmin());
-            preparedStatement.setLong(3, id);
+            preparedStatement.setString(3, updatedUser.getState().name());
+            preparedStatement.setLong(4, id);
 
             preparedStatement.executeUpdate();
         } finally {
