@@ -62,7 +62,7 @@ public class SeriesService {
         try {
             // TODO: 17-Jul-22 change filter to sql select exp
             return episodeDao.findAll().stream()
-                    .filter(episode -> episode.getSeason().getSeries().equals(series))
+                    .filter(episode -> episode.getSeason().getSeries().getId() == series.getId())
                     .collect(Collectors.toList());
         } catch (SQLException e) {
             log.error("sql exception", e);
