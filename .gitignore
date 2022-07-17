@@ -40,3 +40,4 @@ build/
 /src/main/resources/bot.properties
 /src/main/resources/dao.properties
 /.idea/inspectionProfiles/Project_Default.xml
+/.idea/
