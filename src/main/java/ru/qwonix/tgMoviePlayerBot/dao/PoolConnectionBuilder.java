@@ -33,12 +33,12 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
 
     @Override
     public Connection getConnection() throws SQLException {
-        log.debug("всего коннектов {}, доступно {}, используется {}"
+        log.debug("total connections {}, available {}, used {}"
                 , availableConnections.size() + usedConnections.size()
                 , availableConnections.size()
                 , usedConnections.size());
 
-        log.debug("запрос коннекта");
+        log.debug("connection request");
         if (usedConnections.size() == maxPoolSize)
             throw new RuntimeException("no available connections");
 
@@ -50,14 +50,14 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
             connection = availableConnections.pop();
             usedConnections.add(connection);
         }
-        log.debug("коннекта выдан {}", connection);
+        log.debug("take connection {}", connection);
         return connection;
     }
 
     @Override
     public void releaseConnection(Connection connection) throws SQLException {
-        log.debug("коннект принят {}", connection);
-        log.debug("всего коннектов {}, доступно {}, используется {}"
+        log.debug("take connection {}", connection);
+        log.debug("total connections {}, available {}, used {}"
                 , availableConnections.size() + usedConnections.size()
                 , availableConnections.size()
                 , usedConnections.size());
@@ -67,13 +67,13 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
         }
         usedConnections.remove(connection);
         if (connection.isClosed() && usedConnections.remove(connection)) {
-            log.info("коннект убран");
+            log.info("close connection");
             availableConnections.remove(connection);
             return;
         }
 
         availableConnections.push(connection);
-        log.debug("коннект запушен {}", connection);
+        log.debug("connection pushed {}", connection);
     }
 
     @Override

@@ -18,14 +18,11 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class SeriesService {
-    private final ConnectionBuilder connectionBuilder;
-
     private final SeriesDao seriesDao;
     private final EpisodeDao episodeDao;
     private final SeasonDao seasonDao;
 
     public SeriesService(ConnectionBuilder connectionBuilder) {
-        this.connectionBuilder = connectionBuilder;
         seriesDao = new SeriesDaoImpl(connectionBuilder);
         episodeDao = new EpisodeDaoImpl(connectionBuilder);
         seasonDao = new SeasonDaoImpl(connectionBuilder);

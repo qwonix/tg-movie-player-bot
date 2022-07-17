@@ -23,11 +23,10 @@ public class EpisodeDaoImpl implements EpisodeDao {
 
     @Override
     public Episode convert(ResultSet episodeResultSet) throws SQLException {
-        PGInterval duration = (PGInterval) episodeResultSet.getObject("duration");
-
         SeasonDao seasonDao = new SeasonDaoImpl(connectionBuilder);
         Optional<Season> season = seasonDao.find(episodeResultSet.getInt("season_id"));
 
+        PGInterval duration = (PGInterval) episodeResultSet.getObject("duration");
         return Episode.builder()
                 .id(episodeResultSet.getInt("id"))
                 .number(episodeResultSet.getInt("number"))
