@@ -7,17 +7,32 @@ import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 public class BotCommand {
+    private static final Map<String, Method> METHOD_COMMAND = new HashMap<>();
+
+    static {
+        for (Method m : BotCommand.class.getDeclaredMethods()) {
+            if (m.isAnnotationPresent(Command.class)) {
+                Command command = m.getAnnotation(Command.class);
+                METHOD_COMMAND.put(command.command().toLowerCase(), m);
+            }
+        }
+    }
+
     private final DaoContext daoContext;
     private final BotFeatures botFeatures;
-
     public BotCommand(BotFeatures botFeatures, DaoContext daoContext) {
         this.daoContext = daoContext;
         this.botFeatures = botFeatures;
+    }
+
+    static Method getMethodForCommand(String command) {
+        return METHOD_COMMAND.get(command);
     }
 
     @Command(command = "/start")
@@ -52,7 +67,7 @@ public class BotCommand {
 
     @Command(command = "/search")
     public void search(User user, String[] args) {
-        botFeatures.sendText(user, "Введите название фильма или сериала");
+        botFeatures.sendText(user, "Введите название фильма, сериала или серии!");
         user.setState(State.SEARCH);
         daoContext.getUserService().merge(user);
     }

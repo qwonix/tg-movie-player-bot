@@ -29,7 +29,7 @@ public enum State {
             String[] commandArgs = Arrays.copyOfRange(allArgs, 1, allArgs.length);
 
             try {
-                Method commandMethod = commands.get(command);
+                Method commandMethod = BotCommand.getMethodForCommand(command);
 
                 if (commandMethod != null) {
                     commandMethod.invoke(context.getBotCommand(), user, commandArgs);
@@ -86,7 +86,10 @@ public enum State {
 
             botFeatures.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", searchText));
 
-            String escapedMsg = sb.toString().replace("-", "\\-").replace("!", "\\!").replace(".", "\\.");
+            String escapedMsg = sb.toString()
+                    .replace("-", "\\-")
+                    .replace("!", "\\!")
+                    .replace(".", "\\.");
             botFeatures.sendMarkdownTextWithKeyBoard(user, escapedMsg, callbackKeyboard);
         }
 
@@ -95,16 +98,6 @@ public enum State {
             return State.DEFAULT;
         }
     };
-    private static final Map<String, Method> commands = new HashMap<>();
-
-    static {
-        for (Method m : BotCommand.class.getDeclaredMethods()) {
-            if (m.isAnnotationPresent(Command.class)) {
-                Command cmd = m.getAnnotation(Command.class);
-                commands.put(cmd.command(), m);
-            }
-        }
-    }
 
     State() {
 
