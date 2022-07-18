@@ -19,7 +19,7 @@ public class BotCommand {
         for (Method m : BotCommand.class.getDeclaredMethods()) {
             if (m.isAnnotationPresent(Command.class)) {
                 Command command = m.getAnnotation(Command.class);
-                METHOD_COMMAND.put(command.command().toLowerCase(), m);
+                METHOD_COMMAND.put(command.value().toLowerCase(), m);
             }
         }
     }
@@ -35,7 +35,7 @@ public class BotCommand {
         return METHOD_COMMAND.get(command);
     }
 
-    @Command(command = "/start")
+    @Command("/start")
     public void start(User user, String[] args) {
         botFeatures.sendText(user, "Доступ получен, для справки используйте /help");
         botFeatures.sendText(user, "А пока можете посмотреть Смешариков");
@@ -43,13 +43,13 @@ public class BotCommand {
         log.info("start by {}", user);
     }
 
-    @Command(command = "/help")
+    @Command("/help")
     public void help(User user, String[] args) {
         botFeatures.sendMarkdownText(user, "Что надо сделать, если вам навстречу бежит окровавленный негр?\n||*Перезарядить*||");
         log.info("help by {}", user);
     }
 
-    @Command(command = "/all")
+    @Command("/all")
     public void all(User user, String[] args) {
         Map<String, String> ep = new HashMap<>();
 
@@ -65,14 +65,14 @@ public class BotCommand {
         botFeatures.sendMessage(user, message);
     }
 
-    @Command(command = "/search")
+    @Command("/search")
     public void search(User user, String[] args) {
         botFeatures.sendText(user, "Введите название фильма, сериала или серии!");
         user.setState(State.SEARCH);
         daoContext.getUserService().merge(user);
     }
 
-    @Command(command = "/admin")
+    @Command("/admin")
     public void admin(User user, String[] args) {
         if (args.length == 1) {
             String adminPassword = BotConfig.getProperty(BotConfig.ADMIN_PASSWORD);
