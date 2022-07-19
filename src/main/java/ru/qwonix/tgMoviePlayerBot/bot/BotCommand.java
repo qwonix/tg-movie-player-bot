@@ -2,6 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.bot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import ru.qwonix.tgMoviePlayerBot.bot.state.UserState;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
@@ -26,12 +27,13 @@ public class BotCommand {
 
     private final DaoContext daoContext;
     private final BotFeatures botFeatures;
+
     public BotCommand(BotFeatures botFeatures, DaoContext daoContext) {
         this.daoContext = daoContext;
         this.botFeatures = botFeatures;
     }
 
-    static Method getMethodForCommand(String command) {
+    public static Method getMethodForCommand(String command) {
         return METHOD_COMMAND.get(command);
     }
 
@@ -68,7 +70,7 @@ public class BotCommand {
     @Command("/search")
     public void search(User user, String[] args) {
         botFeatures.sendText(user, "Введите название фильма, сериала или серии!");
-        user.setState(State.SEARCH);
+        user.setState(UserState.State.SEARCH);
         daoContext.getUserService().merge(user);
     }
 

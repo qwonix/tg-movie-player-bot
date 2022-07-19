@@ -9,8 +9,8 @@ import java.sql.SQLException;
 @Data
 public class DaoContext {
     private final ConnectionBuilder connectionBuilder;
-    private UserService userService;
-    private SeriesService seriesService;
+    private final UserService userService;
+    private final SeriesService seriesService;
 
     {
         try {

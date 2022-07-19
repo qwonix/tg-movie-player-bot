@@ -10,12 +10,10 @@ import java.util.Optional;
 
 @Slf4j
 public class UserService {
-    private final ConnectionBuilder connectionBuilder;
 
     private final UserDao userDao;
 
     public UserService(ConnectionBuilder connectionBuilder) {
-        this.connectionBuilder = connectionBuilder;
         userDao = new UserDaoImpl(connectionBuilder);
     }
 

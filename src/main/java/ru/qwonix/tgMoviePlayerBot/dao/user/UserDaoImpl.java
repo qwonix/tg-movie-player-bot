@@ -1,6 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.dao.user;
 
-import ru.qwonix.tgMoviePlayerBot.bot.State;
+import ru.qwonix.tgMoviePlayerBot.bot.state.UserState;
 import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
@@ -23,7 +23,7 @@ public class UserDaoImpl implements UserDao {
                 .chatId(userResultSet.getLong("chat_id"))
                 .name(userResultSet.getString("name"))
                 .isAdmin(userResultSet.getBoolean("is_admin"))
-                .state(State.valueOf(userResultSet.getString("state")))
+                .state(UserState.State.valueOf(userResultSet.getString("state")))
                 .build();
     }
 

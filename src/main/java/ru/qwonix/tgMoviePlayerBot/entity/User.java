@@ -2,7 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.entity;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.qwonix.tgMoviePlayerBot.bot.State;
+import ru.qwonix.tgMoviePlayerBot.bot.state.UserState;
 
 
 @Builder(toBuilder = true)
@@ -13,5 +13,5 @@ public class User {
     @Builder.Default
     private boolean isAdmin = false;
     @Builder.Default
-    private State state = State.DEFAULT;
+    private UserState.State state = UserState.State.DEFAULT;
 }

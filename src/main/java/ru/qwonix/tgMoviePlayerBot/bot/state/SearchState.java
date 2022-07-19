@@ -1,0 +1,70 @@
+package ru.qwonix.tgMoviePlayerBot.bot.state;
+
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
+import ru.qwonix.tgMoviePlayerBot.bot.BotFeatures;
+import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
+import ru.qwonix.tgMoviePlayerBot.entity.Series;
+import ru.qwonix.tgMoviePlayerBot.entity.User;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class SearchState extends UserState {
+
+    public SearchState(ChatContext chatContext, BotContext botContext) {
+        super(chatContext, botContext);
+    }
+
+    @Override
+    public void onText() {
+        User user = chatContext.getUser();
+        Update update = chatContext.getUpdate();
+        BotFeatures botFeatures = new BotFeatures(botContext);
+
+        String searchText = update.getMessage().getText();
+
+        // TODO: 15-Jul-22 smart search for name
+
+        List<Series> serials = botContext
+                .getDaoContext()
+                .getSeriesService()
+                .findAllByNameLike(searchText);
+
+        Map<String, String> keyboard = new HashMap<>();
+        StringBuilder sb = new StringBuilder();
+        if (serials.isEmpty()) {
+            botFeatures.sendMarkdownText(user, "Ничего не найдено :\\(");
+            return;
+        }
+
+        for (Series series : serials) {
+            sb.append(String.format("`%s` *%s*", series.getName(), series.getCountry()));
+            sb.append('\n');
+            sb.append('\n');
+            sb.append(String.format("_%s_", series.getDescription()));
+            sb.append('\n');
+            sb.append('\n');
+
+            keyboard.put(series.getName(), String.valueOf(series.getId()));
+        }
+
+        InlineKeyboardMarkup callbackKeyboard = BotFeatures.createCallbackKeyboard(keyboard);
+
+        botFeatures.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", searchText));
+
+        String escapedMsg = sb.toString()
+                .replace("-", "\\-")
+                .replace("!", "\\!")
+                .replace(".", "\\.");
+        botFeatures.sendMarkdownTextWithKeyBoard(user, escapedMsg, callbackKeyboard);
+    }
+
+    @Override
+    public void onVideo() {
+
+    }
+
+}

@@ -19,9 +19,9 @@ public class BotFeatures {
     private final Bot bot;
     private final DaoContext daoContext;
 
-    public BotFeatures(Bot bot, DaoContext daoContext) {
-        this.bot = bot;
-        this.daoContext = daoContext;
+    public BotFeatures(BotContext botContext) {
+        this.bot = botContext.getBot();
+        this.daoContext = botContext.getDaoContext();
     }
 
     public static InlineKeyboardMarkup createLinkKeyboard(Map<String, String> buttons) {

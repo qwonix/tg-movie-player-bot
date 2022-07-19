@@ -1,17 +1,15 @@
 package ru.qwonix.tgMoviePlayerBot.bot;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import lombok.Data;
 import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
-import ru.qwonix.tgMoviePlayerBot.entity.User;
 
-@AllArgsConstructor
-@Getter
+@Data
 public class BotContext {
-    private User user;
-    private Update update;
-    private DaoContext daoContext;
-    private BotFeatures botFeatures;
-    private BotCommand botCommand;
+    private final DaoContext daoContext;
+    private final Bot bot;
+
+    public BotContext(Bot bot) {
+        daoContext = new DaoContext();
+        this.bot = bot;
+    }
 }
