@@ -70,8 +70,8 @@ public class SeriesDaoImpl implements SeriesDao {
 
         List<Series> serials = new ArrayList<>();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM series where name like ?")) {
-            preparedStatement.setString(1, "%" + name + "%");
+                     connection.prepareStatement("SELECT * FROM series where lower(name) like ?")) {
+            preparedStatement.setString(1, "%" + name.toLowerCase() + "%");
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
