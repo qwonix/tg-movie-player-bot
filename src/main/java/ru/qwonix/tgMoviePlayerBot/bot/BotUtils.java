@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class BotFeatures {
+public class BotUtils {
     private final Bot bot;
     private final DaoContext daoContext;
 
-    public BotFeatures(BotContext botContext) {
+    public BotUtils(BotContext botContext) {
         this.bot = botContext.getBot();
         this.daoContext = botContext.getDaoContext();
     }

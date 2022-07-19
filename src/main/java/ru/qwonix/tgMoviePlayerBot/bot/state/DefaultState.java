@@ -3,9 +3,9 @@ package ru.qwonix.tgMoviePlayerBot.bot.state;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Video;
-import ru.qwonix.tgMoviePlayerBot.bot.BotCommand;
+import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
+import ru.qwonix.tgMoviePlayerBot.bot.command.BotCommand;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
-import ru.qwonix.tgMoviePlayerBot.bot.BotFeatures;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
@@ -25,7 +25,7 @@ public class DefaultState extends UserState {
     public void onText() {
         User user = chatContext.getUser();
         Update update = chatContext.getUpdate();
-        BotFeatures botFeatures = new BotFeatures(botContext);
+        BotUtils botUtils = new BotUtils(botContext);
 
         String userMessageText = update.getMessage().getText();
 
@@ -37,12 +37,12 @@ public class DefaultState extends UserState {
             Method commandMethod = BotCommand.getMethodForCommand(command);
 
             if (commandMethod != null) {
-                commandMethod.invoke(new BotCommand(botFeatures, botContext.getDaoContext())
+                commandMethod.invoke(new BotCommand(botUtils, botContext.getDaoContext())
                         , user, commandArgs);
                 return;
             }
 
-            botFeatures.sendText(user, "не понимаю. попробуйте ещё раз!");
+            botUtils.sendText(user, "не понимаю. попробуйте ещё раз!");
 
         } catch (IllegalAccessException e) {
             log.error("reflective access exception", e);
@@ -73,7 +73,7 @@ public class DefaultState extends UserState {
 
         log.info("user {} send video {}", user, video);
         log.info("video fileId {}", video.getFileId());
-        new BotFeatures(botContext).sendVideo(user, fileId);
+        new BotUtils(botContext).sendVideo(user, fileId);
     }
 
 }

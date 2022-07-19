@@ -3,7 +3,7 @@ package ru.qwonix.tgMoviePlayerBot.bot.state;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
-import ru.qwonix.tgMoviePlayerBot.bot.BotFeatures;
+import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
@@ -22,7 +22,7 @@ public class SearchState extends UserState {
     public void onText() {
         User user = chatContext.getUser();
         Update update = chatContext.getUpdate();
-        BotFeatures botFeatures = new BotFeatures(botContext);
+        BotUtils botUtils = new BotUtils(botContext);
 
         String searchText = update.getMessage().getText();
 
@@ -36,7 +36,7 @@ public class SearchState extends UserState {
         Map<String, String> keyboard = new HashMap<>();
         StringBuilder sb = new StringBuilder();
         if (serials.isEmpty()) {
-            botFeatures.sendMarkdownText(user, "Ничего не найдено :\\(");
+            botUtils.sendMarkdownText(user, "Ничего не найдено :\\(");
             return;
         }
 
@@ -51,15 +51,15 @@ public class SearchState extends UserState {
             keyboard.put(series.getName(), String.valueOf(series.getId()));
         }
 
-        InlineKeyboardMarkup callbackKeyboard = BotFeatures.createCallbackKeyboard(keyboard);
+        InlineKeyboardMarkup callbackKeyboard = BotUtils.createCallbackKeyboard(keyboard);
 
-        botFeatures.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", searchText));
+        botUtils.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", searchText));
 
         String escapedMsg = sb.toString()
                 .replace("-", "\\-")
                 .replace("!", "\\!")
                 .replace(".", "\\.");
-        botFeatures.sendMarkdownTextWithKeyBoard(user, escapedMsg, callbackKeyboard);
+        botUtils.sendMarkdownTextWithKeyBoard(user, escapedMsg, callbackKeyboard);
     }
 
     @Override
