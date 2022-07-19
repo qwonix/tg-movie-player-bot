@@ -3,7 +3,7 @@ package ru.qwonix.tgMoviePlayerBot.bot.state;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
-import ru.qwonix.tgMoviePlayerBot.bot.BotFeatures;
+import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
@@ -44,8 +44,8 @@ public abstract class UserState {
                 .map(Episode::getFileId)
                 .orElse("");
 
-        BotFeatures botFeatures = new BotFeatures(botContext);
-        botFeatures.sendVideo(user, fileId);
+        BotUtils botUtils = new BotUtils(botContext);
+        botUtils.sendVideo(user, fileId);
     }
 
 

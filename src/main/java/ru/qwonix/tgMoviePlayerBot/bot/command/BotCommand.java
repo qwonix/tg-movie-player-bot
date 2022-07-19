@@ -1,7 +1,8 @@
-package ru.qwonix.tgMoviePlayerBot.bot;
+package ru.qwonix.tgMoviePlayerBot.bot.command;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.state.UserState;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
@@ -26,11 +27,11 @@ public class BotCommand {
     }
 
     private final DaoContext daoContext;
-    private final BotFeatures botFeatures;
+    private final BotUtils botUtils;
 
-    public BotCommand(BotFeatures botFeatures, DaoContext daoContext) {
+    public BotCommand(BotUtils botUtils, DaoContext daoContext) {
         this.daoContext = daoContext;
-        this.botFeatures = botFeatures;
+        this.botUtils = botUtils;
     }
 
     public static Method getMethodForCommand(String command) {
@@ -39,15 +40,15 @@ public class BotCommand {
 
     @Command("/start")
     public void start(User user, String[] args) {
-        botFeatures.sendText(user, "Доступ получен, для справки используйте /help");
-        botFeatures.sendText(user, "А пока можете посмотреть Смешариков");
-        botFeatures.sendVideo(user, "BAACAgIAAxkBAANRYs6x16Dr5lBF8u3hs5Zxxn_ttjMAAnoaAAJq-3BKVr5yOMPU2aQpBA");
+        botUtils.sendText(user, "Доступ получен, для справки используйте /help");
+        botUtils.sendText(user, "А пока можете посмотреть Смешариков");
+        botUtils.sendVideo(user, "BAACAgIAAxkBAANRYs6x16Dr5lBF8u3hs5Zxxn_ttjMAAnoaAAJq-3BKVr5yOMPU2aQpBA");
         log.info("start by {}", user);
     }
 
     @Command("/help")
     public void help(User user, String[] args) {
-        botFeatures.sendMarkdownText(user, "Что надо сделать, если вам навстречу бежит окровавленный негр?\n||*Перезарядить*||");
+        botUtils.sendMarkdownText(user, "Что надо сделать, если вам навстречу бежит окровавленный негр?\n||*Перезарядить*||");
         log.info("help by {}", user);
     }
 
@@ -61,15 +62,15 @@ public class BotCommand {
 
         SendMessage.SendMessageBuilder message = SendMessage.builder()
                 .text("выбор")
-                .replyMarkup(BotFeatures.createCallbackKeyboard(ep))
+                .replyMarkup(BotUtils.createCallbackKeyboard(ep))
                 .parseMode("MarkdownV2");
 
-        botFeatures.sendMessage(user, message);
+        botUtils.sendMessage(user, message);
     }
 
     @Command("/search")
     public void search(User user, String[] args) {
-        botFeatures.sendText(user, "Введите название фильма, сериала или серии!");
+        botUtils.sendText(user, "Введите название фильма, сериала или серии!");
         user.setState(UserState.State.SEARCH);
         daoContext.getUserService().merge(user);
     }
@@ -80,7 +81,7 @@ public class BotCommand {
             String adminPassword = BotConfig.getProperty(BotConfig.ADMIN_PASSWORD);
             if (args[0].equals(adminPassword)) {
                 user = daoContext.getUserService().setAdmin(user);
-                botFeatures.sendText(user, "Вы получили права админа! /admin для доступа в меню");
+                botUtils.sendText(user, "Вы получили права админа! /admin для доступа в меню");
                 log.warn("became an admin: {}", user);
             } else {
                 log.warn("trying to become an admin: {}", user);
