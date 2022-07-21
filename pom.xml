@@ -47,6 +47,14 @@
             <version>${logback.version}</version>
         </dependency>
 
+        <!-- gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+
+
     </dependencies>
 
 </project>
