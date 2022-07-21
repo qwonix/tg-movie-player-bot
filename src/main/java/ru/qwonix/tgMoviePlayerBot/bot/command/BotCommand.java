@@ -3,6 +3,10 @@ package ru.qwonix.tgMoviePlayerBot.bot.command;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.Action;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.Callback;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallback;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallbackType;
 import ru.qwonix.tgMoviePlayerBot.bot.state.UserState;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
@@ -57,7 +61,10 @@ public class BotCommand {
         Map<String, String> ep = new HashMap<>();
 
         for (Episode episode : daoContext.getSeriesService().findAllEpisodes()) {
-            ep.put(episode.getName(), String.valueOf(episode.getId()));
+            String data = Callback.convertCallback(Action.SELECT
+                    , new SelectCallback(SelectCallbackType.EPISODE, episode.getId()));
+
+            ep.put(episode.getName(), data);
         }
 
         SendMessage.SendMessageBuilder message = SendMessage.builder()

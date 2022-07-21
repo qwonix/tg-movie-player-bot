@@ -1,10 +1,17 @@
 package ru.qwonix.tgMoviePlayerBot.bot.state;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.Action;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.Callback;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallback;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallbackType;
 import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
@@ -36,16 +43,22 @@ public abstract class UserState {
     public void onCallback() {
         CallbackQuery callbackQuery = chatContext.getUpdate().getCallbackQuery();
         String data = callbackQuery.getData();
+
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(data, JsonObject.class);
+        Action action = Action.valueOf(jsonObject.get("action").getAsString());
+
+        switch (action) {
+            case SELECT:
+                SelectCallback callback = new Gson().fromJson(jsonObject.getAsJsonObject("data"), SelectCallback.class);
+                callback.action(botContext, chatContext);
+            case NEXT_PAGE:
+
+            case PREVIOUS_PAGE:
+        }
+
         User user = chatContext.getUser();
         log.info("user {} callback {}", user, data);
-
-        DaoContext daoContext = botContext.getDaoContext();
-        String fileId = daoContext.getSeriesService().findEpisode(Integer.parseInt(data))
-                .map(Episode::getFileId)
-                .orElse("");
-
-        BotUtils botUtils = new BotUtils(botContext);
-        botUtils.sendVideo(user, fileId);
     }
 
 
