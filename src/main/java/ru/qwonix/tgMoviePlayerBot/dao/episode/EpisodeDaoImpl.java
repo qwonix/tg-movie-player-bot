@@ -80,6 +80,27 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
+    public List<Episode> findAllBySeason(Season season) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        List<Episode> episodes = new ArrayList<>();
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT * FROM episode e " +
+                             "inner join season s on s.id = e.season_id where s.id=?")) {
+            preparedStatement.setLong(1, season.getId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Episode episode = convert(resultSet);
+                episodes.add(episode);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+        return episodes;
+    }
+
+    @Override
     public void insert(Episode episode) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 

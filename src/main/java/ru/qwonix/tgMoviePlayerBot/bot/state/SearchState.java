@@ -5,6 +5,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.Action;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.Callback;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallback;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallbackType;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
@@ -47,8 +51,10 @@ public class SearchState extends UserState {
             sb.append(String.format("_%s_", series.getDescription()));
             sb.append('\n');
             sb.append('\n');
+            String data = Callback.convertCallback(Action.SELECT
+                    , new SelectCallback(SelectCallbackType.SERIES, series.getId()));
 
-            keyboard.put(series.getName(), String.valueOf(series.getId()));
+            keyboard.put(series.getName(), data);
         }
 
         InlineKeyboardMarkup callbackKeyboard = BotUtils.createCallbackKeyboard(keyboard);

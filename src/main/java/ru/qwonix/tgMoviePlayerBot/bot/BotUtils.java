@@ -60,6 +60,7 @@ public class BotUtils {
     public void sendVideo(User user, String fileId) {
         try {
             SendDocument sendDocument = SendDocument.builder()
+                    .disableNotification(true)
                     .document(new InputFile(fileId))
                     .chatId(String.valueOf(user.getChatId()))
                     .build();

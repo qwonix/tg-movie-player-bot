@@ -8,6 +8,7 @@ import ru.qwonix.tgMoviePlayerBot.dao.season.SeasonDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDao;
 import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
+import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
 import java.sql.SQLException;
@@ -46,9 +47,45 @@ public class SeriesService {
         return Optional.empty();
     }
 
+    public Optional<Series> findSeries(int id) {
+        try {
+            return seriesDao.find(id);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Optional.empty();
+    }
+
     public List<Episode> findAllEpisodes() {
         try {
             return episodeDao.findAll();
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Collections.emptyList();
+    }
+
+    public List<Episode> findAllEpisodesBySeason(Season season) {
+        try {
+            return episodeDao.findAllBySeason(season);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Collections.emptyList();
+    }
+
+    public Optional<Season> findSeason(int id) {
+        try {
+            return seasonDao.find(id);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Optional.empty();
+    }
+
+    public List<Season> findSeasonsBySeries(Series series) {
+        try {
+            return seasonDao.findAllBySeries(series);
         } catch (SQLException e) {
             log.error("sql exception", e);
         }
