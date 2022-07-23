@@ -58,18 +58,18 @@ public class BotCommand {
 
     @Command("/all")
     public void all(User user, String[] args) {
-        Map<String, String> ep = new HashMap<>();
+        Map<String, String> keyboard = new HashMap<>();
 
         for (Episode episode : daoContext.getSeriesService().findAllEpisodes()) {
             String data = Callback.convertCallback(Action.SELECT
                     , new SelectCallback(SelectCallbackType.EPISODE, episode.getId()));
 
-            ep.put(episode.getName(), data);
+            keyboard.put(episode.getName(), data);
         }
 
         SendMessage.SendMessageBuilder message = SendMessage.builder()
                 .text("выбор")
-                .replyMarkup(BotUtils.createCallbackKeyboard(ep))
+                .replyMarkup(BotUtils.createCallbackKeyboard(keyboard))
                 .parseMode("MarkdownV2");
 
         botUtils.sendMessage(user, message);
