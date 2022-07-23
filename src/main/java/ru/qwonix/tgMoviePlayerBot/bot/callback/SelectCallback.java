@@ -11,6 +11,8 @@ import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,29 +24,38 @@ public class SelectCallback extends Callback {
     private SelectCallbackType selectCallbackType;
     private int id;
 
-    public void action(BotContext botContext, ChatContext chatContext) {
-        switch (selectCallbackType) {
-            case SERIES:
-                seriesCallback(botContext, chatContext);
-                break;
+    private static final Map<String, Method> METHOD_CALLBACK = new HashMap<>();
 
-            case SEASON:
-                seasonCallback(botContext, chatContext);
-                break;
-
-            case EPISODE:
-                episodeCallback(botContext, chatContext);
-                break;
-
-            default:
-                new BotUtils(botContext).sendText(chatContext.getUser(), "дефолт блок");
-                break;
-
+    static {
+        for (Method m : SelectCallback.class.getDeclaredMethods()) {
+            if (m.isAnnotationPresent(CallbackAnn.class)) {
+                CallbackAnn callback = m.getAnnotation(CallbackAnn.class);
+                METHOD_CALLBACK.put(callback.value().toLowerCase(), m);
+                System.out.println(callback.value());
+            }
         }
-
     }
 
-    private void episodeCallback(BotContext botContext, ChatContext chatContext) {
+    public void action(BotContext botContext, ChatContext chatContext) {
+        Method callbackMethod = METHOD_CALLBACK.get(selectCallbackType.toString().toLowerCase());
+
+        boolean b = callbackMethod != null;
+        System.out.println(b);
+        if (b) {
+            try {
+                callbackMethod.invoke(this, botContext, chatContext);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            new BotUtils(botContext).sendText(chatContext.getUser(), "дефолт блок");
+        }
+    }
+
+    @CallbackAnn("episode")
+    public void episodeCallback(BotContext botContext, ChatContext chatContext) {
         SeriesService seriesService = botContext.getDaoContext().getSeriesService();
         Optional<Episode> optionalEpisode = seriesService.findEpisode(id);
         if (optionalEpisode.isPresent()) {
@@ -56,7 +67,8 @@ public class SelectCallback extends Callback {
         }
     }
 
-    private void seasonCallback(BotContext botContext, ChatContext chatContext) {
+    @CallbackAnn("season")
+    public void seasonCallback(BotContext botContext, ChatContext chatContext) {
         SeriesService seriesService = botContext.getDaoContext().getSeriesService();
         Optional<Season> optionalSeason = seriesService.findSeason(id);
         if (optionalSeason.isPresent()) {
@@ -88,11 +100,13 @@ public class SelectCallback extends Callback {
                     .replace(".", "\\.");
             botUtils.sendMarkdownTextWithKeyBoard(chatContext.getUser(), escapedMsg, callbackKeyboard);
         } else {
-            new BotUtils(botContext).sendText(chatContext.getUser(), "Сезона с id " + id + "не найдено. Попробуйте найти его заново.");
+            String text = "Сезона с id " + id + "не найдено. Попробуйте найти его заново.";
+            new BotUtils(botContext).sendText(chatContext.getUser(), text);
         }
     }
 
-    private void seriesCallback(BotContext botContext, ChatContext chatContext) {
+    @CallbackAnn("series")
+    public void seriesCallback(BotContext botContext, ChatContext chatContext) {
         SeriesService seriesService = botContext.getDaoContext().getSeriesService();
         Optional<Series> optionalSeries = seriesService.findSeries(id);
         if (optionalSeries.isPresent()) {
@@ -124,7 +138,8 @@ public class SelectCallback extends Callback {
                     .replace(".", "\\.");
             botUtils.sendMarkdownTextWithKeyBoard(chatContext.getUser(), escapedMsg, callbackKeyboard);
         } else {
-            new BotUtils(botContext).sendText(chatContext.getUser(), "Сериала с id " + id + "не найдено. Попробуйте найти его заново.");
+            String text = "Сериала с id " + id + "не найдено. Попробуйте найти его заново.";
+            new BotUtils(botContext).sendText(chatContext.getUser(), text);
         }
     }
 }
