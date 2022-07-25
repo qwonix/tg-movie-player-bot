@@ -1,18 +1,17 @@
 package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.json.JSONObject;
 
 public class Callback {
-    public static String convertCallback(Action action, Object object) {
-        Gson gson = new Gson();
-        JsonElement jsonObject = gson.toJsonTree(object);
+    public static String convertCallback(Action action, SelectCallback.DataType callbackType, int id) {
+        JSONObject jsonData = new JSONObject();
+        jsonData.put("dataType", callbackType.name());
+        jsonData.put("id", id);
 
-        JsonObject dataWrapper = new JsonObject();
-        dataWrapper.addProperty("action", action.toString());
-        dataWrapper.add("data", jsonObject);
+        JSONObject jsonCallback = new JSONObject();
+        jsonCallback.put("action", action.toString());
+        jsonCallback.put("data", jsonData);
 
-        return dataWrapper.toString();
+        return jsonCallback.toString();
     }
 }

@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface CallbackAnn {
-    String value();
+public @interface CallbackDataType {
+    SelectCallback.DataType value();
 }

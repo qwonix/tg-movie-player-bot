@@ -1,19 +1,12 @@
 package ru.qwonix.tgMoviePlayerBot.bot.state;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
-import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.Action;
-import ru.qwonix.tgMoviePlayerBot.bot.callback.Callback;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallback;
-import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallbackType;
-import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
-import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 @Slf4j
@@ -42,16 +35,17 @@ public abstract class UserState {
 
     public void onCallback() {
         CallbackQuery callbackQuery = chatContext.getUpdate().getCallbackQuery();
-        String data = callbackQuery.getData();
+        String callbackData = callbackQuery.getData();
 
-        Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(data, JsonObject.class);
-        Action action = Action.valueOf(jsonObject.get("action").getAsString());
+        JSONObject jsonObject = new JSONObject(callbackData);
 
+        String actionStr = jsonObject.getString("action");
+        Action action = Action.valueOf(actionStr);
+
+        JSONObject data = jsonObject.getJSONObject("data");
         switch (action) {
             case SELECT:
-                SelectCallback callback = new Gson().fromJson(jsonObject.getAsJsonObject("data"), SelectCallback.class);
-                callback.action(botContext, chatContext);
+                new SelectCallback(botContext, chatContext).action(data);
             case NEXT_PAGE:
 
             case PREVIOUS_PAGE:
@@ -60,7 +54,6 @@ public abstract class UserState {
         User user = chatContext.getUser();
         log.info("user {} callback {}", user, data);
     }
-
 
     public enum State {
         DEFAULT, SEARCH
