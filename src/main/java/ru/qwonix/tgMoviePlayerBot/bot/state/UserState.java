@@ -38,14 +38,13 @@ public abstract class UserState {
         String callbackData = callbackQuery.getData();
 
         JSONObject jsonObject = new JSONObject(callbackData);
-
         String actionStr = jsonObject.getString("action");
-        Action action = Action.valueOf(actionStr);
 
         JSONObject data = jsonObject.getJSONObject("data");
+        Action action = Action.valueOf(actionStr);
         switch (action) {
             case SELECT:
-                new SelectCallback(botContext, chatContext).action(data);
+                new SelectCallback(data).action(botContext, chatContext);
             case NEXT_PAGE:
 
             case PREVIOUS_PAGE:

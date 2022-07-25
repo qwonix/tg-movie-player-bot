@@ -18,37 +18,41 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SelectCallback extends Callback {
-    private final BotContext botContext;
-    private final ChatContext chatContext;
-
-    public enum DataType {
-        SERIES, SEASON, EPISODE
-    }
-
-    private static final Map<String, Method> METHOD_CALLBACK = new HashMap<>();
+    private static final Map<DataType, Method> METHOD_CALLBACK = new HashMap<>();
 
     static {
         for (Method m : SelectCallback.class.getDeclaredMethods()) {
             if (m.isAnnotationPresent(CallbackDataType.class)) {
                 CallbackDataType callback = m.getAnnotation(CallbackDataType.class);
-                METHOD_CALLBACK.put(callback.value().name().toLowerCase(), m);
-                System.out.println(callback.value());
+                METHOD_CALLBACK.put(callback.value(), m);
             }
         }
     }
 
-    public SelectCallback(BotContext botContext, ChatContext chatContext) {
-        this.botContext = botContext;
-        this.chatContext = chatContext;
+    private final SelectCallback.DataType dataType;
+    private final int id;
+    private BotContext botContext;
+    private ChatContext chatContext;
+
+    public SelectCallback(DataType dataType, int id) {
+        this.dataType = dataType;
+        this.id = id;
     }
 
-    public void action(JSONObject callbackData) {
-        String dataType = callbackData.getString("dataType");
-        Method callbackMethod = METHOD_CALLBACK.get(dataType.toLowerCase());
+    public SelectCallback(JSONObject callbackData) {
+        this.dataType = DataType.valueOf(callbackData.getString("dataType"));
+        this.id = callbackData.getInt("id");
+    }
+
+    public void action(BotContext botContext, ChatContext chatContext) {
+        this.botContext = botContext;
+        this.chatContext = chatContext;
+
+        Method callbackMethod = METHOD_CALLBACK.get(dataType);
 
         if (callbackMethod != null) {
             try {
-                callbackMethod.invoke(this, callbackData);
+                callbackMethod.invoke(this);
             } catch (IllegalAccessException | InvocationTargetException ignore) {
             }
         } else {
@@ -57,9 +61,7 @@ public class SelectCallback extends Callback {
     }
 
     @CallbackDataType(DataType.EPISODE)
-    public void episodeCallback(JSONObject callbackData) {
-        int id = callbackData.getInt("id");
-
+    public void episodeCallback() {
         SeriesService seriesService = botContext.getDaoContext().getSeriesService();
         Optional<Episode> optionalEpisode = seriesService.findEpisode(id);
         if (optionalEpisode.isPresent()) {
@@ -72,9 +74,7 @@ public class SelectCallback extends Callback {
     }
 
     @CallbackDataType(DataType.SEASON)
-    public void seasonCallback(JSONObject callbackData) {
-        int id = callbackData.getInt("id");
-
+    public void seasonCallback() {
         SeriesService seriesService = botContext.getDaoContext().getSeriesService();
         Optional<Season> optionalSeason = seriesService.findSeason(id);
         if (optionalSeason.isPresent()) {
@@ -89,9 +89,8 @@ public class SelectCallback extends Callback {
 
             Map<String, String> keyboard = new HashMap<>();
             for (Episode episode : seasonEpisodes) {
-                String data = Callback.convertCallback(Action.SELECT, DataType.EPISODE, episode.getId());
-
-                keyboard.put("Серия " + episode.getNumber(), data);
+                SelectCallback data = new SelectCallback(DataType.EPISODE, episode.getId());
+                keyboard.put("Серия " + episode.getNumber(), data.toJSON().toString());
             }
 
             InlineKeyboardMarkup callbackKeyboard = BotUtils.createCallbackKeyboard(keyboard);
@@ -110,9 +109,7 @@ public class SelectCallback extends Callback {
     }
 
     @CallbackDataType(DataType.SERIES)
-    public void seriesCallback(JSONObject callbackData) {
-        int id = callbackData.getInt("id");
-
+    public void seriesCallback() {
         SeriesService seriesService = botContext.getDaoContext().getSeriesService();
         Optional<Series> optionalSeries = seriesService.findSeries(id);
         if (optionalSeries.isPresent()) {
@@ -127,8 +124,8 @@ public class SelectCallback extends Callback {
 
             Map<String, String> keyboard = new HashMap<>();
             for (Season season : seriesSeasons) {
-                String data = Callback.convertCallback(Action.SELECT, DataType.SEASON, season.getId());
-                keyboard.put("Сезон " + season.getNumber(), data);
+                SelectCallback data = new SelectCallback(DataType.SEASON, season.getId());
+                keyboard.put("Сезон " + season.getNumber(), data.toJSON().toString());
             }
 
             BotUtils botUtils = new BotUtils(botContext);
@@ -144,5 +141,22 @@ public class SelectCallback extends Callback {
             String text = "Сериала с id " + id + "не найдено. Попробуйте найти его заново.";
             new BotUtils(botContext).sendText(chatContext.getUser(), text);
         }
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject jsonData = new JSONObject();
+        jsonData.put("dataType", dataType.name());
+        jsonData.put("id", id);
+
+        JSONObject jsonCallback = new JSONObject();
+        jsonCallback.put("action", Action.SELECT.toString());
+        jsonCallback.put("data", jsonData);
+
+        return jsonCallback;
+    }
+
+    public enum DataType {
+        SERIES, SEASON, EPISODE;
     }
 }
