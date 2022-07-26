@@ -1,7 +1,7 @@
-package ru.qwonix.tgMoviePlayerBot.dao.user;
+package ru.qwonix.tgMoviePlayerBot.database.dao.user;
 
-import ru.qwonix.tgMoviePlayerBot.bot.state.UserState;
-import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.bot.state.State;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.sql.*;
@@ -23,7 +23,7 @@ public class UserDaoImpl implements UserDao {
                 .chatId(userResultSet.getLong("chat_id"))
                 .name(userResultSet.getString("name"))
                 .isAdmin(userResultSet.getBoolean("is_admin"))
-                .state(UserState.State.valueOf(userResultSet.getString("state")))
+                .stateType(State.StateType.valueOf(userResultSet.getString("state")))
                 .build();
     }
 
@@ -74,7 +74,7 @@ public class UserDaoImpl implements UserDao {
             preparedStatement.setLong(1, user.getChatId());
             preparedStatement.setString(2, user.getName());
             preparedStatement.setBoolean(3, user.isAdmin());
-            preparedStatement.setString(4, user.getState().name());
+            preparedStatement.setString(4, user.getStateType().name());
 
             preparedStatement.executeUpdate();
         } finally {
@@ -92,7 +92,7 @@ public class UserDaoImpl implements UserDao {
 
             preparedStatement.setString(1, updatedUser.getName());
             preparedStatement.setBoolean(2, updatedUser.isAdmin());
-            preparedStatement.setString(3, updatedUser.getState().name());
+            preparedStatement.setString(3, updatedUser.getStateType().name());
             preparedStatement.setLong(4, id);
 
             preparedStatement.executeUpdate();

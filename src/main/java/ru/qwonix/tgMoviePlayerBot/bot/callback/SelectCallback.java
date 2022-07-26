@@ -1,12 +1,11 @@
 package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.dao.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
@@ -64,8 +63,8 @@ public class SelectCallback extends Callback {
 
     @CallbackDataType(DataType.EPISODE)
     private void episodeCallback() {
-        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
-        Optional<Episode> optionalEpisode = seriesService.findEpisode(id);
+        SeriesServiceImpl seriesServiceImpl = botContext.getDaoContext().getSeriesServiceImpl();
+        Optional<Episode> optionalEpisode = seriesServiceImpl.findEpisode(id);
         if (optionalEpisode.isPresent()) {
             Episode episode = optionalEpisode.get();
             String sb = String.format("`%s сезон %s серия` – *%s*", episode.getSeason().getNumber(), episode.getNumber(), episode.getName()) +
@@ -89,8 +88,8 @@ public class SelectCallback extends Callback {
 
     @CallbackDataType(DataType.SEASON)
     private void seasonCallback() {
-        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
-        Optional<Season> optionalSeason = seriesService.findSeason(id);
+        SeriesServiceImpl seriesServiceImpl = botContext.getDaoContext().getSeriesServiceImpl();
+        Optional<Season> optionalSeason = seriesServiceImpl.findSeason(id);
         if (optionalSeason.isPresent()) {
             Season season = optionalSeason.get();
 
@@ -99,7 +98,7 @@ public class SelectCallback extends Callback {
                     '\n' +
                     String.format("_%s_", season.getDescription());
 
-            List<Episode> seasonEpisodes = seriesService.findAllEpisodesBySeason(season);
+            List<Episode> seasonEpisodes = seriesServiceImpl.findAllEpisodesBySeason(season);
 
             Map<String, String> keyboard = new HashMap<>();
             for (Episode episode : seasonEpisodes) {
@@ -120,8 +119,8 @@ public class SelectCallback extends Callback {
 
     @CallbackDataType(DataType.SERIES)
     private void seriesCallback() {
-        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
-        Optional<Series> optionalSeries = seriesService.findSeries(id);
+        SeriesServiceImpl seriesServiceImpl = botContext.getDaoContext().getSeriesServiceImpl();
+        Optional<Series> optionalSeries = seriesServiceImpl.findSeries(id);
         if (optionalSeries.isPresent()) {
             Series series = optionalSeries.get();
 
@@ -130,7 +129,7 @@ public class SelectCallback extends Callback {
                     '\n' +
                     String.format("_%s_", series.getDescription());
 
-            List<Season> seriesSeasons = seriesService.findSeasonsBySeries(series);
+            List<Season> seriesSeasons = seriesServiceImpl.findSeasonsBySeries(series);
 
             Map<String, String> keyboard = new HashMap<>();
             for (Season season : seriesSeasons) {
@@ -163,6 +162,6 @@ public class SelectCallback extends Callback {
     }
 
     public enum DataType {
-        SERIES, SEASON, EPISODE;
+        SERIES, SEASON, EPISODE
     }
 }

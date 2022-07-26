@@ -16,9 +16,9 @@ public class Main {
             log.info("telegram init success");
 
         } catch (TelegramApiRequestException e) {
-            log.error("telegram api init error", e);
+            log.error("telegram ApiRequest init error", e);
         } catch (TelegramApiException e) {
-            log.error("telegram init error", e);
+            log.error("telegram Api init error", e);
         }
     }
 }

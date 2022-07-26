@@ -1,4 +1,4 @@
-package ru.qwonix.tgMoviePlayerBot.dao;
+package ru.qwonix.tgMoviePlayerBot.database.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

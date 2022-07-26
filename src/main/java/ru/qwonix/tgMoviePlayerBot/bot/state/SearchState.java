@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SearchState extends UserState {
+public class SearchState extends State {
 
     public SearchState(ChatContext chatContext, BotContext botContext) {
         super(chatContext, botContext);
@@ -31,7 +31,7 @@ public class SearchState extends UserState {
 
         List<Series> serials = botContext
                 .getDaoContext()
-                .getSeriesService()
+                .getSeriesServiceImpl()
                 .findAllByNameLike(searchText);
 
         Map<String, String> keyboard = new HashMap<>();

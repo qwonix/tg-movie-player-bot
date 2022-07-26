@@ -4,7 +4,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.qwonix.tgMoviePlayerBot.bot.state.DefaultState;
-import ru.qwonix.tgMoviePlayerBot.bot.state.UserState;
+import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
@@ -67,30 +67,30 @@ public class Bot extends TelegramLongPollingBot {
     private void onVideoReceived(Update update) {
         User user = findUserFromUpdate(update);
         ChatContext chatContext = new ChatContext(user, update);
-        UserState userState = UserState.getState(user.getState(), chatContext, botContext);
+        State state = State.getState(user.getStateType(), chatContext, botContext);
 
-        userState.onVideo();
+        state.onVideo();
     }
 
     private void onTextMessageReceived(Update update) {
         User user = findUserFromUpdate(update);
         ChatContext chatContext = new ChatContext(user, update);
-        UserState userState = UserState.getState(user.getState(), chatContext, botContext);
+        State state = State.getState(user.getStateType(), chatContext, botContext);
 
         String text = update.getMessage().getText();
         if (text.startsWith("/")) {
-            userState = new DefaultState(chatContext, botContext);
+            state = new DefaultState(chatContext, botContext);
         }
 
-        userState.onText();
+        state.onText();
     }
 
     private void onCallbackReceived(Update update) {
         User user = findUserFromUpdate(update);
         ChatContext chatContext = new ChatContext(user, update);
-        UserState userState = UserState.getState(user.getState(), chatContext, botContext);
+        State state = State.getState(user.getStateType(), chatContext, botContext);
 
-        userState.onCallback();
+        state.onCallback();
     }
 
 

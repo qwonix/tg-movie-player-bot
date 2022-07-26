@@ -1,9 +1,9 @@
-package ru.qwonix.tgMoviePlayerBot.dao.episode;
+package ru.qwonix.tgMoviePlayerBot.database.dao.episode;
 
 import org.postgresql.util.PGInterval;
-import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
-import ru.qwonix.tgMoviePlayerBot.dao.season.SeasonDao;
-import ru.qwonix.tgMoviePlayerBot.dao.season.SeasonDaoImpl;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDao;
+import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 

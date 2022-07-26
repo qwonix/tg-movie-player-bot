@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.qwonix.tgMoviePlayerBot.dao.DaoContext;
+import ru.qwonix.tgMoviePlayerBot.database.dao.DaoContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.util.ArrayList;
@@ -74,41 +74,34 @@ public class BotUtils {
     }
 
     public void sendText(User user, String text) {
-        SendMessage message = new SendMessage();
-
-        message.setChatId(String.valueOf(user.getChatId()));
-        message.setText(text);
-
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            log.error("message sending error " + user, e);
-            e.printStackTrace();
-        }
+        this.sendMessage(user,
+                SendMessage.builder()
+                        .chatId(String.valueOf(user.getChatId()))
+                        .text(text));
     }
 
     public void sendMarkdownText(User user, String markdownMessage) {
-        String escapedMsg = markdownMessage
+        String escapedMessage = markdownMessage
                 .replace("-", "\\-")
                 .replace("!", "\\!")
                 .replace("(", "\\(")
                 .replace(")", "\\)")
                 .replace(".", "\\.");
         SendMessage.SendMessageBuilder message = SendMessage.builder()
-                .text(escapedMsg)
+                .text(escapedMessage)
                 .parseMode("MarkdownV2");
 
         this.sendMessage(user, message);
     }
 
     public void sendMarkdownTextWithKeyBoard(User user, String markdownMessage, InlineKeyboardMarkup keyboard) {
-        String escapedMsg = markdownMessage
+        String escapedMessage = markdownMessage
                 .replace("-", "\\-")
                 .replace("!", "\\!")
                 .replace(".", "\\.");
 
         SendMessage.SendMessageBuilder message = SendMessage.builder()
-                .text(escapedMsg)
+                .text(escapedMessage)
                 .parseMode("MarkdownV2")
                 .replyMarkup(keyboard);
 

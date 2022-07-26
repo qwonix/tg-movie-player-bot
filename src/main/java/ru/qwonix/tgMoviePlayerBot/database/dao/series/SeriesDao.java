@@ -1,6 +1,6 @@
-package ru.qwonix.tgMoviePlayerBot.dao.series;
+package ru.qwonix.tgMoviePlayerBot.database.dao.series;
 
-import ru.qwonix.tgMoviePlayerBot.dao.DefaultDao;
+import ru.qwonix.tgMoviePlayerBot.database.dao.DefaultDao;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
 import java.sql.SQLException;

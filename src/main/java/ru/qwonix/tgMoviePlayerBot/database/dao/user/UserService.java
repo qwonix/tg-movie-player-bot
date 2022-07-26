@@ -1,7 +1,7 @@
-package ru.qwonix.tgMoviePlayerBot.dao.user;
+package ru.qwonix.tgMoviePlayerBot.database.dao.user;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.qwonix.tgMoviePlayerBot.dao.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.sql.SQLException;

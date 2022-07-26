@@ -1,8 +1,11 @@
-package ru.qwonix.tgMoviePlayerBot.dao;
+package ru.qwonix.tgMoviePlayerBot.database.dao;
 
 import lombok.Data;
 import ru.qwonix.tgMoviePlayerBot.config.DatabaseConfig;
-import ru.qwonix.tgMoviePlayerBot.dao.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.dao.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.PoolConnectionBuilder;
 
 import java.sql.SQLException;
 
@@ -10,7 +13,7 @@ import java.sql.SQLException;
 public class DaoContext {
     private final ConnectionBuilder connectionBuilder;
     private final UserService userService;
-    private final SeriesService seriesService;
+    private final SeriesServiceImpl seriesServiceImpl;
 
     {
         try {
@@ -34,6 +37,6 @@ public class DaoContext {
 
     public DaoContext() {
         userService = new UserService(connectionBuilder);
-        seriesService = new SeriesService(connectionBuilder);
+        seriesServiceImpl = new SeriesServiceImpl(connectionBuilder);
     }
 }

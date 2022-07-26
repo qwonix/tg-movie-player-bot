@@ -1,12 +1,13 @@
-package ru.qwonix.tgMoviePlayerBot.dao;
+package ru.qwonix.tgMoviePlayerBot.database.servie;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.qwonix.tgMoviePlayerBot.dao.episode.EpisodeDao;
-import ru.qwonix.tgMoviePlayerBot.dao.episode.EpisodeDaoImpl;
-import ru.qwonix.tgMoviePlayerBot.dao.season.SeasonDao;
-import ru.qwonix.tgMoviePlayerBot.dao.season.SeasonDaoImpl;
-import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDao;
-import ru.qwonix.tgMoviePlayerBot.dao.series.SeriesDaoImpl;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.dao.episode.EpisodeDao;
+import ru.qwonix.tgMoviePlayerBot.database.dao.episode.EpisodeDaoImpl;
+import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDao;
+import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDaoImpl;
+import ru.qwonix.tgMoviePlayerBot.database.dao.series.SeriesDao;
+import ru.qwonix.tgMoviePlayerBot.database.dao.series.SeriesDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
@@ -15,20 +16,20 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
-public class SeriesService {
+public class SeriesServiceImpl implements SeriesService {
     private final SeriesDao seriesDao;
     private final EpisodeDao episodeDao;
     private final SeasonDao seasonDao;
 
-    public SeriesService(ConnectionBuilder connectionBuilder) {
-        seriesDao = new SeriesDaoImpl(connectionBuilder);
-        episodeDao = new EpisodeDaoImpl(connectionBuilder);
-        seasonDao = new SeasonDaoImpl(connectionBuilder);
+    public SeriesServiceImpl(ConnectionBuilder connectionBuilder) {
+        this.seriesDao = new SeriesDaoImpl(connectionBuilder);
+        this.episodeDao = new EpisodeDaoImpl(connectionBuilder);
+        this.seasonDao = new SeasonDaoImpl(connectionBuilder);
     }
 
+    @Override
     public boolean exists(Series series) {
         try {
             return seriesDao.find(series.getId()).isPresent();
@@ -37,7 +38,7 @@ public class SeriesService {
         }
         return false;
     }
-
+    @Override
     public Optional<Episode> findEpisode(int id) {
         try {
             return episodeDao.find(id);
@@ -46,7 +47,7 @@ public class SeriesService {
         }
         return Optional.empty();
     }
-
+    @Override
     public Optional<Series> findSeries(int id) {
         try {
             return seriesDao.find(id);
@@ -55,7 +56,7 @@ public class SeriesService {
         }
         return Optional.empty();
     }
-
+    @Override
     public List<Episode> findAllEpisodes() {
         try {
             return episodeDao.findAll();
@@ -64,7 +65,7 @@ public class SeriesService {
         }
         return Collections.emptyList();
     }
-
+    @Override
     public List<Episode> findAllEpisodesBySeason(Season season) {
         try {
             return episodeDao.findAllBySeason(season);
@@ -73,7 +74,7 @@ public class SeriesService {
         }
         return Collections.emptyList();
     }
-
+    @Override
     public Optional<Season> findSeason(int id) {
         try {
             return seasonDao.find(id);
@@ -82,7 +83,7 @@ public class SeriesService {
         }
         return Optional.empty();
     }
-
+    @Override
     public List<Season> findSeasonsBySeries(Series series) {
         try {
             return seasonDao.findAllBySeries(series);
@@ -91,19 +92,7 @@ public class SeriesService {
         }
         return Collections.emptyList();
     }
-
-    public List<Episode> findAllEpisodesBySerial(Series series) {
-        try {
-            // TODO: 17-Jul-22 change filter to sql select exp
-            return episodeDao.findAll().stream()
-                    .filter(episode -> episode.getSeason().getSeries().getId() == series.getId())
-                    .collect(Collectors.toList());
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
-    }
-
+    @Override
     public List<Series> findAll() {
         try {
             return seriesDao.findAll();
@@ -112,7 +101,7 @@ public class SeriesService {
         }
         return Collections.emptyList();
     }
-
+    @Override
     public List<Series> findAllByName(String name) {
         try {
             return seriesDao.findAllByName(name);
@@ -121,7 +110,7 @@ public class SeriesService {
         }
         return Collections.emptyList();
     }
-
+    @Override
     public List<Series> findAllByNameLike(String name) {
         try {
             return seriesDao.findAllByNameLike(name);
@@ -130,7 +119,7 @@ public class SeriesService {
         }
         return Collections.emptyList();
     }
-
+    @Override
     public void addOrUpdate(Series series) {
         try {
             if (exists(series)) {

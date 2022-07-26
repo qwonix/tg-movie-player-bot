@@ -1,6 +1,6 @@
-package ru.qwonix.tgMoviePlayerBot.dao.season;
+package ru.qwonix.tgMoviePlayerBot.database.dao.season;
 
-import ru.qwonix.tgMoviePlayerBot.dao.DefaultDao;
+import ru.qwonix.tgMoviePlayerBot.database.dao.DefaultDao;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 

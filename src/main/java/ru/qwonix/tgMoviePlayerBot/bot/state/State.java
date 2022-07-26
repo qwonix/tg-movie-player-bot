@@ -8,20 +8,19 @@ import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.Action;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.Callback;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallback;
-import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 @Slf4j
-public abstract class UserState {
+public abstract class State {
     protected final ChatContext chatContext;
     protected final BotContext botContext;
 
-    public UserState(ChatContext chatContext, BotContext botContext) {
+    public State(ChatContext chatContext, BotContext botContext) {
         this.chatContext = chatContext;
         this.botContext = botContext;
     }
 
-    public static UserState getState(State state, ChatContext chatContext, BotContext botContext) {
-        switch (state) {
+    public static State getState(StateType stateType, ChatContext chatContext, BotContext botContext) {
+        switch (stateType) {
             case SEARCH:
                 return new SearchState(chatContext, botContext);
             case DEFAULT:
@@ -64,7 +63,7 @@ public abstract class UserState {
         callback.handle(botContext, chatContext);
     }
 
-    public enum State {
+    public enum StateType {
         DEFAULT, SEARCH
     }
 }

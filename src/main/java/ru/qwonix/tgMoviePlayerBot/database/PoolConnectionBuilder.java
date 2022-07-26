@@ -1,6 +1,7 @@
-package ru.qwonix.tgMoviePlayerBot.dao;
+package ru.qwonix.tgMoviePlayerBot.database;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.qwonix.tgMoviePlayerBot.database.dao.DaoException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

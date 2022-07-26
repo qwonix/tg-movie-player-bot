@@ -1,7 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.bot.state;
 
 import lombok.extern.slf4j.Slf4j;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
@@ -15,7 +14,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Slf4j
-public class DefaultState extends UserState {
+public class DefaultState extends State {
 
     public DefaultState(ChatContext chatContext, BotContext botContext) {
         super(chatContext, botContext);
