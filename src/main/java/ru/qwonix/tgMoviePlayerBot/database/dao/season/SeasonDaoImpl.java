@@ -59,7 +59,7 @@ public class SeasonDaoImpl implements SeasonDao {
 
         List<Season> seasons = new ArrayList<>();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM season where series_id = ?")) {
+                     connection.prepareStatement("SELECT * FROM season where series_id = ? order by number")) {
             preparedStatement.setInt(1, series.getId());
 
             ResultSet resultSet = preparedStatement.executeQuery();

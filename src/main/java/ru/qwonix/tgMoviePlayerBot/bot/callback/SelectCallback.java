@@ -13,10 +13,7 @@ import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class SelectCallback extends Callback {
     private static final Map<DataType, Method> DATATYPE_METHOD = new HashMap<>();
@@ -78,7 +75,6 @@ public class SelectCallback extends Callback {
 
             BotUtils botUtils = new BotUtils(botContext);
             botUtils.sendMarkdownText(chatContext.getUser(), sb);
-            String s = episode.getSeason().getNumber() + " сезон " + episode.getNumber() + " серия – " + episode.getName();
             botUtils.sendVideo(chatContext.getUser(), episode.getFileId());
         } else {
             String text = "Видео с id " + id + "не найдено. Попробуйте найти его заново.";
@@ -93,14 +89,14 @@ public class SelectCallback extends Callback {
         if (optionalSeason.isPresent()) {
             Season season = optionalSeason.get();
 
-            String sb = String.format("`%s сезон` *%s*", season.getNumber(), season.getPremiereReleaseDate()) +
+            String sb = String.format("`%s сезон` *%s*", season.getNumber(), season.getPremiereReleaseDate().format(DateTimeFormatter.ofPattern("d MM y"))) +
                     '\n' +
                     '\n' +
                     String.format("_%s_", season.getDescription());
 
             List<Episode> seasonEpisodes = seriesServiceImpl.findAllEpisodesBySeason(season);
 
-            Map<String, String> keyboard = new HashMap<>();
+            Map<String, String> keyboard = new LinkedHashMap<>();
             for (Episode episode : seasonEpisodes) {
                 SelectCallback data = new SelectCallback(DataType.EPISODE, episode.getId());
                 keyboard.put("Серия " + episode.getNumber(), data.toJSON().toString());
@@ -131,7 +127,7 @@ public class SelectCallback extends Callback {
 
             List<Season> seriesSeasons = seriesServiceImpl.findSeasonsBySeries(series);
 
-            Map<String, String> keyboard = new HashMap<>();
+            Map<String, String> keyboard = new LinkedHashMap<>();
             for (Season season : seriesSeasons) {
                 SelectCallback data = new SelectCallback(DataType.SEASON, season.getId());
                 keyboard.put("Сезон " + season.getNumber(), data.toJSON().toString());

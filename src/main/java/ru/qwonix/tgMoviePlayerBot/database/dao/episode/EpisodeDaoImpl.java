@@ -86,8 +86,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
 
         List<Episode> episodes = new ArrayList<>();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM episode e " +
-                             "inner join season s on s.id = e.season_id where s.id=?")) {
+                     connection.prepareStatement("SELECT * FROM episode e where e.season_id=? order by number")) {
             preparedStatement.setLong(1, season.getId());
 
             ResultSet resultSet = preparedStatement.executeQuery();
