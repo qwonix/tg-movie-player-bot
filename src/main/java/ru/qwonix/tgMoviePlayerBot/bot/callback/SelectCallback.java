@@ -1,6 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import org.json.JSONObject;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
@@ -12,19 +13,20 @@ import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class SelectCallback extends Callback {
-    private static final Map<DataType, Method> METHOD_CALLBACK = new HashMap<>();
+    private static final Map<DataType, Method> DATATYPE_METHOD = new HashMap<>();
 
     static {
         for (Method m : SelectCallback.class.getDeclaredMethods()) {
             if (m.isAnnotationPresent(CallbackDataType.class)) {
                 CallbackDataType callback = m.getAnnotation(CallbackDataType.class);
-                METHOD_CALLBACK.put(callback.value(), m);
+                DATATYPE_METHOD.put(callback.value(), m);
             }
         }
     }
@@ -44,11 +46,11 @@ public class SelectCallback extends Callback {
         this.id = callbackData.getInt("id");
     }
 
-    public void action(BotContext botContext, ChatContext chatContext) {
+    public void handle(BotContext botContext, ChatContext chatContext) {
         this.botContext = botContext;
         this.chatContext = chatContext;
 
-        Method callbackMethod = METHOD_CALLBACK.get(dataType);
+        Method callbackMethod = DATATYPE_METHOD.get(dataType);
 
         if (callbackMethod != null) {
             try {
@@ -61,12 +63,24 @@ public class SelectCallback extends Callback {
     }
 
     @CallbackDataType(DataType.EPISODE)
-    public void episodeCallback() {
+    private void episodeCallback() {
         SeriesService seriesService = botContext.getDaoContext().getSeriesService();
         Optional<Episode> optionalEpisode = seriesService.findEpisode(id);
         if (optionalEpisode.isPresent()) {
             Episode episode = optionalEpisode.get();
-            new BotUtils(botContext).sendVideo(chatContext.getUser(), episode.getFileId());
+            String sb = String.format("`%s сезон %s серия` – *%s*", episode.getSeason().getNumber(), episode.getNumber(), episode.getName()) +
+                    '\n' +
+                    '\n' +
+                    String.format("_%s_", episode.getDescription()) +
+                    '\n' +
+                    '\n' +
+                    String.format("Дата выхода: %s года  %s (%s)", episode.getReleaseDate().format(DateTimeFormatter.ofPattern("d MM y")), episode.getCountry(), episode.getLanguage());
+
+
+            BotUtils botUtils = new BotUtils(botContext);
+            botUtils.sendMarkdownText(chatContext.getUser(), sb);
+            String s = episode.getSeason().getNumber() + " сезон " + episode.getNumber() + " серия – " + episode.getName();
+            botUtils.sendVideo(chatContext.getUser(), episode.getFileId());
         } else {
             String text = "Видео с id " + id + "не найдено. Попробуйте найти его заново.";
             new BotUtils(botContext).sendText(chatContext.getUser(), text);
@@ -74,13 +88,13 @@ public class SelectCallback extends Callback {
     }
 
     @CallbackDataType(DataType.SEASON)
-    public void seasonCallback() {
+    private void seasonCallback() {
         SeriesService seriesService = botContext.getDaoContext().getSeriesService();
         Optional<Season> optionalSeason = seriesService.findSeason(id);
         if (optionalSeason.isPresent()) {
             Season season = optionalSeason.get();
 
-            String sb = String.format("`%s` *%s*", season.getNumber(), season.getPremiereReleaseDate()) +
+            String sb = String.format("`%s сезон` *%s*", season.getNumber(), season.getPremiereReleaseDate()) +
                     '\n' +
                     '\n' +
                     String.format("_%s_", season.getDescription());
@@ -97,11 +111,7 @@ public class SelectCallback extends Callback {
 
             BotUtils botUtils = new BotUtils(botContext);
 
-            String escapedMsg = sb
-                    .replace("-", "\\-")
-                    .replace("!", "\\!")
-                    .replace(".", "\\.");
-            botUtils.sendMarkdownTextWithKeyBoard(chatContext.getUser(), escapedMsg, callbackKeyboard);
+            botUtils.sendMarkdownTextWithKeyBoard(chatContext.getUser(), sb, callbackKeyboard);
         } else {
             String text = "Сезона с id " + id + "не найдено. Попробуйте найти его заново.";
             new BotUtils(botContext).sendText(chatContext.getUser(), text);
@@ -109,7 +119,7 @@ public class SelectCallback extends Callback {
     }
 
     @CallbackDataType(DataType.SERIES)
-    public void seriesCallback() {
+    private void seriesCallback() {
         SeriesService seriesService = botContext.getDaoContext().getSeriesService();
         Optional<Series> optionalSeries = seriesService.findSeries(id);
         if (optionalSeries.isPresent()) {
@@ -129,13 +139,9 @@ public class SelectCallback extends Callback {
             }
 
             BotUtils botUtils = new BotUtils(botContext);
-            String escapedMsg = sb
-                    .replace("-", "\\-")
-                    .replace("!", "\\!")
-                    .replace(".", "\\.");
 
             botUtils.sendMarkdownTextWithKeyBoard(chatContext.getUser()
-                    , escapedMsg
+                    , sb
                     , BotUtils.createCallbackKeyboard(keyboard));
         } else {
             String text = "Сериала с id " + id + "не найдено. Попробуйте найти его заново.";

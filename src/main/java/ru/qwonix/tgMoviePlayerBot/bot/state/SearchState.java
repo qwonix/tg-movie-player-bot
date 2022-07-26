@@ -59,11 +59,7 @@ public class SearchState extends UserState {
 
         botUtils.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", searchText));
 
-        String escapedMsg = sb.toString()
-                .replace("-", "\\-")
-                .replace("!", "\\!")
-                .replace(".", "\\.");
-        botUtils.sendMarkdownTextWithKeyBoard(user, escapedMsg, callbackKeyboard);
+        botUtils.sendMarkdownTextWithKeyBoard(user, sb.toString(), callbackKeyboard);
     }
 
     @Override

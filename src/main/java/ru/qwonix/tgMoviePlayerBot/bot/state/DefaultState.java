@@ -1,6 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.bot.state;
 
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
@@ -39,7 +40,7 @@ public class DefaultState extends UserState {
                 return;
             }
 
-            new BotUtils(botContext).sendText(user, "не понимаю. попробуйте ещё раз!");
+            new BotUtils(botContext).sendText(user, "Не понимаю. Попробуйте ещё раз!");
         } catch (IllegalAccessException e) {
             log.error("reflective access exception", e);
         } catch (InvocationTargetException e) {
@@ -53,7 +54,6 @@ public class DefaultState extends UserState {
         Video video = update.getMessage().getVideo();
         String fileId = video.getFileId();
 
-        User user = chatContext.getUser();
 
 //        Episode newEpisode = Episode.builder()
 //                .number()
@@ -67,9 +67,9 @@ public class DefaultState extends UserState {
 //                .fileId(video.getFileId())
 //                .build();
 
-        log.info("user {} send video {}", user, video);
+        log.info("user {} send video {}", chatContext.getUser(), video);
         log.info("video fileId {}", video.getFileId());
-        new BotUtils(botContext).sendVideo(user, fileId);
+        new BotUtils(botContext).sendVideo(chatContext.getUser(), fileId);
     }
 
 }

@@ -58,15 +58,18 @@ public class BotUtils {
     }
 
     public void sendVideo(User user, String fileId) {
+        SendDocument sendDocument = SendDocument.builder()
+//                .caption(text)
+//                .thumb()
+                .disableNotification(true)
+                .document(new InputFile(fileId))
+                .chatId(String.valueOf(user.getChatId()))
+                .build();
         try {
-            SendDocument sendDocument = SendDocument.builder()
-                    .disableNotification(true)
-                    .document(new InputFile(fileId))
-                    .chatId(String.valueOf(user.getChatId()))
-                    .build();
             bot.execute(sendDocument);
         } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
+            log.error("video sending error " + user, e);
+            e.printStackTrace();
         }
     }
 
@@ -85,16 +88,27 @@ public class BotUtils {
     }
 
     public void sendMarkdownText(User user, String markdownMessage) {
+        String escapedMsg = markdownMessage
+                .replace("-", "\\-")
+                .replace("!", "\\!")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
+                .replace(".", "\\.");
         SendMessage.SendMessageBuilder message = SendMessage.builder()
-                .text(markdownMessage)
+                .text(escapedMsg)
                 .parseMode("MarkdownV2");
 
         this.sendMessage(user, message);
     }
 
     public void sendMarkdownTextWithKeyBoard(User user, String markdownMessage, InlineKeyboardMarkup keyboard) {
+        String escapedMsg = markdownMessage
+                .replace("-", "\\-")
+                .replace("!", "\\!")
+                .replace(".", "\\.");
+
         SendMessage.SendMessageBuilder message = SendMessage.builder()
-                .text(markdownMessage)
+                .text(escapedMsg)
                 .parseMode("MarkdownV2")
                 .replyMarkup(keyboard);
 
