@@ -98,6 +98,8 @@ public class BotUtils {
         String escapedMessage = markdownMessage
                 .replace("-", "\\-")
                 .replace("!", "\\!")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
                 .replace(".", "\\.");
 
         SendMessage.SendMessageBuilder message = SendMessage.builder()

@@ -6,6 +6,7 @@ import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
+import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
 import java.sql.*;
 import java.time.Duration;
@@ -98,6 +99,26 @@ public class EpisodeDaoImpl implements EpisodeDao {
             connectionBuilder.releaseConnection(connection);
         }
         return episodes;
+    }
+
+    @Override
+    public LocalDate findEpisodePremiereReleaseDate(Series series) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT min(e.release_date) as premiere_date FROM episode e " +
+                             "inner join season s on s.id = e.season_id " +
+                             "inner join series ser on ser.id = s.series_id " +
+                             "where ser.id=?")) {
+            preparedStatement.setLong(1, series.getId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+
+           return resultSet.getObject("premiere_date", LocalDate.class);
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
     }
 
     @Override

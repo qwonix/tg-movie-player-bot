@@ -4,6 +4,7 @@ import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,8 @@ public interface SeriesService {
     Optional<Series> findSeries(int id);
 
     List<Episode> findAllEpisodes();
+
+    LocalDate findEpisodePremiereReleaseDate(Series series);
 
     List<Episode> findAllEpisodesBySeason(Season season);
 

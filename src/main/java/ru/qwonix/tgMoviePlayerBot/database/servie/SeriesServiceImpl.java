@@ -13,6 +13,7 @@ import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return false;
     }
+
     @Override
     public Optional<Episode> findEpisode(int id) {
         try {
@@ -47,6 +49,7 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return Optional.empty();
     }
+
     @Override
     public Optional<Series> findSeries(int id) {
         try {
@@ -56,6 +59,7 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return Optional.empty();
     }
+
     @Override
     public List<Episode> findAllEpisodes() {
         try {
@@ -65,6 +69,17 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return Collections.emptyList();
     }
+
+    @Override
+    public LocalDate findEpisodePremiereReleaseDate(Series series) {
+        try {
+            return episodeDao.findEpisodePremiereReleaseDate(series);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return null;
+    }
+
     @Override
     public List<Episode> findAllEpisodesBySeason(Season season) {
         try {
@@ -74,6 +89,7 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return Collections.emptyList();
     }
+
     @Override
     public Optional<Season> findSeason(int id) {
         try {
@@ -83,6 +99,7 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return Optional.empty();
     }
+
     @Override
     public List<Season> findSeasonsBySeries(Series series) {
         try {
@@ -92,6 +109,7 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return Collections.emptyList();
     }
+
     @Override
     public List<Series> findAll() {
         try {
@@ -101,6 +119,7 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return Collections.emptyList();
     }
+
     @Override
     public List<Series> findAllByName(String name) {
         try {
@@ -110,6 +129,7 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return Collections.emptyList();
     }
+
     @Override
     public List<Series> findAllByNameLike(String name) {
         try {
@@ -119,6 +139,7 @@ public class SeriesServiceImpl implements SeriesService {
         }
         return Collections.emptyList();
     }
+
     @Override
     public void addOrUpdate(Series series) {
         try {
