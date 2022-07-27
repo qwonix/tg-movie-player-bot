@@ -63,5 +63,8 @@ public class SearchState extends State {
 
         botUtils.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", searchText));
         botUtils.sendMarkdownTextWithKeyBoard(user, sb.toString(), callbackKeyboard);
+
+        user.setStateType(StateType.DEFAULT);
+        botContext.getDaoContext().getUserService().merge(user);
     }
 }
