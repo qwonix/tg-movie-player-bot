@@ -34,22 +34,24 @@ public class SearchState extends State {
         SeriesService seriesService = botContext
                 .getDaoContext()
                 .getSeriesService();
-        List<Series> serials = seriesService
-                .findAllByNameLike(searchText);
+        List<Series> serials = seriesService.findAllByNameLike(searchText);
 
         Map<String, String> keyboard = new HashMap<>();
-        StringBuilder sb = new StringBuilder();
         if (serials.isEmpty()) {
             botUtils.sendMarkdownText(user, "*Ничего не найдено :(* \n`Попробуйте изменить запрос`");
             return;
         }
 
+        StringBuilder sb = new StringBuilder();
         for (Series series : serials) {
             LocalDate episodePremiereReleaseDate = seriesService.findEpisodePremiereReleaseDate(series);
             sb.append(String.format("`%s` – *%s* (%s)", series.getName(), series.getCountry(), episodePremiereReleaseDate.getYear()));
             sb.append('\n');
             sb.append('\n');
-            sb.append(String.format("_%s_", series.getDescription()));
+            String description = series.getDescription()
+                    .substring(0, series.getDescription().indexOf(' ', 90))
+                    + "...";
+            sb.append(String.format("_%s_", description));
             sb.append('\n');
             sb.append('\n');
 
