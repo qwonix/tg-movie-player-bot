@@ -34,14 +34,11 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
 
     @Override
     public Connection getConnection() throws SQLException {
-        log.debug("total connections {}, available {}, used {}"
-                , availableConnections.size() + usedConnections.size()
-                , availableConnections.size()
-                , usedConnections.size());
-
         log.debug("connection request");
-        if (usedConnections.size() == maxPoolSize)
+
+        if (usedConnections.size() == maxPoolSize) {
             throw new RuntimeException("no available connections");
+        }
 
         Connection connection;
         if (availableConnections.isEmpty()) {
@@ -52,16 +49,16 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
             usedConnections.add(connection);
         }
         log.debug("take connection {}", connection);
+        log.debug("total connections {}, available {}, used {}"
+                , availableConnections.size() + usedConnections.size()
+                , availableConnections.size()
+                , usedConnections.size());
         return connection;
     }
 
     @Override
     public void releaseConnection(Connection connection) throws SQLException {
-        log.debug("take connection {}", connection);
-        log.debug("total connections {}, available {}, used {}"
-                , availableConnections.size() + usedConnections.size()
-                , availableConnections.size()
-                , usedConnections.size());
+        log.debug("connection pushed {}", connection);
 
         if (connection == null) {
             return;
@@ -74,7 +71,11 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
         }
 
         availableConnections.push(connection);
-        log.debug("connection pushed {}", connection);
+        log.debug("total connections {}, available {}, used {}"
+                , availableConnections.size() + usedConnections.size()
+                , availableConnections.size()
+                , usedConnections.size());
+
     }
 
     @Override

@@ -6,7 +6,7 @@ import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallback;
-import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesService;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
@@ -31,10 +31,10 @@ public class SearchState extends State {
 
         // TODO: 15-Jul-22 smart search for name
 
-        SeriesServiceImpl seriesServiceImpl = botContext
+        SeriesService seriesService = botContext
                 .getDaoContext()
-                .getSeriesServiceImpl();
-        List<Series> serials = seriesServiceImpl
+                .getSeriesService();
+        List<Series> serials = seriesService
                 .findAllByNameLike(searchText);
 
         Map<String, String> keyboard = new HashMap<>();
@@ -45,7 +45,7 @@ public class SearchState extends State {
         }
 
         for (Series series : serials) {
-            LocalDate episodePremiereReleaseDate = seriesServiceImpl.findEpisodePremiereReleaseDate(series);
+            LocalDate episodePremiereReleaseDate = seriesService.findEpisodePremiereReleaseDate(series);
             sb.append(String.format("`%s` – *%s* (%s)", series.getName(), series.getCountry(), episodePremiereReleaseDate.getYear()));
             sb.append('\n');
             sb.append('\n');
@@ -62,7 +62,6 @@ public class SearchState extends State {
         InlineKeyboardMarkup callbackKeyboard = BotUtils.createCallbackKeyboard(keyboard);
 
         botUtils.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", searchText));
-
         botUtils.sendMarkdownTextWithKeyBoard(user, sb.toString(), callbackKeyboard);
     }
 }

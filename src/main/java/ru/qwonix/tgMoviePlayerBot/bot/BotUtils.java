@@ -1,12 +1,10 @@
 package ru.qwonix.tgMoviePlayerBot.bot;
 
 import lombok.extern.slf4j.Slf4j;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -60,6 +58,15 @@ public class BotUtils {
         return markupInline;
     }
 
+    private static String escapeMarkdownMessage(String markdownMessage) {
+        return markdownMessage
+                .replace("-", "\\-")
+                .replace("!", "\\!")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
+                .replace(".", "\\.");
+    }
+
     public void sendVideo(User user, String fileId) {
         SendVideo sendVideo = SendVideo.builder()
                 .disableNotification(true)
@@ -89,7 +96,7 @@ public class BotUtils {
                 .photo(new InputFile(photoFileId))
                 .build();
 
-       try {
+        try {
             bot.execute(sendPhoto);
         } catch (TelegramApiException e) {
             log.error("photo sending error " + user, e);
@@ -112,15 +119,6 @@ public class BotUtils {
                 .replyMarkup(keyboard);
 
         this.sendMessage(user, message);
-    }
-
-    private static String escapeMarkdownMessage(String markdownMessage) {
-        return markdownMessage
-                .replace("-", "\\-")
-                .replace("!", "\\!")
-                .replace("(", "\\(")
-                .replace(")", "\\)")
-                .replace(".", "\\.");
     }
 
     private void sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {

@@ -66,11 +66,9 @@ public abstract class State {
 
         log.info("user {} send {} photos", chatContext.getUser(), photos.size());
         for (PhotoSize photo : photos) {
-            log.info("photo fileId {}", photo.getFileId());
-            log.info("photo getFileUniqueId {}", photo.getFileUniqueId());
-            log.info("photo getFilePath {}", photo.getFilePath());
-            log.info("photo getFileSize {}", photo.getFileSize());
-            new BotUtils(botContext).sendMarkdownTextWithPhoto(chatContext.getUser(),"*как*", photo.getFileId());
+            log.info("photo fileId {} getFileUniqueId {} getFilePath {} getFileSize {}"
+                    , photo.getFileId(), photo.getFileUniqueId(), photo.getFilePath(), photo.getFileSize());
+            new BotUtils(botContext).sendMarkdownTextWithPhoto(chatContext.getUser(), "*как*", photo.getFileId());
         }
     }
 

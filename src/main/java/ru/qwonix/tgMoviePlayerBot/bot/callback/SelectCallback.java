@@ -1,11 +1,12 @@
 package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesService;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
@@ -15,6 +16,7 @@ import java.lang.reflect.Method;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+@Slf4j
 public class SelectCallback extends Callback {
     private static final Map<DataType, Method> DATATYPE_METHOD = new HashMap<>();
 
@@ -54,17 +56,19 @@ public class SelectCallback extends Callback {
             } catch (IllegalAccessException | InvocationTargetException ignore) {
             }
         } else {
-            new BotUtils(botContext).sendText(chatContext.getUser(), "дефолт блок");
+            log.error("no annotated callback method for {}", dataType);
         }
     }
 
     @CallbackDataType(DataType.EPISODE)
     private void episodeCallback() {
-        SeriesServiceImpl seriesServiceImpl = botContext.getDaoContext().getSeriesServiceImpl();
-        Optional<Episode> optionalEpisode = seriesServiceImpl.findEpisode(id);
+        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
+        Optional<Episode> optionalEpisode = seriesService.findEpisode(id);
+
         if (optionalEpisode.isPresent()) {
             Episode episode = optionalEpisode.get();
-            String sb = String.format("`%s сезон %s серия` – *%s*", episode.getSeason().getNumber(), episode.getNumber(), episode.getName()) +
+
+            String text = String.format("`%s сезон %s серия` – *%s*", episode.getSeason().getNumber(), episode.getNumber(), episode.getName()) +
                     '\n' +
                     '\n' +
                     String.format("_%s_", episode.getDescription()) +
@@ -73,7 +77,7 @@ public class SelectCallback extends Callback {
                     String.format("Дата выхода: %s года  %s (%s)", episode.getReleaseDate().format(DateTimeFormatter.ofPattern("d MM y")), episode.getCountry(), episode.getLanguage());
 
             BotUtils botUtils = new BotUtils(botContext);
-            botUtils.sendMarkdownTextWithPhoto(chatContext.getUser(), sb, episode.getPreviewFileId());
+            botUtils.sendMarkdownTextWithPhoto(chatContext.getUser(), text, episode.getPreviewFileId());
             botUtils.sendVideo(chatContext.getUser(), episode.getVideoFileId());
         } else {
             String text = "Видео с id " + id + "не найдено. Попробуйте найти его заново.";
@@ -83,8 +87,9 @@ public class SelectCallback extends Callback {
 
     @CallbackDataType(DataType.SEASON)
     private void seasonCallback() {
-        SeriesServiceImpl seriesServiceImpl = botContext.getDaoContext().getSeriesServiceImpl();
-        Optional<Season> optionalSeason = seriesServiceImpl.findSeason(id);
+        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
+        Optional<Season> optionalSeason = seriesService.findSeason(id);
+
         if (optionalSeason.isPresent()) {
             Season season = optionalSeason.get();
 
@@ -93,7 +98,7 @@ public class SelectCallback extends Callback {
                     '\n' +
                     String.format("_%s_", season.getDescription());
 
-            List<Episode> seasonEpisodes = seriesServiceImpl.findAllEpisodesBySeason(season);
+            List<Episode> seasonEpisodes = seriesService.findAllEpisodesBySeason(season);
 
             Map<String, String> keyboard = new LinkedHashMap<>();
             for (Episode episode : seasonEpisodes) {
@@ -102,10 +107,7 @@ public class SelectCallback extends Callback {
             }
 
             InlineKeyboardMarkup callbackKeyboard = BotUtils.createCallbackKeyboard(keyboard);
-
-            BotUtils botUtils = new BotUtils(botContext);
-
-            botUtils.sendMarkdownTextWithKeyBoard(chatContext.getUser(), sb, callbackKeyboard);
+            new BotUtils(botContext).sendMarkdownTextWithKeyBoard(chatContext.getUser(), sb, callbackKeyboard);
         } else {
             String text = "Сезона с id " + id + "не найдено. Попробуйте найти его заново.";
             new BotUtils(botContext).sendText(chatContext.getUser(), text);
@@ -114,28 +116,26 @@ public class SelectCallback extends Callback {
 
     @CallbackDataType(DataType.SERIES)
     private void seriesCallback() {
-        SeriesServiceImpl seriesServiceImpl = botContext.getDaoContext().getSeriesServiceImpl();
-        Optional<Series> optionalSeries = seriesServiceImpl.findSeries(id);
+        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
+        Optional<Series> optionalSeries = seriesService.findSeries(id);
+
         if (optionalSeries.isPresent()) {
             Series series = optionalSeries.get();
 
-            String sb = String.format("*%s* — `%s`", series.getName(), series.getCountry()) +
+            String text = String.format("*%s* — `%s`", series.getName(), series.getCountry()) +
                     '\n' +
                     '\n' +
                     String.format("_%s_", series.getDescription());
 
-            List<Season> seriesSeasons = seriesServiceImpl.findSeasonsBySeries(series);
-
             Map<String, String> keyboard = new LinkedHashMap<>();
+            List<Season> seriesSeasons = seriesService.findSeasonsBySeries(series);
             for (Season season : seriesSeasons) {
                 SelectCallback data = new SelectCallback(DataType.SEASON, season.getId());
                 keyboard.put("Сезон " + season.getNumber(), data.toJSON().toString());
             }
 
-            BotUtils botUtils = new BotUtils(botContext);
-
-            botUtils.sendMarkdownTextWithKeyBoard(chatContext.getUser()
-                    , sb
+            new BotUtils(botContext).sendMarkdownTextWithKeyBoard(chatContext.getUser()
+                    , text
                     , BotUtils.createCallbackKeyboard(keyboard));
         } else {
             String text = "Сериала с id " + id + "не найдено. Попробуйте найти его заново.";
