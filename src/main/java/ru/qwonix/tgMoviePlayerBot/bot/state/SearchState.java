@@ -65,10 +65,4 @@ public class SearchState extends State {
 
         botUtils.sendMarkdownTextWithKeyBoard(user, sb.toString(), callbackKeyboard);
     }
-
-    @Override
-    public void onVideo() {
-
-    }
-
 }

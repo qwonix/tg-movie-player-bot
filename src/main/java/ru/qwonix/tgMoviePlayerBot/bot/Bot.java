@@ -36,6 +36,8 @@ public class Bot extends TelegramLongPollingBot {
             this.onTextMessageReceived(update);
         } else if (update.getMessage().hasVideo()) {
             this.onVideoReceived(update);
+        } else if (update.getMessage().hasPhoto()) {
+            this.onPhotoReceived(update);
         }
     }
 
@@ -70,6 +72,14 @@ public class Bot extends TelegramLongPollingBot {
         State state = State.getState(user.getStateType(), chatContext, botContext);
 
         state.onVideo();
+    }
+
+    private void onPhotoReceived(Update update) {
+        User user = findUserFromUpdate(update);
+        ChatContext chatContext = new ChatContext(user, update);
+        State state = State.getState(user.getStateType(), chatContext, botContext);
+
+        state.onPhoto();
     }
 
     private void onTextMessageReceived(Update update) {

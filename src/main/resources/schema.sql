@@ -11,6 +11,7 @@ create table if not exists "user"
     state    varchar(100)
 );
 
+/*
 create table if not exists movie
 (
     id               serial primary key,
@@ -22,6 +23,7 @@ create table if not exists movie
     country          varchar(50),
     telegram_file_id varchar
 );
+*/
 
 create table if not exists series
 (
@@ -62,5 +64,6 @@ create table if not exists episode
     country          varchar(50),
     duration         interval,
     season_id        int references season,
-    telegram_file_id char(70)
+    tg_video_file_id char(100),
+    tg_preview_file_id char(100)
 );

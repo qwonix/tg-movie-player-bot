@@ -3,11 +3,17 @@ package ru.qwonix.tgMoviePlayerBot.bot.state;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
+import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.Action;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.Callback;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallback;
+
+import java.util.List;
 
 @Slf4j
 public abstract class State {
@@ -31,7 +37,42 @@ public abstract class State {
 
     public abstract void onText();
 
-    public abstract void onVideo();
+    public void onVideo() {
+        Update update = chatContext.getUpdate();
+        Video video = update.getMessage().getVideo();
+        String fileId = video.getFileId();
+
+//        Episode newEpisode = Episode.builder()
+//                .number()
+//                .name()
+//                .description()
+//                .releaseDate()
+//                .language("Русский")
+//                .country("Россия")
+//                .duration(Duration.ofSeconds(video.getDuration()))
+//                .season()
+//                .fileId(video.getFileId())
+//                .build();
+
+        log.info("user {} send video {}", chatContext.getUser(), video);
+        log.info("video fileId {}", video.getFileId());
+        new BotUtils(botContext).sendVideo(chatContext.getUser(), fileId);
+    }
+
+
+    public void onPhoto() {
+        Update update = chatContext.getUpdate();
+        List<PhotoSize> photos = update.getMessage().getPhoto();
+
+        log.info("user {} send {} photos", chatContext.getUser(), photos.size());
+        for (PhotoSize photo : photos) {
+            log.info("photo fileId {}", photo.getFileId());
+            log.info("photo getFileUniqueId {}", photo.getFileUniqueId());
+            log.info("photo getFilePath {}", photo.getFilePath());
+            log.info("photo getFileSize {}", photo.getFileSize());
+            new BotUtils(botContext).sendMarkdownTextWithPhoto(chatContext.getUser(),"*как*", photo.getFileId());
+        }
+    }
 
     public void onCallback() {
         CallbackQuery callbackQuery = chatContext.getUpdate().getCallbackQuery();
@@ -62,6 +103,7 @@ public abstract class State {
         }
         callback.handle(botContext, chatContext);
     }
+
 
     public enum StateType {
         DEFAULT, SEARCH

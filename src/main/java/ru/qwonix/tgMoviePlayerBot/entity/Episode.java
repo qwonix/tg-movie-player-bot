@@ -1,7 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.entity;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 
 import java.time.Duration;
@@ -20,5 +19,6 @@ public class Episode {
     private String country;
     private Duration duration;
     private Season season;
-    private String fileId;
+    private String videoFileId;
+    private String previewFileId;
 }

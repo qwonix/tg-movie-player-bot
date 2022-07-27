@@ -72,10 +72,9 @@ public class SelectCallback extends Callback {
                     '\n' +
                     String.format("Дата выхода: %s года  %s (%s)", episode.getReleaseDate().format(DateTimeFormatter.ofPattern("d MM y")), episode.getCountry(), episode.getLanguage());
 
-
             BotUtils botUtils = new BotUtils(botContext);
-            botUtils.sendMarkdownText(chatContext.getUser(), sb);
-            botUtils.sendVideo(chatContext.getUser(), episode.getFileId());
+            botUtils.sendMarkdownTextWithPhoto(chatContext.getUser(), sb, episode.getPreviewFileId());
+            botUtils.sendVideo(chatContext.getUser(), episode.getVideoFileId());
         } else {
             String text = "Видео с id " + id + "не найдено. Попробуйте найти его заново.";
             new BotUtils(botContext).sendText(chatContext.getUser(), text);

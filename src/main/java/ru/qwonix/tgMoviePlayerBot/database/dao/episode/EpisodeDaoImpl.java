@@ -38,7 +38,8 @@ public class EpisodeDaoImpl implements EpisodeDao {
                 .country(episodeResultSet.getString("country"))
                 .duration(Duration.ofSeconds(duration.getWholeSeconds()))
                 .season(season.orElse(null))
-                .fileId(episodeResultSet.getString("telegram_file_id"))
+                .videoFileId(episodeResultSet.getString("tg_video_file_id"))
+                .previewFileId(episodeResultSet.getString("tg_preview_file_id"))
                 .build();
     }
 
@@ -114,7 +115,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
             ResultSet resultSet = preparedStatement.executeQuery();
             resultSet.next();
 
-           return resultSet.getObject("premiere_date", LocalDate.class);
+            return resultSet.getObject("premiere_date", LocalDate.class);
         } finally {
             connectionBuilder.releaseConnection(connection);
         }
@@ -125,7 +126,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO episode (number, name, description, release_date, language, country, duration, season_id, telegram_file_id) " +
+                     connection.prepareStatement("INSERT INTO episode (number, name, description, release_date, language, country, duration, season_id, tg_video_file_id, tg_preview_file_id) " +
                              "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
 
             preparedStatement.setInt(1, episode.getNumber());
@@ -136,7 +137,8 @@ public class EpisodeDaoImpl implements EpisodeDao {
             preparedStatement.setString(6, episode.getCountry());
             preparedStatement.setObject(7, episode.getDuration());
             preparedStatement.setInt(8, episode.getSeason().getId());
-            preparedStatement.setString(9, episode.getFileId());
+            preparedStatement.setString(9, episode.getVideoFileId());
+            preparedStatement.setString(10, episode.getPreviewFileId());
 
             preparedStatement.executeUpdate();
         } finally {
@@ -149,7 +151,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("UPDATE episode " +
-                             "SET number=?, name=?, description=?, release_date=?, language=?, country=?, duration=?, season_id=?, telegram_file_id=? WHERE id=?")) {
+                             "SET number=?, name=?, description=?, release_date=?, language=?, country=?, duration=?, season_id=?, tg_video_file_id=?, tg_preview_file_id=? WHERE id=?")) {
             preparedStatement.setInt(1, series.getNumber());
             preparedStatement.setString(2, series.getName());
             preparedStatement.setString(3, series.getDescription());
@@ -158,8 +160,10 @@ public class EpisodeDaoImpl implements EpisodeDao {
             preparedStatement.setString(6, series.getCountry());
             preparedStatement.setObject(7, series.getDuration());
             preparedStatement.setInt(8, series.getSeason().getId());
-            preparedStatement.setString(9, series.getFileId());
-            preparedStatement.setLong(10, id);
+            preparedStatement.setString(9, series.getVideoFileId());
+            preparedStatement.setString(10, series.getPreviewFileId());
+
+            preparedStatement.setLong(11, id);
 
             preparedStatement.executeUpdate();
         } finally {

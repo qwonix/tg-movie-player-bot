@@ -3,7 +3,10 @@ package ru.qwonix.tgMoviePlayerBot.bot;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -58,15 +61,13 @@ public class BotUtils {
     }
 
     public void sendVideo(User user, String fileId) {
-        SendDocument sendDocument = SendDocument.builder()
-//                .caption(text)
-//                .thumb()
+        SendVideo sendVideo = SendVideo.builder()
                 .disableNotification(true)
-                .document(new InputFile(fileId))
+                .video(new InputFile(fileId))
                 .chatId(String.valueOf(user.getChatId()))
                 .build();
         try {
-            bot.execute(sendDocument);
+            bot.execute(sendVideo);
         } catch (TelegramApiException e) {
             log.error("video sending error " + user, e);
             e.printStackTrace();
@@ -80,37 +81,49 @@ public class BotUtils {
                         .text(text));
     }
 
+    public void sendMarkdownTextWithPhoto(User user, String markdownMessage, String photoFileId) {
+        SendPhoto sendPhoto = SendPhoto.builder()
+                .caption(escapeMarkdownMessage(markdownMessage))
+                .parseMode("MarkdownV2")
+                .chatId(String.valueOf(user.getChatId()))
+                .photo(new InputFile(photoFileId))
+                .build();
+
+       try {
+            bot.execute(sendPhoto);
+        } catch (TelegramApiException e) {
+            log.error("photo sending error " + user, e);
+            e.printStackTrace();
+        }
+    }
+
     public void sendMarkdownText(User user, String markdownMessage) {
-        String escapedMessage = markdownMessage
-                .replace("-", "\\-")
-                .replace("!", "\\!")
-                .replace("(", "\\(")
-                .replace(")", "\\)")
-                .replace(".", "\\.");
         SendMessage.SendMessageBuilder message = SendMessage.builder()
-                .text(escapedMessage)
+                .text(escapeMarkdownMessage(markdownMessage))
                 .parseMode("MarkdownV2");
 
         this.sendMessage(user, message);
     }
 
     public void sendMarkdownTextWithKeyBoard(User user, String markdownMessage, InlineKeyboardMarkup keyboard) {
-        String escapedMessage = markdownMessage
-                .replace("-", "\\-")
-                .replace("!", "\\!")
-                .replace("(", "\\(")
-                .replace(")", "\\)")
-                .replace(".", "\\.");
-
         SendMessage.SendMessageBuilder message = SendMessage.builder()
-                .text(escapedMessage)
+                .text(escapeMarkdownMessage(markdownMessage))
                 .parseMode("MarkdownV2")
                 .replyMarkup(keyboard);
 
         this.sendMessage(user, message);
     }
 
-    public void sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
+    private static String escapeMarkdownMessage(String markdownMessage) {
+        return markdownMessage
+                .replace("-", "\\-")
+                .replace("!", "\\!")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
+                .replace(".", "\\.");
+    }
+
+    private void sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
         SendMessage message = messageBuilder.chatId(String.valueOf(user.getChatId())).build();
         try {
             bot.execute(message);

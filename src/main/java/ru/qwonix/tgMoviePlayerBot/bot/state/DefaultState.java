@@ -46,29 +46,4 @@ public class DefaultState extends State {
             log.error("called method-command threw an exception", e);
         }
     }
-
-    @Override
-    public void onVideo() {
-        Update update = chatContext.getUpdate();
-        Video video = update.getMessage().getVideo();
-        String fileId = video.getFileId();
-
-
-//        Episode newEpisode = Episode.builder()
-//                .number()
-//                .name()
-//                .description()
-//                .releaseDate()
-//                .language("Русский")
-//                .country("Россия")
-//                .duration(Duration.ofSeconds(video.getDuration()))
-//                .season()
-//                .fileId(video.getFileId())
-//                .build();
-
-        log.info("user {} send video {}", chatContext.getUser(), video);
-        log.info("video fileId {}", video.getFileId());
-        new BotUtils(botContext).sendVideo(chatContext.getUser(), fileId);
-    }
-
 }
