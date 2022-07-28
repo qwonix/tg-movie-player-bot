@@ -129,7 +129,7 @@ public class SelectCallback extends Callback {
                 keyboard.put("Серия " + episode.getNumber() + " «" + episode.getName() + "»", data.toJSON().toString());
             }
 
-            InlineKeyboardMarkup callbackKeyboard = BotUtils.createCallbackKeyboard(keyboard);
+            InlineKeyboardMarkup callbackKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);
             new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
                     , callbackKeyboard
@@ -161,7 +161,7 @@ public class SelectCallback extends Callback {
 
             new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
-                    , BotUtils.createCallbackKeyboard(keyboard)
+                    , BotUtils.createTwoRowsCallbackKeyboard(keyboard)
                     , series.getPreviewFileId());
         } else {
             String text = "Сериала с id " + id + "не найдено. Попробуйте найти его заново.";

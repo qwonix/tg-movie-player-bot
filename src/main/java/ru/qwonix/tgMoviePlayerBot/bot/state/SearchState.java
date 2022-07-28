@@ -61,7 +61,7 @@ public class SearchState extends State {
             keyboard.put(series.getName() + " (" + episodePremiereReleaseDate.getYear() + ")", data.toJSON().toString());
         }
 
-        InlineKeyboardMarkup callbackKeyboard = BotUtils.createCallbackKeyboard(keyboard);
+        InlineKeyboardMarkup callbackKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);
 
         botUtils.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", searchText));
         botUtils.sendMarkdownTextWithKeyBoard(user, sb.toString(), callbackKeyboard);

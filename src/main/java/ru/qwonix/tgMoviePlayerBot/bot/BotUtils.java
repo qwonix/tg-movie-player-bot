@@ -26,7 +26,7 @@ public class BotUtils {
         this.daoContext = botContext.getDaoContext();
     }
 
-    public static InlineKeyboardMarkup createLinkKeyboard(Map<String, String> buttons) {
+    public static InlineKeyboardMarkup createOneRowLinkKeyboard(Map<String, String> buttons) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
@@ -42,7 +42,28 @@ public class BotUtils {
         return markupInline;
     }
 
-    public static InlineKeyboardMarkup createCallbackKeyboard(Map<String, String> buttons) {
+    public static InlineKeyboardMarkup createOneRowCallbackKeyboard(Map<String, String> buttons) {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+        for (Map.Entry<String, String> button : buttons.entrySet()) {
+            List<InlineKeyboardButton> rowInline = new ArrayList<>();
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+
+            inlineKeyboardButton.setText(button.getKey());
+            inlineKeyboardButton.setCallbackData(button.getValue());
+            rowInline.add(inlineKeyboardButton);
+            rowsInline.add(rowInline);
+        }
+        markupInline.setKeyboard(rowsInline);
+        return markupInline;
+    }
+
+    public static InlineKeyboardMarkup createTwoRowsCallbackKeyboard(Map<String, String> buttons) {
+        if (buttons.size() < 6) {
+            return createOneRowCallbackKeyboard(buttons);
+        }
+
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
