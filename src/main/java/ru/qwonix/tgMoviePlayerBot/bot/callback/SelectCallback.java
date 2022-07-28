@@ -112,15 +112,16 @@ public class SelectCallback extends Callback {
             else
                 seriesFinalReleaseDate = season.getFinalReleaseDate().format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
 
+            List<Episode> seasonEpisodes = seriesService.findAllEpisodesBySeason(season);
 
             String text = String.format("*%s – %s сезон*\n", season.getSeries().getName(), season.getNumber())
                     + '\n'
                     + String.format("_%s_\n", season.getDescription())
                     + '\n'
+                    + String.format("*Количество эпизодов*: *%d* / *%s*\n", seasonEpisodes.size(), season.getTotalEpisodesCount())
                     + String.format("*Премьера: _%s_*\n", seriesPremiereReleaseDate)
                     + String.format("*Финал: _%s_*\n", seriesFinalReleaseDate);
 
-            List<Episode> seasonEpisodes = seriesService.findAllEpisodesBySeason(season);
 
             Map<String, String> keyboard = new LinkedHashMap<>();
             for (Episode episode : seasonEpisodes) {

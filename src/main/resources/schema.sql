@@ -51,6 +51,7 @@ create table if not exists season
     description           text     not null,
     premiere_release_date date     not null,
     final_release_date    date     not null,
+    total_episodes_count  int      not null,
     series_id             int references series,
     tg_preview_file_id    char(100)
 );

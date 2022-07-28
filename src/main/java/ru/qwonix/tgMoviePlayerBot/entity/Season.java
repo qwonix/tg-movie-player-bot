@@ -15,6 +15,7 @@ public class Season {
     private String description;
     private LocalDate premiereReleaseDate;
     private LocalDate finalReleaseDate;
+    private int totalEpisodesCount;
     private Series series;
     private String previewFileId;
 }
