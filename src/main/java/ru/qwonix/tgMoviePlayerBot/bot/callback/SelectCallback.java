@@ -72,13 +72,13 @@ public class SelectCallback extends Callback {
         if (optionalEpisode.isPresent()) {
             Episode episode = optionalEpisode.get();
 
-            String text = String.format("`%s сезон %s серия` – *%s*", episode.getSeason().getNumber(), episode.getNumber(), episode.getName()) +
-                    '\n' +
-                    '\n' +
-                    String.format("_%s_", episode.getDescription()) +
-                    '\n' +
-                    '\n' +
-                    String.format("Дата выхода: %s года  %s (%s)", episode.getReleaseDate().format(DateTimeFormatter.ofPattern("d MM y")), episode.getCountry(), episode.getLanguage());
+            String text = String.format("`%s сезон %s серия` – *%s*\n", episode.getSeason().getNumber(), episode.getNumber(), episode.getName())
+                    + '\n'
+                    + String.format("_%s_\n", episode.getDescription())
+                    + '\n'
+                    + String.format("Дата выхода: %s года\n", episode.getReleaseDate().format(
+                    DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru"))))
+                    + String.format("Страна: *%s* (_%s_)", episode.getCountry(), episode.getLanguage());
 
             BotUtils botUtils = new BotUtils(botContext);
             botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
@@ -99,17 +99,33 @@ public class SelectCallback extends Callback {
         if (optionalSeason.isPresent()) {
             Season season = optionalSeason.get();
 
-            String text = String.format("`%s сезон` *%s*", season.getNumber(), season.getPremiereReleaseDate().format(DateTimeFormatter.ofPattern("d MM y"))) +
-                    '\n' +
-                    '\n' +
-                    String.format("_%s_", season.getDescription());
+            String seriesPremiereReleaseDate;
+            if (season.getPremiereReleaseDate() == null) {
+                seriesPremiereReleaseDate = "TBA";
+            } else {
+                seriesPremiereReleaseDate = season.getPremiereReleaseDate().format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
+            }
+
+            String seriesFinalReleaseDate;
+            if (season.getFinalReleaseDate() == null)
+                seriesFinalReleaseDate = "TBA";
+            else
+                seriesFinalReleaseDate = season.getFinalReleaseDate().format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
+
+
+            String text = String.format("*%s – %s сезон*\n", season.getSeries().getName(), season.getNumber())
+                    + '\n'
+                    + String.format("_%s_\n", season.getDescription())
+                    + '\n'
+                    + String.format("*Премьера: _%s_*\n", seriesPremiereReleaseDate)
+                    + String.format("*Финал: _%s_*\n", seriesFinalReleaseDate);
 
             List<Episode> seasonEpisodes = seriesService.findAllEpisodesBySeason(season);
 
             Map<String, String> keyboard = new LinkedHashMap<>();
             for (Episode episode : seasonEpisodes) {
                 SelectCallback data = new SelectCallback(DataType.EPISODE, episode.getId());
-                keyboard.put("Серия " + episode.getNumber(), data.toJSON().toString());
+                keyboard.put("Серия " + episode.getNumber() + " «" + episode.getName() + "»", data.toJSON().toString());
             }
 
             InlineKeyboardMarkup callbackKeyboard = BotUtils.createCallbackKeyboard(keyboard);
@@ -131,10 +147,9 @@ public class SelectCallback extends Callback {
         if (optionalSeries.isPresent()) {
             Series series = optionalSeries.get();
 
-            String text = String.format("*%s* — `%s`", series.getName(), series.getCountry()) +
-                    '\n' +
-                    '\n' +
-                    String.format("_%s_", series.getDescription());
+            String text = String.format("*%s*\n", series.getName())
+                    + '\n'
+                    + String.format("_%s_", series.getDescription());
 
             Map<String, String> keyboard = new LinkedHashMap<>();
             List<Season> seriesSeasons = seriesService.findSeasonsBySeries(series);
