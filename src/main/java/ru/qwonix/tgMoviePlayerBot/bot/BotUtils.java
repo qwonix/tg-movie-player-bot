@@ -42,7 +42,28 @@ public class BotUtils {
         return markupInline;
     }
 
+    public static InlineKeyboardMarkup createCallbackKeyboardOneRow(Map<String, String> buttons) {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+        for (Map.Entry<String, String> button : buttons.entrySet()) {
+            List<InlineKeyboardButton> rowInline = new ArrayList<>();
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+
+            inlineKeyboardButton.setText(button.getKey());
+            inlineKeyboardButton.setCallbackData(button.getValue());
+            rowInline.add(inlineKeyboardButton);
+            rowsInline.add(rowInline);
+        }
+        markupInline.setKeyboard(rowsInline);
+        return markupInline;
+    }
+
     public static InlineKeyboardMarkup createCallbackKeyboard(Map<String, String> buttons) {
+        if (buttons.size() < 6) {
+            return createCallbackKeyboardOneRow(buttons);
+        }
+
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
