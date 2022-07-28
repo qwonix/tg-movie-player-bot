@@ -16,4 +16,5 @@ public class Season {
     private LocalDate premiereReleaseDate;
     private LocalDate finalReleaseDate;
     private Series series;
+    private String previewFileId;
 }

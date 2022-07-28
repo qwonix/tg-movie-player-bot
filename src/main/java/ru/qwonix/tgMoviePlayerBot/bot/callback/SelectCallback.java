@@ -81,7 +81,9 @@ public class SelectCallback extends Callback {
                     String.format("Дата выхода: %s года  %s (%s)", episode.getReleaseDate().format(DateTimeFormatter.ofPattern("d MM y")), episode.getCountry(), episode.getLanguage());
 
             BotUtils botUtils = new BotUtils(botContext);
-            botUtils.sendMarkdownTextWithPhoto(chatContext.getUser(), text, episode.getPreviewFileId());
+            botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
+                    , text
+                    , episode.getPreviewFileId());
             botUtils.sendVideo(chatContext.getUser(), episode.getVideoFileId());
         } else {
             String text = "Видео с id " + id + "не найдено. Попробуйте найти его заново.";
@@ -97,7 +99,7 @@ public class SelectCallback extends Callback {
         if (optionalSeason.isPresent()) {
             Season season = optionalSeason.get();
 
-            String sb = String.format("`%s сезон` *%s*", season.getNumber(), season.getPremiereReleaseDate().format(DateTimeFormatter.ofPattern("d MM y"))) +
+            String text = String.format("`%s сезон` *%s*", season.getNumber(), season.getPremiereReleaseDate().format(DateTimeFormatter.ofPattern("d MM y"))) +
                     '\n' +
                     '\n' +
                     String.format("_%s_", season.getDescription());
@@ -111,7 +113,10 @@ public class SelectCallback extends Callback {
             }
 
             InlineKeyboardMarkup callbackKeyboard = BotUtils.createCallbackKeyboard(keyboard);
-            new BotUtils(botContext).sendMarkdownTextWithKeyBoard(chatContext.getUser(), sb, callbackKeyboard);
+            new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+                    , text
+                    , callbackKeyboard
+                    , season.getPreviewFileId());
         } else {
             String text = "Сезона с id " + id + "не найдено. Попробуйте найти его заново.";
             new BotUtils(botContext).sendText(chatContext.getUser(), text);
@@ -138,9 +143,10 @@ public class SelectCallback extends Callback {
                 keyboard.put("Сезон " + season.getNumber(), data.toJSON().toString());
             }
 
-            new BotUtils(botContext).sendMarkdownTextWithKeyBoard(chatContext.getUser()
+            new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
-                    , BotUtils.createCallbackKeyboard(keyboard));
+                    , BotUtils.createCallbackKeyboard(keyboard)
+                    , series.getPreviewFileId());
         } else {
             String text = "Сериала с id " + id + "не найдено. Попробуйте найти его заново.";
             new BotUtils(botContext).sendText(chatContext.getUser(), text);

@@ -22,6 +22,7 @@ public class SeriesDaoImpl implements SeriesDao {
                 .name(seriesResultSet.getString("name"))
                 .description(seriesResultSet.getString("description"))
                 .country(seriesResultSet.getString("country"))
+                .previewFileId(seriesResultSet.getString("tg_preview_file_id"))
                 .build();
     }
 
@@ -109,11 +110,12 @@ public class SeriesDaoImpl implements SeriesDao {
     public void insert(Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement
-                     = connection.prepareStatement("INSERT INTO series (name, description, country) " +
-                "VALUES(?, ?, ?)")) {
+                     = connection.prepareStatement("INSERT INTO series (name, description, country, tg_preview_file_id) " +
+                "VALUES(?, ?, ?, ?)")) {
             preparedStatement.setString(1, series.getName());
             preparedStatement.setString(2, series.getDescription());
             preparedStatement.setString(3, series.getCountry());
+            preparedStatement.setString(4, series.getPreviewFileId());
 
             preparedStatement.executeUpdate();
         }
@@ -125,11 +127,12 @@ public class SeriesDaoImpl implements SeriesDao {
     public void update(long id, Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE series SET name=?, description=?, country=? WHERE id=?")) {
+                     connection.prepareStatement("UPDATE series SET name=?, description=?, country=?, tg_preview_file_id=? WHERE id=?")) {
             preparedStatement.setString(1, series.getName());
             preparedStatement.setString(2, series.getDescription());
             preparedStatement.setString(3, series.getCountry());
-            preparedStatement.setLong(4, id);
+            preparedStatement.setString(4, series.getPreviewFileId());
+            preparedStatement.setLong(5, id);
             preparedStatement.executeUpdate();
         } finally {
             connectionBuilder.releaseConnection(connection);

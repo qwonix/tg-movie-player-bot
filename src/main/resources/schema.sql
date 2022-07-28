@@ -27,10 +27,11 @@ create table if not exists movie
 
 create table if not exists series
 (
-    id          serial primary key,
-    "name"      varchar(200) not null,
-    description text         not null,
-    country     varchar(50)
+    id                 serial primary key,
+    "name"             varchar(200) not null,
+    description        text         not null,
+    country            varchar(50),
+    tg_preview_file_id char(100)
 );
 
 /*
@@ -50,20 +51,21 @@ create table if not exists season
     description           text     not null,
     premiere_release_date date     not null,
     final_release_date    date     not null,
-    series_id             int references series
+    series_id             int references series,
+    tg_preview_file_id    char(100)
 );
 
 create table if not exists episode
 (
-    id               serial primary key,
-    number           smallint     not null,
-    "name"           varchar(200) not null,
-    description      text         not null,
-    release_date     date         not null,
-    "language"       varchar(50),
-    country          varchar(50),
-    duration         interval,
-    season_id        int references season,
-    tg_video_file_id char(100),
+    id                 serial primary key,
+    number             smallint     not null,
+    "name"             varchar(200) not null,
+    description        text         not null,
+    release_date       date         not null,
+    "language"         varchar(50),
+    country            varchar(50),
+    duration           interval,
+    season_id          int references season,
+    tg_video_file_id   char(100),
     tg_preview_file_id char(100)
 );

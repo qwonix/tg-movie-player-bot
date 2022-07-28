@@ -13,6 +13,7 @@ import ru.qwonix.tgMoviePlayerBot.bot.callback.Action;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.Callback;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallback;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -40,7 +41,6 @@ public abstract class State {
     public void onVideo() {
         Update update = chatContext.getUpdate();
         Video video = update.getMessage().getVideo();
-        String fileId = video.getFileId();
 
 //        Episode newEpisode = Episode.builder()
 //                .number()
@@ -55,8 +55,7 @@ public abstract class State {
 //                .build();
 
         log.info("user {} send video {}", chatContext.getUser(), video);
-        log.info("video fileId {}", video.getFileId());
-        new BotUtils(botContext).sendVideo(chatContext.getUser(), fileId);
+        new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), "`" + video.getFileId() + "`");
     }
 
 
@@ -65,11 +64,13 @@ public abstract class State {
         List<PhotoSize> photos = update.getMessage().getPhoto();
 
         log.info("user {} send {} photos", chatContext.getUser(), photos.size());
+
         for (PhotoSize photo : photos) {
             log.info("photo fileId {} getFileUniqueId {} getFilePath {} getFileSize {}"
                     , photo.getFileId(), photo.getFileUniqueId(), photo.getFilePath(), photo.getFileSize());
-            new BotUtils(botContext).sendMarkdownTextWithPhoto(chatContext.getUser(), "*как*", photo.getFileId());
         }
+        PhotoSize photoSize = photos.stream().max(Comparator.comparingInt(PhotoSize::getFileSize)).get();
+        new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), "`" + photoSize.getFileId() + "`");
     }
 
     public void onCallback() {

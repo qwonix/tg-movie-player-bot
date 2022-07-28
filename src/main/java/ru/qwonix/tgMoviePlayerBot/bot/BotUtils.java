@@ -112,6 +112,23 @@ public class BotUtils {
         this.sendMessage(user, message);
     }
 
+    public void sendMarkdownTextWithKeyBoardAndPhoto(User user, String markdownMessage, InlineKeyboardMarkup keyboard, String photoFileId) {
+        SendPhoto sendPhoto = SendPhoto.builder()
+                .caption(escapeMarkdownMessage(markdownMessage))
+                .parseMode("MarkdownV2")
+                .photo(new InputFile(photoFileId))
+                .replyMarkup(keyboard)
+                .chatId(String.valueOf(user.getChatId()))
+                .build();
+
+        try {
+            bot.execute(sendPhoto);
+        } catch (TelegramApiException e) {
+            log.error("photo sending error " + user, e);
+            e.printStackTrace();
+        }
+    }
+
     public void sendMarkdownTextWithKeyBoard(User user, String markdownMessage, InlineKeyboardMarkup keyboard) {
         SendMessage.SendMessageBuilder message = SendMessage.builder()
                 .text(escapeMarkdownMessage(markdownMessage))

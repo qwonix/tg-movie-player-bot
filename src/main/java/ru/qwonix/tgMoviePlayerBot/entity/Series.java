@@ -11,4 +11,5 @@ public class Series {
     private String name;
     private String description;
     private String country;
+    private String previewFileId;
 }

@@ -31,6 +31,7 @@ public class SeasonDaoImpl implements SeasonDao {
                 .description(seasonResultSet.getString("description"))
                 .premiereReleaseDate(seasonResultSet.getObject("premiere_release_date", LocalDate.class))
                 .finalReleaseDate(seasonResultSet.getObject("final_release_date", LocalDate.class))
+                .previewFileId(seasonResultSet.getString("tg_preview_file_id"))
                 .series(series.orElse(null))
                 .build();
     }
@@ -98,14 +99,15 @@ public class SeasonDaoImpl implements SeasonDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO season (number, description, premiere_release_date, final_release_date, series_id) " +
-                             "VALUES(?, ?, ?, ?, ?)")) {
+                     connection.prepareStatement("INSERT INTO season (number, description, premiere_release_date, final_release_date, series_id, tg_preview_file_id) " +
+                             "VALUES(?, ?, ?, ?, ?, ?)")) {
 
             preparedStatement.setInt(1, season.getNumber());
             preparedStatement.setString(2, season.getDescription());
             preparedStatement.setObject(3, season.getPremiereReleaseDate());
             preparedStatement.setObject(4, season.getFinalReleaseDate());
             preparedStatement.setInt(5, season.getSeries().getId());
+            preparedStatement.setString(6, season.getPreviewFileId());
 
             preparedStatement.executeUpdate();
         } finally {
@@ -118,14 +120,15 @@ public class SeasonDaoImpl implements SeasonDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE season SET number=?, description=?, premiere_release_date=?, final_release_date=?,series_id=? WHERE id=?")) {
+                     connection.prepareStatement("UPDATE season SET number=?, description=?, premiere_release_date=?, final_release_date=?,series_id=?, tg_preview_file_id=? WHERE id=?")) {
 
             preparedStatement.setInt(1, season.getNumber());
             preparedStatement.setString(2, season.getDescription());
             preparedStatement.setObject(3, season.getPremiereReleaseDate());
             preparedStatement.setObject(4, season.getFinalReleaseDate());
             preparedStatement.setLong(5, season.getSeries().getId());
-            preparedStatement.setLong(6, id);
+            preparedStatement.setString(6, season.getPreviewFileId());
+            preparedStatement.setLong(7, id);
 
             preparedStatement.executeUpdate();
         } finally {
@@ -144,6 +147,5 @@ public class SeasonDaoImpl implements SeasonDao {
         } finally {
             connectionBuilder.releaseConnection(connection);
         }
-
     }
 }
