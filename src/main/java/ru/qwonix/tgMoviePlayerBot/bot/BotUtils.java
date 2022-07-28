@@ -12,6 +12,7 @@ import ru.qwonix.tgMoviePlayerBot.database.dao.DaoContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,13 +46,24 @@ public class BotUtils {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
-        for (Map.Entry<String, String> button : buttons.entrySet()) {
+        Iterator<Map.Entry<String, String>> iterator = buttons.entrySet().iterator();
+        while (iterator.hasNext()) {
             List<InlineKeyboardButton> rowInline = new ArrayList<>();
+            Map.Entry<String, String> pair = iterator.next();
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+            inlineKeyboardButton.setText(pair.getKey());
+            inlineKeyboardButton.setCallbackData(pair.getValue());
 
-            inlineKeyboardButton.setText(button.getKey());
-            inlineKeyboardButton.setCallbackData(button.getValue());
             rowInline.add(inlineKeyboardButton);
+
+            if (iterator.hasNext()) {
+                pair = iterator.next();
+                inlineKeyboardButton = new InlineKeyboardButton();
+                inlineKeyboardButton.setText(pair.getKey());
+                inlineKeyboardButton.setCallbackData(pair.getValue());
+
+                rowInline.add(inlineKeyboardButton);
+            }
             rowsInline.add(rowInline);
         }
         markupInline.setKeyboard(rowsInline);
