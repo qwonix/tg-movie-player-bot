@@ -9,9 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.bot.callback.Action;
-import ru.qwonix.tgMoviePlayerBot.bot.callback.Callback;
-import ru.qwonix.tgMoviePlayerBot.bot.callback.SelectCallback;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -63,31 +61,34 @@ public abstract class State {
 
     public void onCallback() {
         CallbackQuery callbackQuery = chatContext.getUpdate().getCallbackQuery();
-        String callbackData = callbackQuery.getData();
 
-        log.info("user {} callback {}", chatContext.getUser(), callbackData);
+        log.info("user {} callback {}", chatContext.getUser(), callbackQuery.getData());
 
-        JSONObject jsonObject = new JSONObject(callbackData);
-        String actionStr = jsonObject.getString("action");
+        JSONObject jsonObject = new JSONObject(callbackQuery.getData());
+        Action action = Action.valueOf(jsonObject.getString("action"));
 
-        JSONObject data = jsonObject.getJSONObject("data");
-        Action action = Action.valueOf(actionStr);
+        JSONObject callbackData = jsonObject.getJSONObject("data");
+        DataType dataType = DataType.valueOf(callbackData.getString("dataType"));
+
         Callback callback = null;
-        switch (action) {
-            case SELECT:
-                callback = new SelectCallback(data);
-                break;
-            case NEXT_PAGE:
+        switch (dataType) {
+            case EPISODE:
+                callback = new EpisodeCallback(botContext, chatContext);
                 break;
 
-            case PREVIOUS_PAGE:
+            case SEASON:
+                callback = new SeasonCallback(botContext, chatContext);
+                break;
+
+            case SERIES:
+                callback = new SeriesCallback(botContext, chatContext);
                 break;
 
             default:
-                log.info("default in switch onCallback");
+                log.info("no such case for {}", dataType);
                 return;
         }
-        callback.handle(botContext, chatContext);
+        callback.handleCallback(callbackData);
     }
 
 
