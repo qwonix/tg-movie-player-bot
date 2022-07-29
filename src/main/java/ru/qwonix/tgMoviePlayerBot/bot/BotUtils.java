@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -100,37 +102,37 @@ public class BotUtils {
                 .replace(".", "\\.");
     }
 
-    public void sendVideo(User user, String fileId) {
-        this.sendVideo(user
+    public Integer sendVideo(User user, String fileId) {
+        return this.sendVideo(user
                 , SendVideo.builder()
                         .disableNotification(true)
                         .video(new InputFile(fileId)));
     }
 
-    public void sendText(User user, String text) {
-        this.sendMessage(user
+    public Integer sendText(User user, String text) {
+        return this.sendMessage(user
                 , SendMessage.builder()
                         .chatId(String.valueOf(user.getChatId()))
                         .text(text));
     }
 
-    public void sendMarkdownTextWithPhoto(User user, String markdownMessage, String photoFileId) {
-        this.sendPhoto(user
+    public Integer sendMarkdownTextWithPhoto(User user, String markdownMessage, String photoFileId) {
+        return this.sendPhoto(user
                 , SendPhoto.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
                         .photo(new InputFile(photoFileId)));
     }
 
-    public void sendMarkdownText(User user, String markdownMessage) {
-        this.sendMessage(user
+    public Integer sendMarkdownText(User user, String markdownMessage) {
+        return this.sendMessage(user
                 , SendMessage.builder()
                         .text(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2"));
     }
 
-    public void sendMarkdownTextWithKeyBoardAndPhoto(User user, String markdownMessage, InlineKeyboardMarkup keyboard, String photoFileId) {
-        this.sendPhoto(user
+    public Integer sendMarkdownTextWithKeyBoardAndPhoto(User user, String markdownMessage, InlineKeyboardMarkup keyboard, String photoFileId) {
+        return this.sendPhoto(user
                 , SendPhoto.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
@@ -138,38 +140,55 @@ public class BotUtils {
                         .replyMarkup(keyboard));
     }
 
-    public void sendMarkdownTextWithKeyBoard(User user, String markdownMessage, InlineKeyboardMarkup keyboard) {
-        this.sendMessage(user
+    public Integer sendMarkdownTextWithKeyBoard(User user, String markdownMessage, InlineKeyboardMarkup keyboard) {
+        return this.sendMessage(user
                 , SendMessage.builder()
                         .text(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
                         .replyMarkup(keyboard));
     }
 
-    private void sendPhoto(User user, SendPhoto.SendPhotoBuilder photoBuilder) {
+    private Integer sendPhoto(User user, SendPhoto.SendPhotoBuilder photoBuilder) {
         SendPhoto photo = photoBuilder.chatId(String.valueOf(user.getChatId())).build();
         try {
-            bot.execute(photo);
+            Message execute = bot.execute(photo);
+            return execute.getMessageId();
         } catch (TelegramApiException e) {
             log.error("photo sending error " + user, e);
         }
+        return null;
     }
 
-    private void sendVideo(User user, SendVideo.SendVideoBuilder videoBuilder) {
+    private Integer sendVideo(User user, SendVideo.SendVideoBuilder videoBuilder) {
         SendVideo photo = videoBuilder.chatId(String.valueOf(user.getChatId())).build();
         try {
-            bot.execute(photo);
+            Message execute = bot.execute(photo);
+            return execute.getMessageId();
         } catch (TelegramApiException e) {
             log.error("video sending error " + user, e);
         }
+        return null;
     }
 
-    private void sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
+    private Integer sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
         SendMessage message = messageBuilder.chatId(String.valueOf(user.getChatId())).build();
         try {
-            bot.execute(message);
+            Message execute = bot.execute(message);
+            return execute.getMessageId();
         } catch (TelegramApiException e) {
             log.error("message sending error " + user, e);
+        }
+        return null;
+    }
+
+    public void deleteMessage(User user, Integer messageId) {
+        DeleteMessage deleteMessage = DeleteMessage.builder()
+                .chatId(String.valueOf(user.getChatId()))
+                .messageId(messageId).build();
+        try {
+            bot.execute(deleteMessage);
+        } catch (TelegramApiException e) {
+            log.error("message deleting error " + user, e);
         }
     }
 }

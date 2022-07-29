@@ -24,6 +24,7 @@ public class UserDaoImpl implements UserDao {
                 .name(userResultSet.getString("name"))
                 .isAdmin(userResultSet.getBoolean("is_admin"))
                 .stateType(State.StateType.valueOf(userResultSet.getString("state")))
+                .messageIdToDelete(userResultSet.getObject("tg_message_id_to_delete", Integer.class))
                 .build();
     }
 
@@ -69,12 +70,13 @@ public class UserDaoImpl implements UserDao {
     public void insert(User user) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO \"user\" VALUES(?, ?, ?, ?)")) {
+                     connection.prepareStatement("INSERT INTO \"user\" VALUES(?, ?, ?, ?, ?)")) {
 
             preparedStatement.setLong(1, user.getChatId());
             preparedStatement.setString(2, user.getName());
             preparedStatement.setBoolean(3, user.isAdmin());
             preparedStatement.setString(4, user.getStateType().name());
+            preparedStatement.setObject(5, user.getMessageIdToDelete());
 
             preparedStatement.executeUpdate();
         } finally {
@@ -88,12 +90,13 @@ public class UserDaoImpl implements UserDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE \"user\" SET name=?, is_admin=?, state=? WHERE chat_id=?")) {
+                     connection.prepareStatement("UPDATE \"user\" SET name=?, is_admin=?, state=?, tg_message_id_to_delete=?  WHERE chat_id=?")) {
 
             preparedStatement.setString(1, updatedUser.getName());
             preparedStatement.setBoolean(2, updatedUser.isAdmin());
             preparedStatement.setString(3, updatedUser.getStateType().name());
-            preparedStatement.setLong(4, id);
+            preparedStatement.setObject(4, updatedUser.getMessageIdToDelete());
+            preparedStatement.setLong(5, id);
 
             preparedStatement.executeUpdate();
         } finally {

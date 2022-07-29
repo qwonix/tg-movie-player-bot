@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Data;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 
+import java.util.Optional;
+
 
 @Builder(toBuilder = true)
 @Data
@@ -14,4 +16,5 @@ public class User {
     private boolean isAdmin = false;
     @Builder.Default
     private State.StateType stateType = State.StateType.DEFAULT;
+    private Integer messageIdToDelete;
 }
