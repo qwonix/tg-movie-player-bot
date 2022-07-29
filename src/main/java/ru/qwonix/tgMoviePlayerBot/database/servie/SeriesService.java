@@ -19,11 +19,11 @@ public interface SeriesService {
 
     LocalDate findEpisodePremiereReleaseDate(Series series);
 
-    List<Episode> findAllEpisodesBySeason(Season season);
+    List<Episode> findAllBySeasonOrderByNumber(Season season);
 
     Optional<Season> findSeason(int id);
 
-    List<Season> findSeasonsBySeries(Series series);
+    List<Season> findSeasonsBySeriesOrderByNumber(Series series);
 
     List<Series> findAll();
 

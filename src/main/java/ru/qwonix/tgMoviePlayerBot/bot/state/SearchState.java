@@ -45,14 +45,12 @@ public class SearchState extends State {
         StringBuilder sb = new StringBuilder();
         for (Series series : serials) {
             LocalDate episodePremiereReleaseDate = seriesService.findEpisodePremiereReleaseDate(series);
-            sb.append(String.format("`%s` – *%s* (%s)", series.getName(), series.getCountry(), episodePremiereReleaseDate.getYear()));
-            sb.append('\n');
+            sb.append(String.format("`%s` – *%s* (%s)\n", series.getName(), series.getCountry(), episodePremiereReleaseDate.getYear()));
             sb.append('\n');
             String description = series.getDescription()
                     .substring(0, series.getDescription().indexOf(' ', 90))
                     + "...";
-            sb.append(String.format("_%s_", description));
-            sb.append('\n');
+            sb.append(String.format("_%s_\n", description));
             sb.append('\n');
 
             SelectCallback data

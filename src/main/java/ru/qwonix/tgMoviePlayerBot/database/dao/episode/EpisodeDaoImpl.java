@@ -82,7 +82,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
-    public List<Episode> findAllBySeason(Season season) throws SQLException {
+    public List<Episode> findAllBySeasonOrderByNumber(Season season) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         List<Episode> episodes = new ArrayList<>();
@@ -127,7 +127,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("INSERT INTO episode (number, name, description, release_date, language, country, duration, season_id, tg_video_file_id, tg_preview_file_id) " +
-                             "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
+                             "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
 
             preparedStatement.setInt(1, episode.getNumber());
             preparedStatement.setString(2, episode.getName());

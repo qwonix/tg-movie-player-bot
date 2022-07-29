@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface EpisodeDao extends DefaultDao<Episode> {
-    List<Episode> findAllBySeason(Season season) throws SQLException;
+    List<Episode> findAllBySeasonOrderByNumber(Season season) throws SQLException;
 
     LocalDate findEpisodePremiereReleaseDate(Series series) throws SQLException;
 }

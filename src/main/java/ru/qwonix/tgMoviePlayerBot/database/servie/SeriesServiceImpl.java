@@ -81,9 +81,9 @@ public class SeriesServiceImpl implements SeriesService {
     }
 
     @Override
-    public List<Episode> findAllEpisodesBySeason(Season season) {
+    public List<Episode> findAllBySeasonOrderByNumber(Season season) {
         try {
-            return episodeDao.findAllBySeason(season);
+            return episodeDao.findAllBySeasonOrderByNumber(season);
         } catch (SQLException e) {
             log.error("sql exception", e);
         }
@@ -101,9 +101,9 @@ public class SeriesServiceImpl implements SeriesService {
     }
 
     @Override
-    public List<Season> findSeasonsBySeries(Series series) {
+    public List<Season> findSeasonsBySeriesOrderByNumber(Series series) {
         try {
-            return seasonDao.findAllBySeries(series);
+            return seasonDao.findAllBySeriesOrderByNumber(series);
         } catch (SQLException e) {
             log.error("sql exception", e);
         }

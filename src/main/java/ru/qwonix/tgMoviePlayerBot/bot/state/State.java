@@ -42,18 +42,6 @@ public abstract class State {
         Update update = chatContext.getUpdate();
         Video video = update.getMessage().getVideo();
 
-//        Episode newEpisode = Episode.builder()
-//                .number()
-//                .name()
-//                .description()
-//                .releaseDate()
-//                .language("Русский")
-//                .country("Россия")
-//                .duration(Duration.ofSeconds(video.getDuration()))
-//                .season()
-//                .fileId(video.getFileId())
-//                .build();
-
         log.info("user {} send video {}", chatContext.getUser(), video);
         new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), "`" + video.getFileId() + "`");
     }
@@ -98,7 +86,6 @@ public abstract class State {
             default:
                 log.info("default in switch onCallback");
                 return;
-
         }
         callback.handle(botContext, chatContext);
     }

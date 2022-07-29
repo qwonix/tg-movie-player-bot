@@ -56,7 +56,7 @@ public class SeasonDaoImpl implements SeasonDao {
     }
 
     @Override
-    public List<Season> findAllBySeries(Series series) throws SQLException {
+    public List<Season> findAllBySeriesOrderByNumber(Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         List<Season> seasons = new ArrayList<>();

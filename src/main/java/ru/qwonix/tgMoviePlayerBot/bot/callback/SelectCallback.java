@@ -86,8 +86,9 @@ public class SelectCallback extends Callback {
                     , episode.getPreviewFileId());
             botUtils.sendVideo(chatContext.getUser(), episode.getVideoFileId());
         } else {
-            String text = "Видео с id " + id + "не найдено. Попробуйте найти его заново.";
-            new BotUtils(botContext).sendText(chatContext.getUser(), text);
+            String text = "Такого видео не существует. `Попробуйте найти его заново.`";
+            log.error("no video with {} id", id);
+            new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), text);
         }
     }
 
@@ -103,16 +104,18 @@ public class SelectCallback extends Callback {
             if (season.getPremiereReleaseDate() == null) {
                 seriesPremiereReleaseDate = "TBA";
             } else {
-                seriesPremiereReleaseDate = season.getPremiereReleaseDate().format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
+                seriesPremiereReleaseDate = season.getPremiereReleaseDate()
+                        .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
             }
 
             String seriesFinalReleaseDate;
             if (season.getFinalReleaseDate() == null)
                 seriesFinalReleaseDate = "TBA";
             else
-                seriesFinalReleaseDate = season.getFinalReleaseDate().format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
+                seriesFinalReleaseDate = season.getFinalReleaseDate()
+                        .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
 
-            List<Episode> seasonEpisodes = seriesService.findAllEpisodesBySeason(season);
+            List<Episode> seasonEpisodes = seriesService.findAllBySeasonOrderByNumber(season);
 
             String text = String.format("*%s – %s сезон*\n", season.getSeries().getName(), season.getNumber())
                     + '\n'
@@ -121,7 +124,6 @@ public class SelectCallback extends Callback {
                     + String.format("*Количество эпизодов*: *%d* / *%s*\n", seasonEpisodes.size(), season.getTotalEpisodesCount())
                     + String.format("*Премьера: _%s_*\n", seriesPremiereReleaseDate)
                     + String.format("*Финал: _%s_*\n", seriesFinalReleaseDate);
-
 
             Map<String, String> keyboard = new LinkedHashMap<>();
             for (Episode episode : seasonEpisodes) {
@@ -135,8 +137,9 @@ public class SelectCallback extends Callback {
                     , callbackKeyboard
                     , season.getPreviewFileId());
         } else {
-            String text = "Сезона с id " + id + "не найдено. Попробуйте найти его заново.";
-            new BotUtils(botContext).sendText(chatContext.getUser(), text);
+            String text = "Такого сезона не существует. `Попробуйте найти его заново.`";
+            log.error("no season with {} id", id);
+            new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), text);
         }
     }
 
@@ -153,7 +156,7 @@ public class SelectCallback extends Callback {
                     + String.format("_%s_", series.getDescription());
 
             Map<String, String> keyboard = new LinkedHashMap<>();
-            List<Season> seriesSeasons = seriesService.findSeasonsBySeries(series);
+            List<Season> seriesSeasons = seriesService.findSeasonsBySeriesOrderByNumber(series);
             for (Season season : seriesSeasons) {
                 SelectCallback data = new SelectCallback(DataType.SEASON, season.getId());
                 keyboard.put("Сезон " + season.getNumber(), data.toJSON().toString());
@@ -164,8 +167,9 @@ public class SelectCallback extends Callback {
                     , BotUtils.createTwoRowsCallbackKeyboard(keyboard)
                     , series.getPreviewFileId());
         } else {
-            String text = "Сериала с id " + id + "не найдено. Попробуйте найти его заново.";
-            new BotUtils(botContext).sendText(chatContext.getUser(), text);
+            String text = "Такого сериала не существует. `Попробуйте найти его заново.`";
+            log.error("no series with {} id", id);
+            new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), text);
         }
     }
 

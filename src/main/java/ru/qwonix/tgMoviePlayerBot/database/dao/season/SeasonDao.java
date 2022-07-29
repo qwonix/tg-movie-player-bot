@@ -10,5 +10,5 @@ import java.util.List;
 
 public interface SeasonDao extends DefaultDao<Season> {
 
-    List<Season> findAllBySeries(Series series) throws SQLException;
+    List<Season> findAllBySeriesOrderByNumber(Series series) throws SQLException;
 }
