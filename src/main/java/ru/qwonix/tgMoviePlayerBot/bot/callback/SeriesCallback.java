@@ -62,7 +62,7 @@ public class SeriesCallback extends Callback {
                     , BotUtils.createTwoRowsCallbackKeyboard(keyboard)
                     , series.getPreviewFileId());
         } else {
-            String text = "Такого сериала не существует. `Попробуйте найти его заново.`";
+            String text = "Такого сериала не существует. `Попробуйте изменить запрос.`";
             log.error("no series with {} id", seriesId);
             new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), text);
         }
