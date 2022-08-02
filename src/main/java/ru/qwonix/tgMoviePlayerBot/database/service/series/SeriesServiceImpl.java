@@ -30,7 +30,7 @@ public class SeriesServiceImpl implements SeriesService {
     }
 
     @Override
-    public Optional<Series> findSeries(int id) {
+    public Optional<Series> find(int id) {
         try {
             return seriesDao.find(id);
         } catch (SQLException e) {
@@ -72,9 +72,9 @@ public class SeriesServiceImpl implements SeriesService {
 
 
     @Override
-    public List<Series> findAllByNameLikeWithLimitAndOffset(String name, int limit, int offset) {
+    public List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page) {
         try {
-            return seriesDao.findAllByNameLikeWithLimitAndOffset(name, limit, offset);
+            return seriesDao.findAllByNameLikeWithLimitAndPage(name, limit, page);
         } catch (SQLException e) {
             log.error("sql exception", e);
         }

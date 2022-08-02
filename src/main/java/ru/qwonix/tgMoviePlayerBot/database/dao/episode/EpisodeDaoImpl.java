@@ -122,7 +122,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
-    public List<Episode> findAllBySeasonOrderByNumberWithLimitAndOffset(Season season, int limit, int offset) throws SQLException {
+    public List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         List<Episode> episodes = new ArrayList<>();
@@ -130,7 +130,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
                      connection.prepareStatement("SELECT * FROM episode e where e.season_id=? order by number limit ? offset ?")) {
             preparedStatement.setLong(1, season.getId());
             preparedStatement.setInt(2, limit);
-            preparedStatement.setInt(3, offset);
+            preparedStatement.setInt(3, limit * page);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {

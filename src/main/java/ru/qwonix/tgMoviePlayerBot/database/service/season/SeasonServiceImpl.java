@@ -21,7 +21,7 @@ public class SeasonServiceImpl implements SeasonService {
     }
 
     @Override
-    public Optional<Season> findSeason(int id) {
+    public Optional<Season> find(int id) {
         try {
             return seasonDao.find(id);
         } catch (SQLException e) {
@@ -31,7 +31,7 @@ public class SeasonServiceImpl implements SeasonService {
     }
 
     @Override
-    public List<Season> findSeasonsBySeriesOrderByNumber(Series series) {
+    public List<Season> findAllBySeriesOrderByNumber(Series series) {
         try {
             return seasonDao.findAllBySeriesOrderByNumber(series);
         } catch (SQLException e) {

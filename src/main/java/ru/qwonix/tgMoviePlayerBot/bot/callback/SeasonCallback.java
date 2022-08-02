@@ -24,11 +24,11 @@ public class SeasonCallback extends Callback {
         this.chatContext = chatContext;
     }
 
-    public static JSONObject toJSON(int seasonId, int offset) {
+    public static JSONObject toJSON(int seasonId, int page) {
         JSONObject jsonData = new JSONObject();
         jsonData.put("dataType", DataType.SEASON);
         jsonData.put("id", seasonId);
-        jsonData.put("offset", offset);
+        jsonData.put("page", page);
 
         return Callback.toCallbackJson(jsonData);
     }
@@ -36,12 +36,12 @@ public class SeasonCallback extends Callback {
     @Override
     public void handleCallback(JSONObject callbackData) {
         int seasonId = callbackData.getInt("id");
-        int offset = callbackData.getInt("offset");
+        int page = callbackData.getInt("page");
 
         SeasonService seasonService = botContext.getDatabaseContext().getSeasonService();
         EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
 
-        Optional<Season> optionalSeason = seasonService.findSeason(seasonId);
+        Optional<Season> optionalSeason = seasonService.find(seasonId);
 
         if (optionalSeason.isPresent()) {
             Season season = optionalSeason.get();

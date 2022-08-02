@@ -28,16 +28,16 @@ public class QueryCallback extends Callback {
         this.chatContext = chatContext;
     }
 
-    public static JSONObject toJson(String query, int offset) {
+    public static JSONObject toJson(String query, int page) {
         JSONObject jsonData = new JSONObject();
         jsonData.put("dataType", DataType.QUERY);
         jsonData.put("query", query);
-        jsonData.put("offset", offset);
+        jsonData.put("page", page);
 
         return Callback.toCallbackJson(jsonData);
     }
 
-    public void handleCallback(String query, int offset) {
+    public void handleCallback(String query, int page) {
         User user = chatContext.getUser();
         BotUtils botUtils = new BotUtils(botContext);
 
@@ -55,9 +55,9 @@ public class QueryCallback extends Callback {
 
         Map<String, String> keyboard = new HashMap<>();
         StringBuilder sb = new StringBuilder();
-        List<Series> serials = seriesService.findAllByNameLikeWithLimitAndOffset(query, limit, offset);
+        List<Series> serials = seriesService.findAllByNameLikeWithLimitAndPage(query, limit, page);
         for (Series series : serials) {
-            LocalDate episodePremiereReleaseDate = episodeService.findEpisodePremiereReleaseDate(series);
+            LocalDate episodePremiereReleaseDate = episodeService.findPremiereReleaseDate(series);
             sb.append(String.format("`%s` – *%s* (%s)\n", series.getName(), series.getCountry(), episodePremiereReleaseDate.getYear()));
             sb.append('\n');
             String description = series.getDescription()
@@ -73,40 +73,40 @@ public class QueryCallback extends Callback {
         List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createOneRowCallbackKeyboard(keyboard);
 
         if (pagesCount > 1) {
-            List<InlineKeyboardButton> controlButtons = createControlButtons(query, pagesCount, offset);
+            List<InlineKeyboardButton> controlButtons = createControlButtons(query, pagesCount, page);
             inlineKeyboard.add(controlButtons);
         }
 
         botUtils.sendMarkdownTextWithKeyBoard(user, sb.toString(), new InlineKeyboardMarkup(inlineKeyboard));
     }
 
-    private List<InlineKeyboardButton> createControlButtons(String query, int pagesCount, int offset) {
+    private List<InlineKeyboardButton> createControlButtons(String query, int pagesCount, int page) {
         InlineKeyboardButton previous;
         InlineKeyboardButton next;
 
-        if (offset == 0) {
+        if (page == 0) {
             previous = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, offset).toString())
+                    .callbackData(QueryCallback.toJson(query, page).toString())
                     .text(lockCharacter).build();
         } else {
             previous = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, offset - 1).toString())
+                    .callbackData(QueryCallback.toJson(query, page - 1).toString())
                     .text("‹").build();
         }
 
-        if (pagesCount == offset + 1) {
+        if (pagesCount == page + 1) {
             next = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, offset).toString())
+                    .callbackData(QueryCallback.toJson(query, page).toString())
                     .text(lockCharacter).build();
         } else {
             next = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, offset + 1).toString())
+                    .callbackData(QueryCallback.toJson(query, page + 1).toString())
                     .text("›").build();
         }
 
         InlineKeyboardButton current = InlineKeyboardButton.builder()
-                .callbackData(QueryCallback.toJson(query, offset).toString())
-                .text(offset + 1 + "/" + pagesCount).build();
+                .callbackData(QueryCallback.toJson(query, page).toString())
+                .text(page + 1 + "/" + pagesCount).build();
 
         return Arrays.asList(previous, current, next);
     }
@@ -114,7 +114,7 @@ public class QueryCallback extends Callback {
     @Override
     public void handleCallback(JSONObject callbackData) {
         String query = callbackData.getString("query");
-        int offset = callbackData.getInt("offset");
-        handleCallback(query, offset);
+        int page = callbackData.getInt("page");
+        handleCallback(query, page);
     }
 }

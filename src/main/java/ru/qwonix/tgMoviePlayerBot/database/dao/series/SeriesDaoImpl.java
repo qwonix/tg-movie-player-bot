@@ -104,7 +104,7 @@ public class SeriesDaoImpl implements SeriesDao {
     }
 
     @Override
-    public List<Series> findAllByNameLikeWithLimitAndOffset(String name, int limit, int offset) throws SQLException {
+    public List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         List<Series> serials = new ArrayList<>();
@@ -112,7 +112,7 @@ public class SeriesDaoImpl implements SeriesDao {
                      connection.prepareStatement("SELECT * FROM series where lower(name) like ? limit ? offset ?")) {
             preparedStatement.setString(1, "%" + name.toLowerCase() + "%");
             preparedStatement.setInt(2, limit);
-            preparedStatement.setInt(3, offset);
+            preparedStatement.setInt(3, limit * page);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 

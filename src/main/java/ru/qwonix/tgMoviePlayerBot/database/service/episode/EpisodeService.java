@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EpisodeService {
-    Optional<Episode> findEpisode(int id);
+    Optional<Episode> find(int id);
 
-    List<Episode> findAllEpisodes();
+    List<Episode> findAll();
 
-    LocalDate findEpisodePremiereReleaseDate(Series series);
+    LocalDate findPremiereReleaseDate(Series series);
 
     List<Episode> findAllBySeasonOrderByNumber(Season season);
 
-    List<Episode> findAllBySeasonOrderByNumberWithLimitAndOffset(Season season, int limit, int offset);
+    List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page);
 }

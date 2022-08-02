@@ -23,7 +23,7 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
-    public Optional<Episode> findEpisode(int id) {
+    public Optional<Episode> find(int id) {
         try {
             return episodeDao.find(id);
         } catch (SQLException e) {
@@ -33,7 +33,7 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
-    public List<Episode> findAllEpisodes() {
+    public List<Episode> findAll() {
         try {
             return episodeDao.findAll();
         } catch (SQLException e) {
@@ -43,7 +43,7 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
-    public LocalDate findEpisodePremiereReleaseDate(Series series) {
+    public LocalDate findPremiereReleaseDate(Series series) {
         try {
             return episodeDao.findEpisodePremiereReleaseDate(series);
         } catch (SQLException e) {
@@ -63,9 +63,9 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
-    public List<Episode> findAllBySeasonOrderByNumberWithLimitAndOffset(Season season, int limit, int offset) {
+    public List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page) {
         try {
-            return episodeDao.findAllBySeasonOrderByNumberWithLimitAndOffset(season, limit, offset);
+            return episodeDao.findAllBySeasonOrderByNumberWithLimitAndPage(season, limit, page);
         } catch (SQLException e) {
             log.error("sql exception", e);
         }

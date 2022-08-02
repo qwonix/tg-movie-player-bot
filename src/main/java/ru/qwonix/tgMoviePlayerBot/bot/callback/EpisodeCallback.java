@@ -36,7 +36,7 @@ public class EpisodeCallback extends Callback {
         int episodeId = callbackData.getInt("id");
 
         EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
-        Optional<Episode> optionalEpisode = episodeService.findEpisode(episodeId);
+        Optional<Episode> optionalEpisode = episodeService.find(episodeId);
 
         if (optionalEpisode.isPresent()) {
             Episode episode = optionalEpisode.get();

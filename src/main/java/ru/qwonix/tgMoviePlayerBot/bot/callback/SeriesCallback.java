@@ -40,7 +40,7 @@ public class SeriesCallback extends Callback {
         SeasonService seasonService = botContext.getDatabaseContext().getSeasonService();
         SeriesService seriesService = botContext.getDatabaseContext().getSeriesService();
 
-        Optional<Series> optionalSeries = seriesService.findSeries(seriesId);
+        Optional<Series> optionalSeries = seriesService.find(seriesId);
 
         if (optionalSeries.isPresent()) {
             Series series = optionalSeries.get();
@@ -50,7 +50,7 @@ public class SeriesCallback extends Callback {
                     + String.format("_%s_", series.getDescription());
 
             Map<String, String> keyboard = new LinkedHashMap<>();
-            List<Season> seriesSeasons = seasonService.findSeasonsBySeriesOrderByNumber(series);
+            List<Season> seriesSeasons = seasonService.findAllBySeriesOrderByNumber(series);
             for (Season season : seriesSeasons) {
                 JSONObject callbackSeason = SeasonCallback.toJSON(season.getId(), 0);
                 keyboard.put("Сезон " + season.getNumber(), callbackSeason.toString());
