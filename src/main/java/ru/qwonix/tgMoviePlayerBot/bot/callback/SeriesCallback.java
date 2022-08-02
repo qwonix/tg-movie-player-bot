@@ -52,7 +52,7 @@ public class SeriesCallback extends Callback {
             Map<String, String> keyboard = new LinkedHashMap<>();
             List<Season> seriesSeasons = seasonService.findAllBySeriesOrderByNumber(series);
             for (Season season : seriesSeasons) {
-                JSONObject callbackSeason = SeasonCallback.toJSON(season.getId(), 0);
+                JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
                 keyboard.put("Сезон " + season.getNumber(), callbackSeason.toString());
             }
 

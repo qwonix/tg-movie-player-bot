@@ -3,6 +3,7 @@ package ru.qwonix.tgMoviePlayerBot.bot.callback;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
@@ -18,13 +19,14 @@ import java.util.*;
 public class SeasonCallback extends Callback {
     private final BotContext botContext;
     private final ChatContext chatContext;
+    private static final String lockCharacter = "×";
 
     public SeasonCallback(BotContext botContext, ChatContext chatContext) {
         this.botContext = botContext;
         this.chatContext = chatContext;
     }
 
-    public static JSONObject toJSON(int seasonId, int page) {
+    public static JSONObject toJson(int seasonId, int page) {
         JSONObject jsonData = new JSONObject();
         jsonData.put("dataType", DataType.SEASON);
         jsonData.put("id", seasonId);
@@ -45,7 +47,12 @@ public class SeasonCallback extends Callback {
 
         if (optionalSeason.isPresent()) {
             Season season = optionalSeason.get();
-            List<Episode> seasonEpisodes = episodeService.findAllBySeasonOrderByNumber(season);
+
+            int episodesCount = episodeService.countAllBySeason(season);
+            int limit = 3;
+            int pagesCount = (int) Math.ceil(episodesCount / (double) limit);
+
+            List<Episode> seasonEpisodes = episodeService.findAllBySeasonOrderByNumberWithLimitAndPage(season, limit, page);
 
             String text = createText(season, seasonEpisodes);
 
@@ -55,11 +62,16 @@ public class SeasonCallback extends Callback {
                 keyboard.put("Серия " + episode.getNumber() + " «" + episode.getName() + "»", episodeCallback.toString());
             }
 
+            List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createOneRowCallbackKeyboard(keyboard);
 
-            InlineKeyboardMarkup callbackKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);
+            if (pagesCount > 1) {
+                List<InlineKeyboardButton> controlButtons = createControlButtons(seasonId, pagesCount, page);
+                inlineKeyboard.add(controlButtons);
+            }
+
             new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
-                    , callbackKeyboard
+                    , new InlineKeyboardMarkup(inlineKeyboard)
                     , season.getPreviewFileId());
         } else {
             String text = "Такого сезона не существует. `Попробуйте найти его заново.`";
@@ -92,5 +104,36 @@ public class SeasonCallback extends Callback {
                 + String.format("*Количество эпизодов*: *%d* / *%s*\n", seasonEpisodes.size(), season.getTotalEpisodesCount())
                 + String.format("*Премьера: _%s_*\n", seriesPremiereReleaseDate)
                 + String.format("*Финал: _%s_*\n", seriesFinalReleaseDate);
+    }
+
+    private List<InlineKeyboardButton> createControlButtons(int seasonId, int pagesCount, int page) {
+        InlineKeyboardButton previous;
+        InlineKeyboardButton next;
+
+        if (page == 0) {
+            previous = InlineKeyboardButton.builder()
+                    .callbackData(SeasonCallback.toJson(seasonId, page).toString())
+                    .text(lockCharacter).build();
+        } else {
+            previous = InlineKeyboardButton.builder()
+                    .callbackData(SeasonCallback.toJson(seasonId, page - 1).toString())
+                    .text("‹").build();
+        }
+
+        if (pagesCount == page + 1) {
+            next = InlineKeyboardButton.builder()
+                    .callbackData(SeasonCallback.toJson(seasonId, page).toString())
+                    .text(lockCharacter).build();
+        } else {
+            next = InlineKeyboardButton.builder()
+                    .callbackData(SeasonCallback.toJson(seasonId, page + 1).toString())
+                    .text("›").build();
+        }
+
+        InlineKeyboardButton current = InlineKeyboardButton.builder()
+                .callbackData(SeasonCallback.toJson(seasonId, page).toString())
+                .text(page + 1 + "/" + pagesCount).build();
+
+        return Arrays.asList(previous, current, next);
     }
 }

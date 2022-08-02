@@ -18,4 +18,6 @@ public interface EpisodeService {
     List<Episode> findAllBySeasonOrderByNumber(Season season);
 
     List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page);
+
+    int countAllBySeason(Season season);
 }

@@ -127,7 +127,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
 
         List<Episode> episodes = new ArrayList<>();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM episode e where e.season_id=? order by number limit ? offset ?")) {
+                     connection.prepareStatement("SELECT * FROM episode where season_id=? order by number limit ? offset ?")) {
             preparedStatement.setLong(1, season.getId());
             preparedStatement.setInt(2, limit);
             preparedStatement.setInt(3, limit * page);
@@ -141,6 +141,22 @@ public class EpisodeDaoImpl implements EpisodeDao {
             connectionBuilder.releaseConnection(connection);
         }
         return episodes;
+    }
+
+    @Override
+    public int countAllBySeason(Season season) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT count(*) as count FROM episode where season_id=?")) {
+            preparedStatement.setLong(1, season.getId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            return resultSet.getInt("count");
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
     }
 
     @Override

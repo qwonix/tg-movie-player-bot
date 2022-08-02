@@ -15,4 +15,6 @@ public interface EpisodeDao extends DefaultDao<Episode> {
     LocalDate findEpisodePremiereReleaseDate(Series series) throws SQLException;
 
     List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page) throws SQLException;
+
+    int countAllBySeason(Season season) throws SQLException;
 }

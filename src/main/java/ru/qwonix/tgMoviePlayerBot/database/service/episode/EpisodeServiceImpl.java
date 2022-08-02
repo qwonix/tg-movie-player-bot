@@ -71,4 +71,14 @@ public class EpisodeServiceImpl implements EpisodeService {
         }
         return Collections.emptyList();
     }
+
+    @Override
+    public int countAllBySeason(Season season) {
+        try {
+            return episodeDao.countAllBySeason(season);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return -1;
+    }
 }
