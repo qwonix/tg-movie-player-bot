@@ -44,7 +44,7 @@ public class BotUtils {
         return markupInline;
     }
 
-    public static InlineKeyboardMarkup createOneRowCallbackKeyboard(Map<String, String> buttons) {
+    public static List<List<InlineKeyboardButton>> createOneRowCallbackKeyboard(Map<String, String> buttons) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
@@ -58,12 +58,12 @@ public class BotUtils {
             rowsInline.add(rowInline);
         }
         markupInline.setKeyboard(rowsInline);
-        return markupInline;
+        return rowsInline;
     }
 
     public static InlineKeyboardMarkup createTwoRowsCallbackKeyboard(Map<String, String> buttons) {
         if (buttons.size() < 6) {
-            return createOneRowCallbackKeyboard(buttons);
+            return new InlineKeyboardMarkup(createOneRowCallbackKeyboard(buttons));
         }
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();

@@ -4,8 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 
-import java.util.Optional;
-
 
 @Builder(toBuilder = true)
 @Data

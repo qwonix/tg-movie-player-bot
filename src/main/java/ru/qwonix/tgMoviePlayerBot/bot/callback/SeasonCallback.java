@@ -28,11 +28,7 @@ public class SeasonCallback extends Callback {
         jsonData.put("dataType", DataType.SEASON);
         jsonData.put("id", seasonId);
 
-        JSONObject jsonCallback = new JSONObject();
-        jsonCallback.put("action", Action.SELECT);
-        jsonCallback.put("data", jsonData);
-
-        return jsonCallback;
+        return Callback.toCallbackJson(jsonData);
     }
 
     @Override
@@ -79,8 +75,7 @@ public class SeasonCallback extends Callback {
         String seriesFinalReleaseDate;
         if (season.getFinalReleaseDate() == null) {
             seriesFinalReleaseDate = "TBA";
-        }
-        else {
+        } else {
             seriesFinalReleaseDate = season.getFinalReleaseDate()
                     .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
         }

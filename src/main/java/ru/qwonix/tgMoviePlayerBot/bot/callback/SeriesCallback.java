@@ -29,11 +29,7 @@ public class SeriesCallback extends Callback {
         jsonData.put("dataType", DataType.SERIES);
         jsonData.put("id", seriesId);
 
-        JSONObject jsonCallback = new JSONObject();
-        jsonCallback.put("action", Action.SELECT);
-        jsonCallback.put("data", jsonData);
-
-        return jsonCallback;
+        return Callback.toCallbackJson(jsonData);
     }
 
     @Override

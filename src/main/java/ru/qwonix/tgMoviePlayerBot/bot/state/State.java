@@ -64,11 +64,8 @@ public abstract class State {
 
         log.info("user {} callback {}", chatContext.getUser(), callbackQuery.getData());
 
-        JSONObject jsonObject = new JSONObject(callbackQuery.getData());
-        Action action = Action.valueOf(jsonObject.getString("action"));
-
-        JSONObject callbackData = jsonObject.getJSONObject("data");
-        DataType dataType = DataType.valueOf(callbackData.getString("dataType"));
+        JSONObject jsonObject = Callback.fromCallbackJson(callbackQuery.getData());
+        DataType dataType = DataType.valueOf(jsonObject.getString("dataType"));
 
         Callback callback = null;
         switch (dataType) {
@@ -84,11 +81,15 @@ public abstract class State {
                 callback = new SeriesCallback(botContext, chatContext);
                 break;
 
+            case QUERY:
+                callback = new QueryCallback(botContext, chatContext);
+                break;
+
             default:
                 log.info("no such case for {}", dataType);
                 return;
         }
-        callback.handleCallback(callbackData);
+        callback.handleCallback(jsonObject);
     }
 
 

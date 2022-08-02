@@ -140,6 +140,27 @@ public class SeriesServiceImpl implements SeriesService {
         return Collections.emptyList();
     }
 
+
+    @Override
+    public List<Series> findAllByNameLikeWithLimitAndOffset(String name, int limit, int offset) {
+        try {
+            return seriesDao.findAllByNameLikeWithLimitAndOffset(name, limit, offset);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int countAllByNameLike(String name) {
+        try {
+            return seriesDao.countAllByNameLike(name);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return -1;
+    }
+
     @Override
     public void addOrUpdate(Series series) {
         try {

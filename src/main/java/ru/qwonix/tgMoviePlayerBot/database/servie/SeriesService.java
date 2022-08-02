@@ -31,5 +31,9 @@ public interface SeriesService {
 
     List<Series> findAllByNameLike(String name);
 
+    List<Series> findAllByNameLikeWithLimitAndOffset(String name, int limit, int offset);
+
+    int countAllByNameLike(String name);
+
     void addOrUpdate(Series series);
 }

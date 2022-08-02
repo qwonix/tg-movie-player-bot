@@ -1,8 +1,8 @@
 package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
@@ -11,11 +11,14 @@ import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class QueryCallback extends Callback {
+    private static final String lockCharacter = "\uD83D\uDD12";
+
     private final BotContext botContext;
     private final ChatContext chatContext;
 
@@ -24,26 +27,33 @@ public class QueryCallback extends Callback {
         this.chatContext = chatContext;
     }
 
+    public static JSONObject toJson(String query, int offset) {
+        JSONObject jsonData = new JSONObject();
+        jsonData.put("dataType", DataType.QUERY);
+        jsonData.put("query", query);
+        jsonData.put("offset", offset);
 
-    public void handleCallback(String searchText) {
+        return Callback.toCallbackJson(jsonData);
+    }
+
+    public void handleCallback(String query, int offset) {
         User user = chatContext.getUser();
         BotUtils botUtils = new BotUtils(botContext);
 
-        // TODO: 15-Jul-22 smart search for name
+        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
 
-        SeriesService seriesService = botContext
-                .getDaoContext()
-                .getSeriesService();
-
-        List<Series> serials = seriesService.findAllByNameLike(searchText);
-        if (serials.isEmpty()) {
+        int searchResultCount = seriesService.countAllByNameLike(query);
+        if (searchResultCount == 0) {
             botUtils.sendMarkdownText(user, "*Ничего не найдено :(* \n`Попробуйте изменить запрос`");
             return;
         }
 
+        int limit = 3;
+        int pagesCount = (int) Math.ceil(searchResultCount / (double) limit);
 
         Map<String, String> keyboard = new HashMap<>();
         StringBuilder sb = new StringBuilder();
+        List<Series> serials = seriesService.findAllByNameLikeWithLimitAndOffset(query, limit, offset);
         for (Series series : serials) {
             LocalDate episodePremiereReleaseDate = seriesService.findEpisodePremiereReleaseDate(series);
             sb.append(String.format("`%s` – *%s* (%s)\n", series.getName(), series.getCountry(), episodePremiereReleaseDate.getYear()));
@@ -58,17 +68,51 @@ public class QueryCallback extends Callback {
             keyboard.put(series.getName() + " (" + episodePremiereReleaseDate.getYear() + ")", seriesCallback.toString());
         }
 
-        InlineKeyboardMarkup callbackKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);
+        List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createOneRowCallbackKeyboard(keyboard);
 
-        botUtils.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", searchText));
-        botUtils.sendMarkdownTextWithKeyBoard(user, sb.toString(), callbackKeyboard);
+        if (pagesCount > 1) {
+            List<InlineKeyboardButton> controlButtons = createControlButtons(query, pagesCount, offset);
+            inlineKeyboard.add(controlButtons);
+        }
 
+        botUtils.sendMarkdownTextWithKeyBoard(user, sb.toString(), new InlineKeyboardMarkup(inlineKeyboard));
+    }
+
+    private List<InlineKeyboardButton> createControlButtons(String query, int pagesCount, int offset) {
+        InlineKeyboardButton previous;
+        InlineKeyboardButton next;
+
+        if (offset == 0) {
+            previous = InlineKeyboardButton.builder()
+                    .callbackData(QueryCallback.toJson(query, offset).toString())
+                    .text(lockCharacter).build();
+        } else {
+            previous = InlineKeyboardButton.builder()
+                    .callbackData(QueryCallback.toJson(query, offset - 1).toString())
+                    .text("‹").build();
+        }
+
+        if (pagesCount == offset + 1) {
+            next = InlineKeyboardButton.builder()
+                    .callbackData(QueryCallback.toJson(query, offset).toString())
+                    .text(lockCharacter).build();
+        } else {
+            next = InlineKeyboardButton.builder()
+                    .callbackData(QueryCallback.toJson(query, offset + 1).toString())
+                    .text("›").build();
+        }
+
+        InlineKeyboardButton current = InlineKeyboardButton.builder()
+                .callbackData(QueryCallback.toJson(query, offset).toString())
+                .text(offset + 1 + "/" + pagesCount).build();
+
+        return Arrays.asList(previous, current, next);
     }
 
     @Override
     public void handleCallback(JSONObject callbackData) {
-        String searchText = callbackData.getString("query");
-
-        handleCallback(searchText);
+        String query = callbackData.getString("query");
+        int offset = callbackData.getInt("offset");
+        handleCallback(query, offset);
     }
 }

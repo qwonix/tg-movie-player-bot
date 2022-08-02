@@ -28,11 +28,7 @@ public class EpisodeCallback extends Callback {
         jsonData.put("dataType", DataType.EPISODE);
         jsonData.put("id", episodeId);
 
-        JSONObject jsonCallback = new JSONObject();
-        jsonCallback.put("action", Action.SELECT);
-        jsonCallback.put("data", jsonData);
-
-        return jsonCallback;
+        return Callback.toCallbackJson(jsonData);
     }
 
     @Override
