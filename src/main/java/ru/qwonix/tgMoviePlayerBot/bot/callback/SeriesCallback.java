@@ -5,7 +5,8 @@ import org.json.JSONObject;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
+import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesService;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
@@ -36,7 +37,9 @@ public class SeriesCallback extends Callback {
     public void handleCallback(JSONObject callbackData) {
         int seriesId = callbackData.getInt("id");
 
-        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
+        SeasonService seasonService = botContext.getDatabaseContext().getSeasonService();
+        SeriesService seriesService = botContext.getDatabaseContext().getSeriesService();
+
         Optional<Series> optionalSeries = seriesService.findSeries(seriesId);
 
         if (optionalSeries.isPresent()) {
@@ -47,9 +50,9 @@ public class SeriesCallback extends Callback {
                     + String.format("_%s_", series.getDescription());
 
             Map<String, String> keyboard = new LinkedHashMap<>();
-            List<Season> seriesSeasons = seriesService.findSeasonsBySeriesOrderByNumber(series);
+            List<Season> seriesSeasons = seasonService.findSeasonsBySeriesOrderByNumber(series);
             for (Season season : seriesSeasons) {
-                JSONObject callbackSeason = SeasonCallback.toJSON(season.getId());
+                JSONObject callbackSeason = SeasonCallback.toJSON(season.getId(), 0);
                 keyboard.put("Сезон " + season.getNumber(), callbackSeason.toString());
             }
 

@@ -21,6 +21,6 @@ public class SearchState extends State {
 
         User user = chatContext.getUser();
         user.setStateType(StateType.DEFAULT);
-        botContext.getDaoContext().getUserService().merge(user);
+        botContext.getDatabaseContext().getUserService().merge(user);
     }
 }

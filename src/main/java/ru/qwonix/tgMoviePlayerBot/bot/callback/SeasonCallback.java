@@ -6,7 +6,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 
@@ -23,10 +24,11 @@ public class SeasonCallback extends Callback {
         this.chatContext = chatContext;
     }
 
-    public static JSONObject toJSON(int seasonId) {
+    public static JSONObject toJSON(int seasonId, int offset) {
         JSONObject jsonData = new JSONObject();
         jsonData.put("dataType", DataType.SEASON);
         jsonData.put("id", seasonId);
+        jsonData.put("offset", offset);
 
         return Callback.toCallbackJson(jsonData);
     }
@@ -34,13 +36,16 @@ public class SeasonCallback extends Callback {
     @Override
     public void handleCallback(JSONObject callbackData) {
         int seasonId = callbackData.getInt("id");
+        int offset = callbackData.getInt("offset");
 
-        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
-        Optional<Season> optionalSeason = seriesService.findSeason(seasonId);
+        SeasonService seasonService = botContext.getDatabaseContext().getSeasonService();
+        EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
+
+        Optional<Season> optionalSeason = seasonService.findSeason(seasonId);
 
         if (optionalSeason.isPresent()) {
             Season season = optionalSeason.get();
-            List<Episode> seasonEpisodes = seriesService.findAllBySeasonOrderByNumber(season);
+            List<Episode> seasonEpisodes = episodeService.findAllBySeasonOrderByNumber(season);
 
             String text = createText(season, seasonEpisodes);
 

@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 
 import java.time.format.DateTimeFormatter;
@@ -35,8 +35,8 @@ public class EpisodeCallback extends Callback {
     public void handleCallback(JSONObject callbackData) {
         int episodeId = callbackData.getInt("id");
 
-        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
-        Optional<Episode> optionalEpisode = seriesService.findEpisode(episodeId);
+        EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
+        Optional<Episode> optionalEpisode = episodeService.findEpisode(episodeId);
 
         if (optionalEpisode.isPresent()) {
             Episode episode = optionalEpisode.get();

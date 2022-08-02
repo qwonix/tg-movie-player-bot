@@ -1,7 +1,9 @@
-package ru.qwonix.tgMoviePlayerBot.database.dao.user;
+package ru.qwonix.tgMoviePlayerBot.database.service.user;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.dao.user.UserDao;
+import ru.qwonix.tgMoviePlayerBot.database.dao.user.UserDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.sql.SQLException;
@@ -9,20 +11,22 @@ import java.util.Optional;
 
 
 @Slf4j
-public class UserService {
+public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
 
-    public UserService(ConnectionBuilder connectionBuilder) {
+    public UserServiceImpl(ConnectionBuilder connectionBuilder) {
         userDao = new UserDaoImpl(connectionBuilder);
     }
 
+    @Override
     public User setAdmin(User user) {
         User admin = user.toBuilder().isAdmin(true).build();
         merge(admin);
         return admin;
     }
 
+    @Override
     public boolean exists(long chatId) {
         try {
             return userDao.find(chatId).isPresent();
@@ -32,6 +36,7 @@ public class UserService {
         return false;
     }
 
+    @Override
     public void merge(User user) {
         try {
             if (exists(user.getChatId())) {
@@ -44,6 +49,7 @@ public class UserService {
         }
     }
 
+    @Override
     public Optional<User> findUser(long userChatId) {
         try {
             return userDao.find(userChatId);

@@ -1,4 +1,4 @@
-package ru.qwonix.tgMoviePlayerBot.database.servie;
+package ru.qwonix.tgMoviePlayerBot.database.service.series;
 
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
@@ -9,21 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SeriesService {
+
     boolean exists(Series series);
 
-    Optional<Episode> findEpisode(int id);
-
     Optional<Series> findSeries(int id);
-
-    List<Episode> findAllEpisodes();
-
-    LocalDate findEpisodePremiereReleaseDate(Series series);
-
-    List<Episode> findAllBySeasonOrderByNumber(Season season);
-
-    Optional<Season> findSeason(int id);
-
-    List<Season> findSeasonsBySeriesOrderByNumber(Series series);
 
     List<Series> findAll();
 

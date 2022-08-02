@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.qwonix.tgMoviePlayerBot.database.dao.DaoContext;
+import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.util.ArrayList;
@@ -21,11 +21,11 @@ import java.util.Map;
 @Slf4j
 public class BotUtils {
     private final Bot bot;
-    private final DaoContext daoContext;
+    private final DatabaseContext databaseContext;
 
     public BotUtils(BotContext botContext) {
         this.bot = botContext.getBot();
-        this.daoContext = botContext.getDaoContext();
+        this.databaseContext = botContext.getDatabaseContext();
     }
 
     public static InlineKeyboardMarkup createOneRowLinkKeyboard(Map<String, String> buttons) {

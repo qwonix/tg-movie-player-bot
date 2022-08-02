@@ -6,7 +6,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.database.servie.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
+import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesService;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class QueryCallback extends Callback {
-    private static final String lockCharacter = "\uD83D\uDD12";
+    private static final String lockCharacter = "×";
 
     private final BotContext botContext;
     private final ChatContext chatContext;
@@ -40,7 +41,8 @@ public class QueryCallback extends Callback {
         User user = chatContext.getUser();
         BotUtils botUtils = new BotUtils(botContext);
 
-        SeriesService seriesService = botContext.getDaoContext().getSeriesService();
+        SeriesService seriesService = botContext.getDatabaseContext().getSeriesService();
+        EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
 
         int searchResultCount = seriesService.countAllByNameLike(query);
         if (searchResultCount == 0) {
@@ -55,7 +57,7 @@ public class QueryCallback extends Callback {
         StringBuilder sb = new StringBuilder();
         List<Series> serials = seriesService.findAllByNameLikeWithLimitAndOffset(query, limit, offset);
         for (Series series : serials) {
-            LocalDate episodePremiereReleaseDate = seriesService.findEpisodePremiereReleaseDate(series);
+            LocalDate episodePremiereReleaseDate = episodeService.findEpisodePremiereReleaseDate(series);
             sb.append(String.format("`%s` – *%s* (%s)\n", series.getName(), series.getCountry(), episodePremiereReleaseDate.getYear()));
             sb.append('\n');
             String description = series.getDescription()

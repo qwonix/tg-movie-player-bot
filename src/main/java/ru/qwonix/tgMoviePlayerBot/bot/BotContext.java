@@ -1,15 +1,15 @@
 package ru.qwonix.tgMoviePlayerBot.bot;
 
 import lombok.Data;
-import ru.qwonix.tgMoviePlayerBot.database.dao.DaoContext;
+import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
 
 @Data
 public class BotContext {
-    private final DaoContext daoContext;
+    private final DatabaseContext databaseContext;
     private final Bot bot;
 
     public BotContext(Bot bot) {
-        daoContext = new DaoContext();
+        this.databaseContext = new DatabaseContext();
         this.bot = bot;
     }
 }

@@ -54,13 +54,13 @@ public class Bot extends TelegramLongPollingBot {
             throw new IllegalArgumentException("update has no user");
         }
 
-        Optional<User> optionalUser = botContext.getDaoContext()
+        Optional<User> optionalUser = botContext.getDatabaseContext()
                 .getUserService()
                 .findUser(telegramUser.getId());
 
         user = optionalUser.orElseGet(() -> {
             User newUser = convertTelegramUserToUser(telegramUser);
-            botContext.getDaoContext().getUserService().merge(newUser);
+            botContext.getDatabaseContext().getUserService().merge(newUser);
             return newUser;
         });
         return user;
