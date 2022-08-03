@@ -39,4 +39,24 @@ public class SeasonServiceImpl implements SeasonService {
         }
         return Collections.emptyList();
     }
+
+    @Override
+    public List<Season> findAllBySeriesOrderByNumberWithLimitAndPage(Series series, int limit, int page) {
+        try {
+            return seasonDao.findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int countAllBySeries(Series series) {
+        try {
+            return seasonDao.countAllBySeries(series);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return -1;
+    }
 }

@@ -66,7 +66,7 @@ public class QueryCallback extends Callback {
             sb.append(String.format("_%s_\n", description));
             sb.append('\n');
 
-            JSONObject seriesCallback = SeriesCallback.toJson(series.getId());
+            JSONObject seriesCallback = SeriesCallback.toJson(series.getId(), 0);
             keyboard.put(series.getName() + " (" + episodePremiereReleaseDate.getYear() + ")", seriesCallback.toString());
         }
 

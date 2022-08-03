@@ -61,9 +61,9 @@ public class BotUtils {
         return rowsInline;
     }
 
-    public static InlineKeyboardMarkup createTwoRowsCallbackKeyboard(Map<String, String> buttons) {
+    public static List<List<InlineKeyboardButton>> createTwoRowsCallbackKeyboard(Map<String, String> buttons) {
         if (buttons.size() < 6) {
-            return new InlineKeyboardMarkup(createOneRowCallbackKeyboard(buttons));
+            return createOneRowCallbackKeyboard(buttons);
         }
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -89,8 +89,7 @@ public class BotUtils {
             }
             rowsInline.add(rowInline);
         }
-        markupInline.setKeyboard(rowsInline);
-        return markupInline;
+        return rowsInline;
     }
 
     private static String escapeMarkdownMessage(String markdownMessage) {

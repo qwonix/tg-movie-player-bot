@@ -67,7 +67,7 @@ public abstract class State {
         JSONObject jsonObject = Callback.fromCallbackJson(callbackQuery.getData());
         DataType dataType = DataType.valueOf(jsonObject.getString("dataType"));
 
-        Callback callback = null;
+        Callback callback;
         switch (dataType) {
             case EPISODE:
                 callback = new EpisodeCallback(botContext, chatContext);

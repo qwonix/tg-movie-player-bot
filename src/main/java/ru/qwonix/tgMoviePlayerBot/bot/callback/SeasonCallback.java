@@ -74,7 +74,7 @@ public class SeasonCallback extends Callback {
                     , new InlineKeyboardMarkup(inlineKeyboard)
                     , season.getPreviewFileId());
         } else {
-            String text = "Такого сезона не существует. `Попробуйте найти его заново.`";
+            String text = "Такого сезона не существует. `Попробуйте изменить запрос`.";
             log.error("no season with {} id", seasonId);
             new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), text);
         }
