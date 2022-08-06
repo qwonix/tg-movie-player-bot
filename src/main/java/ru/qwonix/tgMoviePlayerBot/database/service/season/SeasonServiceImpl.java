@@ -31,16 +31,6 @@ public class SeasonServiceImpl implements SeasonService {
     }
 
     @Override
-    public List<Season> findAllBySeriesOrderByNumber(Series series) {
-        try {
-            return seasonDao.findAllBySeriesOrderByNumber(series);
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
-    }
-
-    @Override
     public List<Season> findAllBySeriesOrderByNumberWithLimitAndPage(Series series, int limit, int page) {
         try {
             return seasonDao.findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);

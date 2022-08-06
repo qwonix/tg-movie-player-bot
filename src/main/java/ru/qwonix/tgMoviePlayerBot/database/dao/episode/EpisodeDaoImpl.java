@@ -82,27 +82,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
-    public List<Episode> findAllBySeasonOrderByNumber(Season season) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<Episode> episodes = new ArrayList<>();
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM episode e where e.season_id=? order by number")) {
-            preparedStatement.setLong(1, season.getId());
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                Episode episode = convert(resultSet);
-                episodes.add(episode);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return episodes;
-    }
-
-    @Override
-    public LocalDate findEpisodePremiereReleaseDate(Series series) throws SQLException {
+    public LocalDate findPremiereReleaseDate(Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
@@ -163,6 +143,8 @@ public class EpisodeDaoImpl implements EpisodeDao {
     public void insert(Episode episode) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
+        PGInterval interval = new PGInterval();
+        interval.setSeconds(episode.getDuration().getSeconds());
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("INSERT INTO episode (number, name, description, release_date, language, country, duration, season_id, tg_video_file_id, tg_preview_file_id) " +
                              "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
@@ -173,7 +155,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
             preparedStatement.setObject(4, episode.getReleaseDate());
             preparedStatement.setString(5, episode.getLanguage());
             preparedStatement.setString(6, episode.getCountry());
-            preparedStatement.setObject(7, episode.getDuration());
+            preparedStatement.setObject(7, interval);
             preparedStatement.setInt(8, episode.getSeason().getId());
             preparedStatement.setString(9, episode.getVideoFileId());
             preparedStatement.setString(10, episode.getPreviewFileId());
@@ -185,21 +167,24 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
-    public void update(long id, Episode series) throws SQLException {
+    public void update(long id, Episode episode) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
+
+        PGInterval interval = new PGInterval();
+        interval.setSeconds(episode.getDuration().getSeconds());
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("UPDATE episode " +
                              "SET number=?, name=?, description=?, release_date=?, language=?, country=?, duration=?, season_id=?, tg_video_file_id=?, tg_preview_file_id=? WHERE id=?")) {
-            preparedStatement.setInt(1, series.getNumber());
-            preparedStatement.setString(2, series.getName());
-            preparedStatement.setString(3, series.getDescription());
-            preparedStatement.setObject(4, series.getReleaseDate());
-            preparedStatement.setString(5, series.getLanguage());
-            preparedStatement.setString(6, series.getCountry());
-            preparedStatement.setObject(7, series.getDuration());
-            preparedStatement.setInt(8, series.getSeason().getId());
-            preparedStatement.setString(9, series.getVideoFileId());
-            preparedStatement.setString(10, series.getPreviewFileId());
+            preparedStatement.setInt(1, episode.getNumber());
+            preparedStatement.setString(2, episode.getName());
+            preparedStatement.setString(3, episode.getDescription());
+            preparedStatement.setObject(4, episode.getReleaseDate());
+            preparedStatement.setString(5, episode.getLanguage());
+            preparedStatement.setString(6, episode.getCountry());
+            preparedStatement.setObject(7, interval);
+            preparedStatement.setInt(8, episode.getSeason().getId());
+            preparedStatement.setString(9, episode.getVideoFileId());
+            preparedStatement.setString(10, episode.getPreviewFileId());
 
             preparedStatement.setLong(11, id);
 

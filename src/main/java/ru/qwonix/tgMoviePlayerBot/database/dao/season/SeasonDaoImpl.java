@@ -56,26 +56,6 @@ public class SeasonDaoImpl implements SeasonDao {
     }
 
     @Override
-    public List<Season> findAllBySeriesOrderByNumber(Series series) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<Season> seasons = new ArrayList<>();
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM season where series_id = ? order by number")) {
-            preparedStatement.setInt(1, series.getId());
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                Season season = convert(resultSet);
-                seasons.add(season);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return seasons;
-    }
-
-    @Override
     public List<Season> findAllBySeriesOrderByNumberWithLimitAndPage(Series series, int limit, int page) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 

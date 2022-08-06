@@ -45,48 +45,6 @@ public class SeriesDaoImpl implements SeriesDao {
     }
 
     @Override
-    public List<Series> findAllByName(String name) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<Series> serials = new ArrayList<>();
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM series where name = ?")) {
-            preparedStatement.setString(1, name);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                Series series = convert(resultSet);
-                serials.add(series);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return serials;
-    }
-
-    @Override
-    public List<Series> findAllByNameLike(String name) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<Series> serials = new ArrayList<>();
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM series where lower(name) like ?")) {
-            preparedStatement.setString(1, "%" + name.toLowerCase() + "%");
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                Series series = convert(resultSet);
-                serials.add(series);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return serials;
-    }
-
-    @Override
     public int countAllByNameLike(String name) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 

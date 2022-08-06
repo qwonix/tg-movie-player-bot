@@ -18,7 +18,6 @@ import java.util.*;
 public class SeriesCallback extends Callback {
     private final BotContext botContext;
     private final ChatContext chatContext;
-    private static final String lockCharacter = "×";
 
     public SeriesCallback(BotContext botContext, ChatContext chatContext) {
         this.botContext = botContext;
@@ -86,7 +85,7 @@ public class SeriesCallback extends Callback {
         if (page == 0) {
             previous = InlineKeyboardButton.builder()
                     .callbackData(SeriesCallback.toJson(seriesId, page).toString())
-                    .text(lockCharacter).build();
+                    .text("×").build();
         } else {
             previous = InlineKeyboardButton.builder()
                     .callbackData(SeriesCallback.toJson(seriesId, page - 1).toString())
@@ -96,7 +95,7 @@ public class SeriesCallback extends Callback {
         if (pagesCount == page + 1) {
             next = InlineKeyboardButton.builder()
                     .callbackData(SeriesCallback.toJson(seriesId, page).toString())
-                    .text(lockCharacter).build();
+                    .text("×").build();
         } else {
             next = InlineKeyboardButton.builder()
                     .callbackData(SeriesCallback.toJson(seriesId, page + 1).toString())

@@ -50,26 +50,6 @@ public class SeriesServiceImpl implements SeriesService {
         return Collections.emptyList();
     }
 
-    @Override
-    public List<Series> findAllByName(String name) {
-        try {
-            return seriesDao.findAllByName(name);
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Series> findAllByNameLike(String name) {
-        try {
-            return seriesDao.findAllByNameLike(name);
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
-    }
-
 
     @Override
     public List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page) {
@@ -89,18 +69,5 @@ public class SeriesServiceImpl implements SeriesService {
             log.error("sql exception", e);
         }
         return -1;
-    }
-
-    @Override
-    public void addOrUpdate(Series series) {
-        try {
-            if (exists(series)) {
-                seriesDao.update(series.getId(), series);
-            } else {
-                seriesDao.insert(series);
-            }
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
     }
 }

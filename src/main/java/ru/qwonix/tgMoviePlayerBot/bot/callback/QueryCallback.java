@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 public class QueryCallback extends Callback {
-    private static final String lockCharacter = "×";
 
     private final BotContext botContext;
     private final ChatContext chatContext;
@@ -57,8 +56,8 @@ public class QueryCallback extends Callback {
         StringBuilder sb = new StringBuilder();
         List<Series> serials = seriesService.findAllByNameLikeWithLimitAndPage(query, limit, page);
         for (Series series : serials) {
-            LocalDate episodePremiereReleaseDate = episodeService.findPremiereReleaseDate(series);
-            sb.append(String.format("`%s` – *%s* (%s)\n", series.getName(), series.getCountry(), episodePremiereReleaseDate.getYear()));
+            LocalDate premiereReleaseDate = episodeService.findPremiereReleaseDate(series);
+            sb.append(String.format("`%s` – *%s* (%s)\n", series.getName(), series.getCountry(), premiereReleaseDate.getYear()));
             sb.append('\n');
             String description = series.getDescription()
                     .substring(0, series.getDescription().indexOf(' ', 90))
@@ -67,7 +66,7 @@ public class QueryCallback extends Callback {
             sb.append('\n');
 
             JSONObject seriesCallback = SeriesCallback.toJson(series.getId(), 0);
-            keyboard.put(series.getName() + " (" + episodePremiereReleaseDate.getYear() + ")", seriesCallback.toString());
+            keyboard.put(series.getName() + " (" + premiereReleaseDate.getYear() + ")", seriesCallback.toString());
         }
 
         List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createOneRowCallbackKeyboard(keyboard);
@@ -87,7 +86,7 @@ public class QueryCallback extends Callback {
         if (page == 0) {
             previous = InlineKeyboardButton.builder()
                     .callbackData(QueryCallback.toJson(query, page).toString())
-                    .text(lockCharacter).build();
+                    .text("×").build();
         } else {
             previous = InlineKeyboardButton.builder()
                     .callbackData(QueryCallback.toJson(query, page - 1).toString())
@@ -97,7 +96,7 @@ public class QueryCallback extends Callback {
         if (pagesCount == page + 1) {
             next = InlineKeyboardButton.builder()
                     .callbackData(QueryCallback.toJson(query, page).toString())
-                    .text(lockCharacter).build();
+                    .text("×").build();
         } else {
             next = InlineKeyboardButton.builder()
                     .callbackData(QueryCallback.toJson(query, page + 1).toString())

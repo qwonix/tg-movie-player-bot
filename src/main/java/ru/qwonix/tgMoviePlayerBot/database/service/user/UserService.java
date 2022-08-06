@@ -5,7 +5,7 @@ import ru.qwonix.tgMoviePlayerBot.entity.User;
 import java.util.Optional;
 
 public interface UserService {
-    User setAdmin(User user);
+    User makeAdmin(User user);
 
     boolean exists(long chatId);
 

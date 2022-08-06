@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface SeasonDao extends DefaultDao<Season> {
 
-    List<Season> findAllBySeriesOrderByNumber(Series series) throws SQLException;
-
     List<Season> findAllBySeriesOrderByNumberWithLimitAndPage(Series series, int limit, int page) throws SQLException;
 
     int countAllBySeries(Series series) throws SQLException;

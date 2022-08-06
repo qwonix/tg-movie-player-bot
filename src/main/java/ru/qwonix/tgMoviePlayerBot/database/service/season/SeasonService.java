@@ -10,8 +10,8 @@ import java.util.Optional;
 public interface SeasonService {
     Optional<Season> find(int id);
 
-    List<Season> findAllBySeriesOrderByNumber(Series series);
     List<Season> findAllBySeriesOrderByNumberWithLimitAndPage(Series series, int limit, int page);
+
     int countAllBySeries(Series series);
 
 }

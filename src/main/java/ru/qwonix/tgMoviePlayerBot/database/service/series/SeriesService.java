@@ -13,13 +13,7 @@ public interface SeriesService {
 
     List<Series> findAll();
 
-    List<Series> findAllByName(String name);
-
-    List<Series> findAllByNameLike(String name);
-
     List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page);
 
     int countAllByNameLike(String name);
-
-    void addOrUpdate(Series series);
 }

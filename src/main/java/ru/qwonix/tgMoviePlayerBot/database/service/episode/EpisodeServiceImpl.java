@@ -45,21 +45,11 @@ public class EpisodeServiceImpl implements EpisodeService {
     @Override
     public LocalDate findPremiereReleaseDate(Series series) {
         try {
-            return episodeDao.findEpisodePremiereReleaseDate(series);
+            return episodeDao.findPremiereReleaseDate(series);
         } catch (SQLException e) {
             log.error("sql exception", e);
         }
         return null;
-    }
-
-    @Override
-    public List<Episode> findAllBySeasonOrderByNumber(Season season) {
-        try {
-            return episodeDao.findAllBySeasonOrderByNumber(season);
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
     }
 
     @Override
@@ -81,4 +71,14 @@ public class EpisodeServiceImpl implements EpisodeService {
         }
         return -1;
     }
+
+    @Override
+    public void insert(Episode episode) {
+        try {
+            episodeDao.insert(episode);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+    }
+
 }

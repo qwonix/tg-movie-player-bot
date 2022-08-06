@@ -19,7 +19,6 @@ import java.util.*;
 public class SeasonCallback extends Callback {
     private final BotContext botContext;
     private final ChatContext chatContext;
-    private static final String lockCharacter = "×";
 
     public SeasonCallback(BotContext botContext, ChatContext chatContext) {
         this.botContext = botContext;
@@ -113,7 +112,7 @@ public class SeasonCallback extends Callback {
         if (page == 0) {
             previous = InlineKeyboardButton.builder()
                     .callbackData(SeasonCallback.toJson(seasonId, page).toString())
-                    .text(lockCharacter).build();
+                    .text("×").build();
         } else {
             previous = InlineKeyboardButton.builder()
                     .callbackData(SeasonCallback.toJson(seasonId, page - 1).toString())
@@ -123,7 +122,7 @@ public class SeasonCallback extends Callback {
         if (pagesCount == page + 1) {
             next = InlineKeyboardButton.builder()
                     .callbackData(SeasonCallback.toJson(seasonId, page).toString())
-                    .text(lockCharacter).build();
+                    .text("×").build();
         } else {
             next = InlineKeyboardButton.builder()
                     .callbackData(SeasonCallback.toJson(seasonId, page + 1).toString())

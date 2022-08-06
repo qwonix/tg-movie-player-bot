@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User setAdmin(User user) {
+    public User makeAdmin(User user) {
         User admin = user.toBuilder().isAdmin(true).build();
         merge(admin);
         return admin;
