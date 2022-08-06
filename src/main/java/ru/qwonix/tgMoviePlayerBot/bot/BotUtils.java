@@ -14,9 +14,11 @@ import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class BotUtils {
@@ -28,65 +30,39 @@ public class BotUtils {
         this.databaseContext = botContext.getDatabaseContext();
     }
 
-    public static InlineKeyboardMarkup createOneRowLinkKeyboard(Map<String, String> buttons) {
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<>();
-
-        for (Map.Entry<String, String> button : buttons.entrySet()) {
-            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-            inlineKeyboardButton.setText(button.getKey());
-            inlineKeyboardButton.setUrl(button.getValue());
-            rowInline.add(inlineKeyboardButton);
-        }
-        rowsInline.add(rowInline);
-        markupInline.setKeyboard(rowsInline);
-        return markupInline;
+    public static List<List<InlineKeyboardButton>> createOneRowCallbackKeyboard(Map<String, String> buttons) {
+        return BotUtils.convertToCallbackButtons(buttons).map(Arrays::asList).collect(Collectors.toList());
     }
 
-    public static List<List<InlineKeyboardButton>> createOneRowCallbackKeyboard(Map<String, String> buttons) {
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-
-        for (Map.Entry<String, String> button : buttons.entrySet()) {
-            List<InlineKeyboardButton> rowInline = new ArrayList<>();
-            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-
-            inlineKeyboardButton.setText(button.getKey());
-            inlineKeyboardButton.setCallbackData(button.getValue());
-            rowInline.add(inlineKeyboardButton);
-            rowsInline.add(rowInline);
-        }
-        markupInline.setKeyboard(rowsInline);
-        return rowsInline;
+    private static Stream<InlineKeyboardButton> convertToCallbackButtons(Map<String, String> buttons) {
+        return buttons.entrySet().stream().map(pair ->
+                InlineKeyboardButton.builder()
+                        .text(pair.getKey())
+                        .callbackData(pair.getValue())
+                        .build());
     }
 
     public static List<List<InlineKeyboardButton>> createTwoRowsCallbackKeyboard(Map<String, String> buttons) {
         if (buttons.size() < 6) {
             return createOneRowCallbackKeyboard(buttons);
         }
-
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
-        Iterator<Map.Entry<String, String>> iterator = buttons.entrySet().iterator();
-        while (iterator.hasNext()) {
+        int l = buttons.size() / 2;
+        List<InlineKeyboardButton> firstPart = convertToCallbackButtons(buttons).limit(l).collect(Collectors.toList());
+        List<InlineKeyboardButton> secondPart = convertToCallbackButtons(buttons).skip(l).collect(Collectors.toList());
+
+        for (int i = 0; i < l; i++) {
             List<InlineKeyboardButton> rowInline = new ArrayList<>();
-            Map.Entry<String, String> pair = iterator.next();
-            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-            inlineKeyboardButton.setText(pair.getKey());
-            inlineKeyboardButton.setCallbackData(pair.getValue());
 
-            rowInline.add(inlineKeyboardButton);
+            rowInline.add(firstPart.get(i));
+            rowInline.add(secondPart.get(i));
+            rowsInline.add(rowInline);
+        }
 
-            if (iterator.hasNext()) {
-                pair = iterator.next();
-                inlineKeyboardButton = new InlineKeyboardButton();
-                inlineKeyboardButton.setText(pair.getKey());
-                inlineKeyboardButton.setCallbackData(pair.getValue());
-
-                rowInline.add(inlineKeyboardButton);
-            }
+        if (buttons.size() % 2 == 1) {
+            List<InlineKeyboardButton> rowInline = new ArrayList<>();
+            rowInline.add(secondPart.get(l));
             rowsInline.add(rowInline);
         }
         return rowsInline;

@@ -48,12 +48,35 @@ public class SeasonCallback extends Callback {
             Season season = optionalSeason.get();
 
             int episodesCount = episodeService.countAllBySeason(season);
-            int limit = 3;
+            int limit = 12;
             int pagesCount = (int) Math.ceil(episodesCount / (double) limit);
 
             List<Episode> seasonEpisodes = episodeService.findAllBySeasonOrderByNumberWithLimitAndPage(season, limit, page);
 
-            String text = createText(season, seasonEpisodes);
+            String seriesPremiereReleaseDate;
+            if (season.getPremiereReleaseDate() == null) {
+                seriesPremiereReleaseDate = "TBA";
+            } else {
+                seriesPremiereReleaseDate = season.getPremiereReleaseDate()
+                        .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
+            }
+
+            String seriesFinalReleaseDate;
+            if (season.getFinalReleaseDate() == null) {
+                seriesFinalReleaseDate = "TBA";
+            } else {
+                seriesFinalReleaseDate = season.getFinalReleaseDate()
+                        .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
+            }
+
+            String text = String.format("*%s – %s сезон*\n", season.getSeries().getName(), season.getNumber())
+                    + '\n'
+                    + String.format("_%s_\n", season.getDescription())
+                    + '\n'
+                    + String.format("*Количество эпизодов*: *%d* / *%s*\n", episodesCount, season.getTotalEpisodesCount())
+                    + String.format("*Премьера: _%s_*\n", seriesPremiereReleaseDate)
+                    + String.format("*Финал: _%s_*\n", seriesFinalReleaseDate);
+
 
             Map<String, String> keyboard = new LinkedHashMap<>();
             for (Episode episode : seasonEpisodes) {
@@ -61,7 +84,7 @@ public class SeasonCallback extends Callback {
                 keyboard.put("Серия " + episode.getNumber() + " «" + episode.getName() + "»", episodeCallback.toString());
             }
 
-            List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createOneRowCallbackKeyboard(keyboard);
+            List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);
 
             if (pagesCount > 1) {
                 List<InlineKeyboardButton> controlButtons = createControlButtons(seasonId, pagesCount, page);
@@ -77,32 +100,6 @@ public class SeasonCallback extends Callback {
             log.error("no season with {} id", seasonId);
             new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), text);
         }
-    }
-
-    private String createText(Season season, List<Episode> seasonEpisodes) {
-        String seriesPremiereReleaseDate;
-        if (season.getPremiereReleaseDate() == null) {
-            seriesPremiereReleaseDate = "TBA";
-        } else {
-            seriesPremiereReleaseDate = season.getPremiereReleaseDate()
-                    .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
-        }
-
-        String seriesFinalReleaseDate;
-        if (season.getFinalReleaseDate() == null) {
-            seriesFinalReleaseDate = "TBA";
-        } else {
-            seriesFinalReleaseDate = season.getFinalReleaseDate()
-                    .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
-        }
-
-        return String.format("*%s – %s сезон*\n", season.getSeries().getName(), season.getNumber())
-                + '\n'
-                + String.format("_%s_\n", season.getDescription())
-                + '\n'
-                + String.format("*Количество эпизодов*: *%d* / *%s*\n", seasonEpisodes.size(), season.getTotalEpisodesCount())
-                + String.format("*Премьера: _%s_*\n", seriesPremiereReleaseDate)
-                + String.format("*Финал: _%s_*\n", seriesFinalReleaseDate);
     }
 
     private List<InlineKeyboardButton> createControlButtons(int seasonId, int pagesCount, int page) {
