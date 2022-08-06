@@ -81,7 +81,7 @@ public class SeasonCallback extends Callback {
             Map<String, String> keyboard = new LinkedHashMap<>();
             for (Episode episode : seasonEpisodes) {
                 JSONObject episodeCallback = EpisodeCallback.toJSON(episode.getId());
-                keyboard.put("Серия " + episode.getNumber() + " «" + episode.getName() + "»", episodeCallback.toString());
+                keyboard.put("Серия " + episode.getNumber() + " «" + episode.getTitle() + "»", episodeCallback.toString());
             }
 
             List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);

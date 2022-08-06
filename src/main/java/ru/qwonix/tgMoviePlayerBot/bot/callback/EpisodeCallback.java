@@ -41,7 +41,7 @@ public class EpisodeCallback extends Callback {
         if (optionalEpisode.isPresent()) {
             Episode episode = optionalEpisode.get();
 
-            String text = String.format("`%s сезон %s серия` – *%s*\n", episode.getSeason().getNumber(), episode.getNumber(), episode.getName())
+            String text = String.format("`%s сезон %s серия` – *%s*\n", episode.getSeason().getNumber(), episode.getNumber(), episode.getTitle())
                     + '\n'
                     + String.format("_%s_\n", episode.getDescription())
                     + '\n'

@@ -25,13 +25,13 @@ public class EpisodeDaoImpl implements EpisodeDao {
     @Override
     public Episode convert(ResultSet episodeResultSet) throws SQLException {
         SeasonDao seasonDao = new SeasonDaoImpl(connectionBuilder);
-        Optional<Season> season = seasonDao.find(episodeResultSet.getInt("season_id"));
 
+        Optional<Season> season = seasonDao.find(episodeResultSet.getInt("season_id"));
         PGInterval duration = (PGInterval) episodeResultSet.getObject("duration");
         return Episode.builder()
                 .id(episodeResultSet.getInt("id"))
                 .number(episodeResultSet.getInt("number"))
-                .name(episodeResultSet.getString("name"))
+                .title(episodeResultSet.getString("title"))
                 .description(episodeResultSet.getString("description"))
                 .releaseDate(episodeResultSet.getObject("release_date", LocalDate.class))
                 .language(episodeResultSet.getString("language"))
@@ -87,9 +87,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT min(e.release_date) as premiere_date FROM episode e " +
-                             "inner join season s on s.id = e.season_id " +
-                             "inner join series ser on ser.id = s.series_id " +
-                             "where ser.id=?")) {
+                             "inner join season s on s.id = e.season_id where s.series_id=?")) {
             preparedStatement.setLong(1, series.getId());
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -146,11 +144,11 @@ public class EpisodeDaoImpl implements EpisodeDao {
         PGInterval interval = new PGInterval();
         interval.setSeconds(episode.getDuration().getSeconds());
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO episode (number, name, description, release_date, language, country, duration, season_id, tg_video_file_id, tg_preview_file_id) " +
+                     connection.prepareStatement("INSERT INTO episode (number, title, description, release_date, language, country, duration, season_id, tg_video_file_id, tg_preview_file_id) " +
                              "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
 
             preparedStatement.setInt(1, episode.getNumber());
-            preparedStatement.setString(2, episode.getName());
+            preparedStatement.setString(2, episode.getTitle());
             preparedStatement.setString(3, episode.getDescription());
             preparedStatement.setObject(4, episode.getReleaseDate());
             preparedStatement.setString(5, episode.getLanguage());
@@ -174,9 +172,9 @@ public class EpisodeDaoImpl implements EpisodeDao {
         interval.setSeconds(episode.getDuration().getSeconds());
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("UPDATE episode " +
-                             "SET number=?, name=?, description=?, release_date=?, language=?, country=?, duration=?, season_id=?, tg_video_file_id=?, tg_preview_file_id=? WHERE id=?")) {
+                             "SET number=?, title=?, description=?, release_date=?, language=?, country=?, duration=?, season_id=?, tg_video_file_id=?, tg_preview_file_id=? WHERE id=?")) {
             preparedStatement.setInt(1, episode.getNumber());
-            preparedStatement.setString(2, episode.getName());
+            preparedStatement.setString(2, episode.getTitle());
             preparedStatement.setString(3, episode.getDescription());
             preparedStatement.setObject(4, episode.getReleaseDate());
             preparedStatement.setString(5, episode.getLanguage());
