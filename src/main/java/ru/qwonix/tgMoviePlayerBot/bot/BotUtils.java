@@ -7,7 +7,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
@@ -106,7 +107,7 @@ public class BotUtils {
                         .parseMode("MarkdownV2"));
     }
 
-    public Integer sendMarkdownTextWithKeyBoardAndPhoto(User user, String markdownMessage, InlineKeyboardMarkup keyboard, String photoFileId) {
+    public Integer sendMarkdownTextWithKeyBoardAndPhoto(User user, String markdownMessage, ReplyKeyboard keyboard, String photoFileId) {
         return this.sendPhoto(user
                 , SendPhoto.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
@@ -115,7 +116,7 @@ public class BotUtils {
                         .replyMarkup(keyboard));
     }
 
-    public Integer sendMarkdownTextWithKeyBoard(User user, String markdownMessage, InlineKeyboardMarkup keyboard) {
+    public Integer sendMarkdownTextWithKeyBoard(User user, String markdownMessage, ReplyKeyboard keyboard) {
         return this.sendMessage(user
                 , SendMessage.builder()
                         .text(escapeMarkdownMessage(markdownMessage))

@@ -37,7 +37,9 @@ public class QueryCallback extends Callback {
     }
 
     public void handleCallback(String query, int page) {
-        User user = chatContext.getUser();
+        new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), "*Поиск по названию находится в разработке*");
+
+        /*
         BotUtils botUtils = new BotUtils(botContext);
 
         SeriesService seriesService = botContext.getDatabaseContext().getSeriesService();
@@ -45,7 +47,7 @@ public class QueryCallback extends Callback {
 
         int searchResultCount = seriesService.countAllByNameLike(query);
         if (searchResultCount == 0) {
-            botUtils.sendMarkdownText(user, "*Ничего не найдено :(* \n`Попробуйте изменить запрос`");
+            botUtils.sendMarkdownText(chatContext.getUser(), "*Ничего не найдено :(* \n`Попробуйте изменить запрос`");
             return;
         }
 
@@ -76,10 +78,11 @@ public class QueryCallback extends Callback {
             inlineKeyboard.add(controlButtons);
         }
 
-        botUtils.sendMarkdownTextWithKeyBoard(user, sb.toString(), new InlineKeyboardMarkup(inlineKeyboard));
+        botUtils.sendMarkdownTextWithKeyBoard(chatContext.getUser(), sb.toString(), new InlineKeyboardMarkup(inlineKeyboard));
+         */
     }
 
-    private List<InlineKeyboardButton> createControlButtons(String query, int pagesCount, int page) {
+    public static List<InlineKeyboardButton> createControlButtons(String query, int pagesCount, int page) {
         InlineKeyboardButton previous;
         InlineKeyboardButton next;
 

@@ -62,7 +62,6 @@ public class UserDaoImpl implements UserDao {
             connectionBuilder.releaseConnection(connection);
         }
 
-
         return Optional.empty();
     }
 

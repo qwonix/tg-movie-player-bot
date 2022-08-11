@@ -13,6 +13,8 @@ public interface SeriesService {
 
     List<Series> findAll();
 
+    List<Series> findAllWithLimitAndPage(int limit, int page);
+
     List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page);
 
     int countAllByNameLike(String name);

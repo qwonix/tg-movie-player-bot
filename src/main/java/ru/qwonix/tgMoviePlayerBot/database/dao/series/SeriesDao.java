@@ -11,4 +11,7 @@ public interface SeriesDao extends DefaultDao<Series> {
     int countAllByNameLike(String name) throws SQLException;
 
     List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page) throws SQLException;
+
+    List<Series> findAllWithLimitAndPage(int limit, int page) throws SQLException;
+
 }

@@ -85,6 +85,28 @@ public class SeriesDaoImpl implements SeriesDao {
     }
 
     @Override
+    public List<Series> findAllWithLimitAndPage(int limit, int page) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        List<Series> serials = new ArrayList<>();
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT * FROM series limit ? offset ?")) {
+            preparedStatement.setInt(1, limit);
+            preparedStatement.setInt(2, limit * page);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Series series = convert(resultSet);
+                serials.add(series);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+        return serials;
+    }
+
+    @Override
     public Optional<Series> find(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 

@@ -52,6 +52,16 @@ public class SeriesServiceImpl implements SeriesService {
 
 
     @Override
+    public List<Series> findAllWithLimitAndPage(int limit, int page) {
+        try {
+            return seriesDao.findAllWithLimitAndPage(limit, page);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page) {
         try {
             return seriesDao.findAllByNameLikeWithLimitAndPage(name, limit, page);
