@@ -42,13 +42,28 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
 
         Connection connection;
         if (availableConnections.isEmpty()) {
-            connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+            log.debug("available connections is empty, creating a new connection");
+
+            try {
+                connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+            } catch (SQLException e) {
+                this.onUnavailableDatabase();
+                return null;
+            }
+
             usedConnections.add(connection);
         } else {
+            log.debug("there is a available connection");
+
             connection = availableConnections.pop();
+            if (!connection.isValid(2)) {
+                this.onUnavailableDatabase();
+                return null;
+            }
+
             usedConnections.add(connection);
         }
-        log.debug("take connection {}", connection);
+
         log.debug("total connections {}, available {}, used {}"
                 , availableConnections.size() + usedConnections.size()
                 , availableConnections.size()
@@ -56,9 +71,15 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
         return connection;
     }
 
+    private void onUnavailableDatabase() throws SQLException {
+        log.error("cannot connect to the database");
+        this.closeConnections();
+        System.exit(1);
+    }
+
     @Override
     public void releaseConnection(Connection connection) throws SQLException {
-        log.debug("connection pushed {}", connection);
+        log.debug("release connection {}", connection);
 
         if (connection == null) {
             return;
