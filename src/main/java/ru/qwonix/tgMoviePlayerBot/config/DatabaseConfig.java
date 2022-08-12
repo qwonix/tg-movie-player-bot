@@ -13,7 +13,7 @@ public abstract class DatabaseConfig {
     public synchronized static String getProperty(String name) {
         if (properties.isEmpty()) {
             try (InputStream is = DatabaseConfig.class.getClassLoader()
-                    .getResourceAsStream("dao.properties")) {
+                    .getResourceAsStream("database.properties")) {
                 properties.load(is);
             } catch (Exception ex) {
                 ex.printStackTrace();

@@ -73,7 +73,6 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
 
     private void onUnavailableDatabase() throws SQLException {
         log.error("cannot connect to the database");
-        this.closeConnections();
         System.exit(1);
     }
 
@@ -103,9 +102,11 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
     public void closeConnections() throws SQLException {
         for (Connection connection : usedConnections) {
             connection.close();
+            usedConnections.remove(connection);
         }
         for (Connection connection : availableConnections) {
             connection.close();
+            availableConnections.remove(connection);
         }
         log.info("all connections have been closed");
     }
