@@ -7,8 +7,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
-import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesService;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
@@ -38,23 +36,25 @@ public class SeriesCallback extends Callback {
         int seriesId = callbackData.getInt("id");
         int page = callbackData.getInt("page");
 
-        SeasonService seasonService = botContext.getDatabaseContext().getSeasonService();
-        SeriesService seriesService = botContext.getDatabaseContext().getSeriesService();
+        handleCallback(seriesId, page);
+    }
 
-        Optional<Series> optionalSeries = seriesService.find(seriesId);
+    private void handleCallback(int seriesId, int page) {
+        Optional<Series> optionalSeries = botContext.getDatabaseContext().getSeriesService().find(seriesId);
 
         if (optionalSeries.isPresent()) {
             Series series = optionalSeries.get();
-
-            int seasonsCount = seasonService.countAllBySeries(series);
-            int limit = 1;
-            int pagesCount = (int) Math.ceil(seasonsCount / (double) limit);
-
             String text = String.format("*%s*\n", series.getName())
                     + '\n'
                     + String.format("_%s_", series.getDescription());
 
-            List<Season> seriesSeasons = seasonService.findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
+            int seasonsCount = botContext.getDatabaseContext().getSeasonService().countAllBySeries(series);
+            int limit = 1;
+            int pagesCount = (int) Math.ceil(seasonsCount / (double) limit);
+
+            List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()
+                    .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
+
             Map<String, String> keyboard = new LinkedHashMap<>();
             for (Season season : seriesSeasons) {
                 JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
@@ -67,10 +67,23 @@ public class SeriesCallback extends Callback {
                 inlineKeyboard.add(controlButtons);
             }
 
-            new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
-                    , text
-                    , new InlineKeyboardMarkup(inlineKeyboard)
-                    , series.getPreviewFileId());
+
+            Integer messageIdToDelete = chatContext.getUser().getMessageIdToDelete();
+            if (messageIdToDelete != null) {
+                new BotUtils(botContext).editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+                        , messageIdToDelete
+                        , text
+                        , new InlineKeyboardMarkup(inlineKeyboard)
+                        , series.getPreviewFileId());
+
+            } else {
+                Integer messageId = new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+                        , text
+                        , new InlineKeyboardMarkup(inlineKeyboard)
+                        , series.getPreviewFileId());
+                chatContext.getUser().setMessageIdToDelete(messageId);
+                botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
+            }
         } else {
             String text = "Такого сериала не существует. `Попробуйте изменить запрос.`";
             log.error("no series with {} id", seriesId);

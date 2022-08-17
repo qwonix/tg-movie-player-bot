@@ -5,9 +5,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -100,6 +104,17 @@ public class BotUtils {
                         .photo(new InputFile(photoFileId)));
     }
 
+    public void editMarkdownTextWithPhoto(User user, Integer messageId, String markdownMessage, String photoFileId) {
+        this.editMedia(user, messageId
+                , EditMessageMedia.builder()
+                        .media(new InputMediaPhoto(photoFileId)));
+
+        this.editMessage(user, messageId
+                , EditMessageCaption.builder()
+                        .caption(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2"));
+    }
+
     public Integer sendMarkdownText(User user, String markdownMessage) {
         return this.sendMessage(user
                 , SendMessage.builder()
@@ -116,9 +131,30 @@ public class BotUtils {
                         .replyMarkup(keyboard));
     }
 
+    public void editMarkdownTextWithKeyBoardAndPhoto(User user, int messageId, String markdownMessage, InlineKeyboardMarkup keyboard, String photoFileId) {
+        this.editMedia(user, messageId
+                , EditMessageMedia.builder()
+                        .media(new InputMediaPhoto(photoFileId)));
+
+        this.editMessage(user, messageId
+                , EditMessageCaption.builder()
+                        .caption(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2")
+                        .replyMarkup(keyboard));
+    }
+
     public Integer sendMarkdownTextWithKeyBoard(User user, String markdownMessage, ReplyKeyboard keyboard) {
         return this.sendMessage(user
                 , SendMessage.builder()
+                        .text(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2")
+                        .replyMarkup(keyboard));
+    }
+
+    public void editMarkdownTextWithKeyBoard(User user, int messageId, String markdownMessage, InlineKeyboardMarkup keyboard) {
+        this.editMessage(user, messageId
+                , EditMessageText.builder()
+                        .messageId(messageId)
                         .text(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
                         .replyMarkup(keyboard));
@@ -146,6 +182,19 @@ public class BotUtils {
         return null;
     }
 
+    private void editMessage(User user, int messageId, EditMessageCaption.EditMessageCaptionBuilder editMessageCaptionBuilder) {
+        EditMessageCaption editMessageCaption = editMessageCaptionBuilder
+                .chatId(String.valueOf(user.getChatId()))
+                .messageId(messageId)
+                .build();
+
+        try {
+            bot.execute(editMessageCaption);
+        } catch (TelegramApiException e) {
+            log.error("message editing error " + user, e);
+        }
+    }
+
     private Integer sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
         SendMessage message = messageBuilder.chatId(String.valueOf(user.getChatId())).build();
         try {
@@ -156,6 +205,33 @@ public class BotUtils {
         }
         return null;
     }
+
+    private void editMessage(User user, int messageId, EditMessageText.EditMessageTextBuilder editMessageTextBuilder) {
+        EditMessageText editMessage = editMessageTextBuilder
+                .chatId(String.valueOf(user.getChatId()))
+                .messageId(messageId)
+                .build();
+
+        try {
+            bot.execute(editMessage);
+        } catch (TelegramApiException e) {
+            log.error("message editing error " + user, e);
+        }
+    }
+
+    private void editMedia(User user, int messageId, EditMessageMedia.EditMessageMediaBuilder editMessageMediaBuilder) {
+        EditMessageMedia editMedia = editMessageMediaBuilder
+                .chatId(String.valueOf(user.getChatId()))
+                .messageId(messageId)
+                .build();
+
+        try {
+            bot.execute(editMedia);
+        } catch (TelegramApiException e) {
+            log.error("media editing error " + user, e);
+        }
+    }
+
 
     public void deleteMessage(User user, Integer messageId) {
         DeleteMessage deleteMessage = DeleteMessage.builder()

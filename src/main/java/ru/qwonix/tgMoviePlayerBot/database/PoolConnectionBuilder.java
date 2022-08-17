@@ -106,7 +106,8 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
         }
         for (Connection connection : availableConnections) {
             connection.close();
-            availableConnections.remove(connection);
+            // FIXME: 12-Aug-22 exception on shutdown
+//            availableConnections.remove(connection);
         }
         log.info("all connections have been closed");
     }

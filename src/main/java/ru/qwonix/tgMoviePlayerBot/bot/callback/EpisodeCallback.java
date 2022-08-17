@@ -2,6 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
@@ -49,11 +50,26 @@ public class EpisodeCallback extends Callback {
                     DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru"))))
                     + String.format("Страна: *%s* (_%s_)", episode.getCountry(), episode.getLanguage());
 
+
+            Integer messageIdToDelete = chatContext.getUser().getMessageIdToDelete();
             BotUtils botUtils = new BotUtils(botContext);
-            botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
-                    , text
-                    , episode.getPreviewFileId());
-            botUtils.sendVideo(chatContext.getUser(), episode.getVideoFileId());
+
+            if (messageIdToDelete != null) {
+                new BotUtils(botContext).editMarkdownTextWithPhoto(chatContext.getUser()
+                        , messageIdToDelete
+                        , text
+                        , episode.getPreviewFileId());
+                Integer videoMessageId = botUtils.sendVideo(chatContext.getUser(), episode.getVideoFileId());
+
+            } else {
+                Integer messageId = botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
+                        , text
+                        , episode.getPreviewFileId());
+                Integer videoMessageId = botUtils.sendVideo(chatContext.getUser(), episode.getVideoFileId());
+
+                chatContext.getUser().setMessageIdToDelete(messageId);
+                botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
+            }
         } else {
             String text = "Такого видео не существует. `Попробуйте найти его заново.`";
             log.error("no video with {} id", episodeId);

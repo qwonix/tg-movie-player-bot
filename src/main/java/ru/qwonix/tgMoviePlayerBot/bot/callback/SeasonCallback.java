@@ -91,10 +91,24 @@ public class SeasonCallback extends Callback {
                 inlineKeyboard.add(controlButtons);
             }
 
-            new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
-                    , text
-                    , new InlineKeyboardMarkup(inlineKeyboard)
-                    , season.getPreviewFileId());
+
+            Integer messageIdToDelete = chatContext.getUser().getMessageIdToDelete();
+            if (messageIdToDelete != null) {
+                new BotUtils(botContext).editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+                        , messageIdToDelete
+                        , text
+                        , new InlineKeyboardMarkup(inlineKeyboard)
+                        , season.getPreviewFileId());
+
+            } else {
+                Integer messageId = new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+                        , text
+                        , new InlineKeyboardMarkup(inlineKeyboard)
+                        , season.getPreviewFileId());
+                chatContext.getUser().setMessageIdToDelete(messageId);
+                botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
+            }
+
         } else {
             String text = "Такого сезона не существует. `Попробуйте изменить запрос`.";
             log.error("no season with {} id", seasonId);

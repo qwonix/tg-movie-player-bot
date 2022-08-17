@@ -38,6 +38,6 @@ build/
 .DS_Store
 /logs.log
 /src/main/resources/bot.properties
-/src/main/resources/dao.properties
+/src/main/resources/database.properties
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/
