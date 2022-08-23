@@ -33,6 +33,26 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
+    public Optional<Episode> findNext(int id) {
+        try {
+            return episodeDao.findNext(id);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Episode> findPrevious(int id) {
+        try {
+            return episodeDao.findPrevious(id);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public List<Episode> findAll() {
         try {
             return episodeDao.findAll();

@@ -21,6 +21,7 @@ public class Bot extends TelegramLongPollingBot {
         return User.builder()
                 .chatId(telegramUser.getId())
                 .name(telegramUser.getFirstName())
+                .messagesIds(new MessagesIds())
                 .build();
     }
 

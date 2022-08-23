@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
+import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
 import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
@@ -34,11 +35,8 @@ public class SeasonCallback extends Callback {
         return Callback.toCallbackJson(jsonData);
     }
 
-    @Override
-    public void handleCallback(JSONObject callbackData) {
-        int seasonId = callbackData.getInt("id");
-        int page = callbackData.getInt("page");
 
+    public void handleCallback(int seasonId, int page) {
         SeasonService seasonService = botContext.getDatabaseContext().getSeasonService();
         EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
 
@@ -91,23 +89,34 @@ public class SeasonCallback extends Callback {
                 inlineKeyboard.add(controlButtons);
             }
 
+            BotUtils botUtils = new BotUtils(botContext);
+            MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
 
-            Integer messageIdToDelete = chatContext.getUser().getMessageIdToDelete();
-            if (messageIdToDelete != null) {
-                new BotUtils(botContext).editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
-                        , messageIdToDelete
+//            if (messagesIds.hasEpisodeMessageId()) {
+//                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
+//                messagesIds.setEpisodeMessageId(null);
+//            }
+//            if (messagesIds.hasVideoMessageId()) {
+//                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
+//                messagesIds.setVideoMessageId(null);
+//            }
+
+            if (messagesIds.hasSeasonMessageId()) {
+                botUtils.editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+                        , messagesIds.getSeasonMessageId()
                         , text
                         , new InlineKeyboardMarkup(inlineKeyboard)
                         , season.getPreviewFileId());
 
             } else {
-                Integer messageId = new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+                Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                         , text
                         , new InlineKeyboardMarkup(inlineKeyboard)
                         , season.getPreviewFileId());
-                chatContext.getUser().setMessageIdToDelete(messageId);
-                botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
+                messagesIds.setSeasonMessageId(seriesMessageId);
+
             }
+            botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
 
         } else {
             String text = "Такого сезона не существует. `Попробуйте изменить запрос`.";
@@ -115,6 +124,15 @@ public class SeasonCallback extends Callback {
             new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), text);
         }
     }
+
+    @Override
+    public void handleCallback(JSONObject callbackData) {
+        int seasonId = callbackData.getInt("id");
+        int page = callbackData.getInt("page");
+
+        handleCallback(seasonId, page);
+    }
+
 
     private List<InlineKeyboardButton> createControlButtons(int seasonId, int pagesCount, int page) {
         InlineKeyboardButton previous;

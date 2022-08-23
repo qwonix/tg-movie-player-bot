@@ -1,21 +1,13 @@
 package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
-import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesService;
-import ru.qwonix.tgMoviePlayerBot.entity.Series;
-import ru.qwonix.tgMoviePlayerBot.entity.User;
 
-import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class QueryCallback extends Callback {
 
@@ -34,6 +26,37 @@ public class QueryCallback extends Callback {
         jsonData.put("page", page);
 
         return Callback.toCallbackJson(jsonData);
+    }
+
+    public static List<InlineKeyboardButton> createControlButtons(String query, int pagesCount, int page) {
+        InlineKeyboardButton previous;
+        InlineKeyboardButton next;
+
+        if (page == 0) {
+            previous = InlineKeyboardButton.builder()
+                    .callbackData(QueryCallback.toJson(query, page).toString())
+                    .text("×").build();
+        } else {
+            previous = InlineKeyboardButton.builder()
+                    .callbackData(QueryCallback.toJson(query, page - 1).toString())
+                    .text("‹").build();
+        }
+
+        if (pagesCount == page + 1) {
+            next = InlineKeyboardButton.builder()
+                    .callbackData(QueryCallback.toJson(query, page).toString())
+                    .text("×").build();
+        } else {
+            next = InlineKeyboardButton.builder()
+                    .callbackData(QueryCallback.toJson(query, page + 1).toString())
+                    .text("›").build();
+        }
+
+        InlineKeyboardButton current = InlineKeyboardButton.builder()
+                .callbackData(QueryCallback.toJson(query, page).toString())
+                .text(page + 1 + "/" + pagesCount).build();
+
+        return Arrays.asList(previous, current, next);
     }
 
     public void handleCallback(String query, int page) {
@@ -80,37 +103,6 @@ public class QueryCallback extends Callback {
 
         botUtils.sendMarkdownTextWithKeyBoard(chatContext.getUser(), sb.toString(), new InlineKeyboardMarkup(inlineKeyboard));
          */
-    }
-
-    public static List<InlineKeyboardButton> createControlButtons(String query, int pagesCount, int page) {
-        InlineKeyboardButton previous;
-        InlineKeyboardButton next;
-
-        if (page == 0) {
-            previous = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, page).toString())
-                    .text("×").build();
-        } else {
-            previous = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, page - 1).toString())
-                    .text("‹").build();
-        }
-
-        if (pagesCount == page + 1) {
-            next = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, page).toString())
-                    .text("×").build();
-        } else {
-            next = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, page + 1).toString())
-                    .text("›").build();
-        }
-
-        InlineKeyboardButton current = InlineKeyboardButton.builder()
-                .callbackData(QueryCallback.toJson(query, page).toString())
-                .text(page + 1 + "/" + pagesCount).build();
-
-        return Arrays.asList(previous, current, next);
     }
 
     @Override

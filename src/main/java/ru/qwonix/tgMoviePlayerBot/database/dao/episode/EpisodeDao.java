@@ -8,8 +8,13 @@ import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface EpisodeDao extends DefaultDao<Episode> {
+
+    Optional<Episode> findNext(long id) throws SQLException;
+
+    Optional<Episode> findPrevious(long id) throws SQLException;
 
     LocalDate findPremiereReleaseDate(Series series) throws SQLException;
 

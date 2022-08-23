@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -89,6 +90,21 @@ public class BotUtils {
                         .video(new InputFile(fileId)));
     }
 
+    public Integer sendVideoWithKeyboard(User user, String fileId, InlineKeyboardMarkup keyboard) {
+        return this.sendVideo(user
+                , SendVideo.builder()
+                        .disableNotification(true)
+                        .video(new InputFile(fileId))
+                        .replyMarkup(keyboard));
+    }
+
+    public void editVideoWithKeyboard(User user, Integer messageId, String fileId, InlineKeyboardMarkup keyboard) {
+        this.editMedia(user, messageId
+                , EditMessageMedia.builder()
+                        .media(new InputMediaVideo(fileId))
+                        .replyMarkup(keyboard));
+    }
+
     public Integer sendText(User user, String text) {
         return this.sendMessage(user
                 , SendMessage.builder()
@@ -139,6 +155,17 @@ public class BotUtils {
         this.editMessage(user, messageId
                 , EditMessageCaption.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2")
+                        .replyMarkup(keyboard));
+    }
+
+    public void editKeyBoardAndPhoto(User user, int messageId, InlineKeyboardMarkup keyboard, String photoFileId) {
+        this.editMedia(user, messageId
+                , EditMessageMedia.builder()
+                        .media(new InputMediaPhoto(photoFileId)));
+
+        this.editMessage(user, messageId
+                , EditMessageCaption.builder()
                         .parseMode("MarkdownV2")
                         .replyMarkup(keyboard));
     }

@@ -11,6 +11,10 @@ import java.util.Optional;
 public interface EpisodeService {
     Optional<Episode> find(int id);
 
+    Optional<Episode> findNext(int id);
+
+    Optional<Episode> findPrevious(int id);
+
     List<Episode> findAll();
 
     LocalDate findPremiereReleaseDate(Series series);

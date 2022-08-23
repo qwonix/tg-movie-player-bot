@@ -82,6 +82,53 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
+    public Optional<Episode> findNext(long id) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("select * from episode " +
+                             "where number = (select number from episode where id = ?) + 1 " +
+                             "and season_id = (select season_id from episode where id = ?)")) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.setLong(2, id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Episode episode = convert(resultSet);
+                return Optional.of(episode);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Episode> findPrevious(long id) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("select * from episode " +
+                             "where number = (select number from episode where id = ?) - 1 " +
+                             "and season_id = (select season_id from episode where id = ?)")) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.setLong(2, id);
+
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Episode episode = convert(resultSet);
+                return Optional.of(episode);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
     public LocalDate findPremiereReleaseDate(Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 

@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
+import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
@@ -67,23 +68,42 @@ public class SeriesCallback extends Callback {
                 inlineKeyboard.add(controlButtons);
             }
 
+            BotUtils botUtils = new BotUtils(botContext);
+            MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
 
-            Integer messageIdToDelete = chatContext.getUser().getMessageIdToDelete();
-            if (messageIdToDelete != null) {
-                new BotUtils(botContext).editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
-                        , messageIdToDelete
-                        , text
-                        , new InlineKeyboardMarkup(inlineKeyboard)
-                        , series.getPreviewFileId());
-
-            } else {
-                Integer messageId = new BotUtils(botContext).sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
-                        , text
-                        , new InlineKeyboardMarkup(inlineKeyboard)
-                        , series.getPreviewFileId());
-                chatContext.getUser().setMessageIdToDelete(messageId);
-                botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
+            if (messagesIds.hasSeasonMessageId()) {
+                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeasonMessageId());
+                messagesIds.setSeasonMessageId(null);
             }
+            if (messagesIds.hasEpisodeMessageId()) {
+                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
+                messagesIds.setEpisodeMessageId(null);
+            }
+            if (messagesIds.hasVideoMessageId()) {
+                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
+                messagesIds.setVideoMessageId(null);
+            }
+            if (messagesIds.hasSeriesMessageId()) {
+                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeriesMessageId());
+                messagesIds.setSeriesMessageId(null);
+            }
+
+            if (messagesIds.hasSeriesMessageId()) {
+                botUtils.editKeyBoardAndPhoto(chatContext.getUser()
+                        , messagesIds.getSeriesMessageId()
+                        , new InlineKeyboardMarkup(inlineKeyboard)
+                        , series.getPreviewFileId());
+            } else {
+                Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+                        , text
+                        , new InlineKeyboardMarkup(inlineKeyboard)
+                        , series.getPreviewFileId());
+
+                messagesIds.setSeriesMessageId(seriesMessageId);
+            }
+
+            botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
+
         } else {
             String text = "Такого сериала не существует. `Попробуйте изменить запрос.`";
             log.error("no series with {} id", seriesId);

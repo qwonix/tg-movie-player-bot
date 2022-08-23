@@ -2,6 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.entity;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 
 
@@ -14,5 +15,5 @@ public class User {
     private boolean isAdmin = false;
     @Builder.Default
     private State.StateType stateType = State.StateType.DEFAULT;
-    private Integer messageIdToDelete;
+    private MessagesIds messagesIds;
 }
