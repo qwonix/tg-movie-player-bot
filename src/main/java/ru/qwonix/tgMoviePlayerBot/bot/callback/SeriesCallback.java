@@ -2,6 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
@@ -44,71 +45,79 @@ public class SeriesCallback extends Callback {
         Optional<Series> optionalSeries = botContext.getDatabaseContext().getSeriesService().find(seriesId);
 
         if (optionalSeries.isPresent()) {
-            Series series = optionalSeries.get();
-            String text = String.format("*%s*\n", series.getName())
-                    + '\n'
-                    + String.format("_%s_", series.getDescription());
-
-            int seasonsCount = botContext.getDatabaseContext().getSeasonService().countAllBySeries(series);
-            int limit = 1;
-            int pagesCount = (int) Math.ceil(seasonsCount / (double) limit);
-
-            List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()
-                    .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
-
-            Map<String, String> keyboard = new LinkedHashMap<>();
-            for (Season season : seriesSeasons) {
-                JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
-                keyboard.put("Сезон " + season.getNumber(), callbackSeason.toString());
-            }
-            List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);
-
-            if (pagesCount > 1) {
-                List<InlineKeyboardButton> controlButtons = createControlButtons(seriesId, pagesCount, page);
-                inlineKeyboard.add(controlButtons);
-            }
-
-            BotUtils botUtils = new BotUtils(botContext);
-            MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
-
-            if (messagesIds.hasSeasonMessageId()) {
-                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeasonMessageId());
-                messagesIds.setSeasonMessageId(null);
-            }
-            if (messagesIds.hasEpisodeMessageId()) {
-                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
-                messagesIds.setEpisodeMessageId(null);
-            }
-            if (messagesIds.hasVideoMessageId()) {
-                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
-                messagesIds.setVideoMessageId(null);
-            }
-            if (messagesIds.hasSeriesMessageId()) {
-                botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeriesMessageId());
-                messagesIds.setSeriesMessageId(null);
-            }
-
-            if (messagesIds.hasSeriesMessageId()) {
-                botUtils.editKeyBoardAndPhoto(chatContext.getUser()
-                        , messagesIds.getSeriesMessageId()
-                        , new InlineKeyboardMarkup(inlineKeyboard)
-                        , series.getPreviewFileId());
-            } else {
-                Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
-                        , text
-                        , new InlineKeyboardMarkup(inlineKeyboard)
-                        , series.getPreviewFileId());
-
-                messagesIds.setSeriesMessageId(seriesMessageId);
-            }
-
-            botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
+            this.onSeriesExists(optionalSeries.get(), page);
 
         } else {
-            String text = "Такого сериала не существует. `Попробуйте изменить запрос.`";
+            AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
+                    .callbackQueryId(chatContext.getUpdate().getCallbackQuery().getId())
+                    .text("Такого сериала не существует. Попробуйте найти его заново.")
+                    .showAlert(false)
+                    .build();
+
+            new BotUtils(botContext).executeAlert(answerCallbackQuery);
             log.error("no series with {} id", seriesId);
-            new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), text);
         }
+    }
+
+    private void onSeriesExists(Series series, int page) {
+        String text = String.format("*%s*\n", series.getName())
+                + '\n'
+                + String.format("_%s_", series.getDescription());
+
+        int seasonsCount = botContext.getDatabaseContext().getSeasonService().countAllBySeries(series);
+        int limit = 1;
+        int pagesCount = (int) Math.ceil(seasonsCount / (double) limit);
+
+        List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()
+                .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
+
+        Map<String, String> keyboard = new LinkedHashMap<>();
+        for (Season season : seriesSeasons) {
+            JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
+            keyboard.put("Сезон " + season.getNumber(), callbackSeason.toString());
+        }
+        List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);
+
+        if (pagesCount > 1) {
+            List<InlineKeyboardButton> controlButtons = createControlButtons(series.getId(), pagesCount, page);
+            inlineKeyboard.add(controlButtons);
+        }
+
+        BotUtils botUtils = new BotUtils(botContext);
+        MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
+
+        if (messagesIds.hasSeasonMessageId()) {
+            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeasonMessageId());
+            messagesIds.setSeasonMessageId(null);
+        }
+        if (messagesIds.hasEpisodeMessageId()) {
+            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
+            messagesIds.setEpisodeMessageId(null);
+        }
+        if (messagesIds.hasVideoMessageId()) {
+            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
+            messagesIds.setVideoMessageId(null);
+        }
+        if (messagesIds.hasSeriesMessageId()) {
+            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeriesMessageId());
+            messagesIds.setSeriesMessageId(null);
+        }
+
+        if (messagesIds.hasSeriesMessageId()) {
+            botUtils.editKeyBoardAndPhoto(chatContext.getUser()
+                    , messagesIds.getSeriesMessageId()
+                    , new InlineKeyboardMarkup(inlineKeyboard)
+                    , series.getPreviewFileId());
+        } else {
+            Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+                    , text
+                    , new InlineKeyboardMarkup(inlineKeyboard)
+                    , series.getPreviewFileId());
+
+            messagesIds.setSeriesMessageId(seriesMessageId);
+        }
+
+        botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
     }
 
     private List<InlineKeyboardButton> createControlButtons(int seriesId, int pagesCount, int page) {

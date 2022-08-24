@@ -16,7 +16,6 @@ public class MessagesIds {
 
     public static MessagesIds fromJson(String json) {
         JSONObject jsonObject = new JSONObject(json);
-
         MessagesIds MessagesIds = new MessagesIds();
 
         Integer episodeMessageId = jsonObject.optInt("episodeMessageId");

@@ -1,6 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.bot;
 
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
@@ -83,13 +84,6 @@ public class BotUtils {
                 .replace(".", "\\.");
     }
 
-    public Integer sendVideo(User user, String fileId) {
-        return this.sendVideo(user
-                , SendVideo.builder()
-                        .disableNotification(true)
-                        .video(new InputFile(fileId)));
-    }
-
     public Integer sendVideoWithKeyboard(User user, String fileId, InlineKeyboardMarkup keyboard) {
         return this.sendVideo(user
                 , SendVideo.builder()
@@ -125,7 +119,7 @@ public class BotUtils {
                 , EditMessageMedia.builder()
                         .media(new InputMediaPhoto(photoFileId)));
 
-        this.editMessage(user, messageId
+        this.editMessageCaption(user, messageId
                 , EditMessageCaption.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2"));
@@ -152,7 +146,7 @@ public class BotUtils {
                 , EditMessageMedia.builder()
                         .media(new InputMediaPhoto(photoFileId)));
 
-        this.editMessage(user, messageId
+        this.editMessageCaption(user, messageId
                 , EditMessageCaption.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
@@ -164,7 +158,7 @@ public class BotUtils {
                 , EditMessageMedia.builder()
                         .media(new InputMediaPhoto(photoFileId)));
 
-        this.editMessage(user, messageId
+        this.editMessageCaption(user, messageId
                 , EditMessageCaption.builder()
                         .parseMode("MarkdownV2")
                         .replyMarkup(keyboard));
@@ -209,7 +203,20 @@ public class BotUtils {
         return null;
     }
 
-    private void editMessage(User user, int messageId, EditMessageCaption.EditMessageCaptionBuilder editMessageCaptionBuilder) {
+    private void editMessage(User user, int messageId, EditMessageText.EditMessageTextBuilder editMessageTextBuilder) {
+        EditMessageText editMessage = editMessageTextBuilder
+                .chatId(String.valueOf(user.getChatId()))
+                .messageId(messageId)
+                .build();
+
+        try {
+            bot.execute(editMessage);
+        } catch (TelegramApiException e) {
+            log.error("message editing error " + user, e);
+        }
+    }
+
+    private void editMessageCaption(User user, int messageId, EditMessageCaption.EditMessageCaptionBuilder editMessageCaptionBuilder) {
         EditMessageCaption editMessageCaption = editMessageCaptionBuilder
                 .chatId(String.valueOf(user.getChatId()))
                 .messageId(messageId)
@@ -233,16 +240,19 @@ public class BotUtils {
         return null;
     }
 
-    private void editMessage(User user, int messageId, EditMessageText.EditMessageTextBuilder editMessageTextBuilder) {
-        EditMessageText editMessage = editMessageTextBuilder
-                .chatId(String.valueOf(user.getChatId()))
-                .messageId(messageId)
+    public void confirmCallback(String callbackQueryId) {
+        AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
+                .callbackQueryId(callbackQueryId)
+                .showAlert(false)
                 .build();
+        this.executeAlert(answerCallbackQuery);
+    }
 
+    public void executeAlert(AnswerCallbackQuery answerCallbackQuery) {
         try {
-            bot.execute(editMessage);
+            bot.execute(answerCallbackQuery);
         } catch (TelegramApiException e) {
-            log.error("message editing error " + user, e);
+            log.error("execute alert sending error ", e);
         }
     }
 
@@ -255,7 +265,7 @@ public class BotUtils {
         try {
             bot.execute(editMedia);
         } catch (TelegramApiException e) {
-            log.error("media editing error " + user, e);
+            log.error("media editing eror " + user, e);
         }
     }
 

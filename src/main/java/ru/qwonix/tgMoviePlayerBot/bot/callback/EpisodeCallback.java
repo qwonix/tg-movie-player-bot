@@ -2,6 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
@@ -12,10 +13,7 @@ import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 
 @Slf4j
@@ -37,51 +35,61 @@ public class EpisodeCallback extends Callback {
     }
 
     public void handleCallback(int episodeId) {
-        EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
-        Optional<Episode> optionalEpisode = episodeService.find(episodeId);
+        Optional<Episode> optionalEpisode = botContext.getDatabaseContext().getEpisodeService().find(episodeId);
 
         if (optionalEpisode.isPresent()) {
-            Episode episode = optionalEpisode.get();
+            this.onEpisodeExists(optionalEpisode.get());
 
-            String text = String.format("`%s сезон %s серия` – *%s*\n", episode.getSeason().getNumber(), episode.getNumber(), episode.getTitle())
-                    + '\n'
-                    + String.format("_%s_\n", episode.getDescription())
-                    + '\n'
-                    + String.format("Дата выхода: %s года\n", episode.getReleaseDate().format(
-                    DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru"))))
-                    + String.format("Страна: *%s* (_%s_)", episode.getCountry(), episode.getLanguage());
-
-
-            BotUtils botUtils = new BotUtils(botContext);
-            MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
-            if (messagesIds.hasEpisodeMessageId()) {
-                botUtils.editMarkdownTextWithPhoto(chatContext.getUser()
-                        , messagesIds.getEpisodeMessageId()
-                        , text
-                        , episode.getPreviewFileId());
-
-                botUtils.editVideoWithKeyboard(chatContext.getUser()
-                        , messagesIds.getVideoMessageId()
-                        , episode.getVideoFileId()
-                        , new InlineKeyboardMarkup(createControlButtons(episode)));
-
-            } else {
-                Integer episodeMessageId = botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
-                        , text
-                        , episode.getPreviewFileId());
-                Integer videoMessageId = botUtils.sendVideoWithKeyboard(chatContext.getUser()
-                        , episode.getVideoFileId()
-                        , new InlineKeyboardMarkup(createControlButtons(episode)));
-
-                messagesIds.setEpisodeMessageId(episodeMessageId);
-                messagesIds.setVideoMessageId(videoMessageId);
-            }
-            botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
         } else {
-            String text = "Такого видео не существует. `Попробуйте найти его заново.`";
+            AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
+                    .callbackQueryId(chatContext.getUpdate().getCallbackQuery().getId())
+                    .text("Такого видео не существует. Попробуйте найти его заново.")
+                    .showAlert(false)
+                    .build();
+
+            new BotUtils(botContext).executeAlert(answerCallbackQuery);
+
             log.error("no video with {} id", episodeId);
-            new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), text);
         }
+    }
+
+    private void onEpisodeExists(Episode episode) {
+        BotUtils botUtils = new BotUtils(botContext);
+
+        String text = String.format("`%s сезон %s серия` – *%s*\n", episode.getSeason().getNumber(), episode.getNumber(), episode.getTitle())
+                + '\n'
+                + String.format("_%s_\n", episode.getDescription())
+                + '\n'
+                + String.format("Дата выхода: %s года\n", episode.getReleaseDate().format(
+                DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru"))))
+                + String.format("Страна: *%s* (_%s_)", episode.getCountry(), episode.getLanguage());
+
+        MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
+        if (messagesIds.hasEpisodeMessageId()) {
+            botUtils.editMarkdownTextWithPhoto(chatContext.getUser()
+                    , messagesIds.getEpisodeMessageId()
+                    , text
+                    , episode.getPreviewFileId());
+
+            botUtils.editVideoWithKeyboard(chatContext.getUser()
+                    , messagesIds.getVideoMessageId()
+                    , episode.getVideoFileId()
+                    , new InlineKeyboardMarkup(createControlButtons(episode)));
+
+        } else {
+            Integer episodeMessageId = botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
+                    , text
+                    , episode.getPreviewFileId());
+            messagesIds.setEpisodeMessageId(episodeMessageId);
+
+            Integer videoMessageId = botUtils.sendVideoWithKeyboard(chatContext.getUser()
+                    , episode.getVideoFileId()
+                    , new InlineKeyboardMarkup(createControlButtons(episode)));
+            messagesIds.setVideoMessageId(videoMessageId);
+        }
+
+        botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
+        botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());
     }
 
     @Override
@@ -125,6 +133,6 @@ public class EpisodeCallback extends Callback {
                 .callbackData(EpisodeCallback.toJSON(currentEpisodeId).toString())
                 .text(currentEpisode.getNumber() + "/" + seasonEpisodesCount).build();
 
-        return Arrays.asList(Arrays.asList(previous, current, next));
+        return Collections.singletonList(Arrays.asList(previous, current, next));
     }
 }
