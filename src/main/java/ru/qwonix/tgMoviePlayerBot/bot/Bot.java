@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.qwonix.tgMoviePlayerBot.bot.state.DefaultState;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
+import ru.qwonix.tgMoviePlayerBot.config.TelegramConfig;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.util.Optional;
@@ -107,11 +108,11 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return BotConfig.getProperty(BotConfig.BOT_USERNAME);
+        return TelegramConfig.getProperty(TelegramConfig.BOT_USERNAME);
     }
 
     @Override
     public String getBotToken() {
-        return BotConfig.getProperty(BotConfig.BOT_TOKEN);
+        return TelegramConfig.getProperty(TelegramConfig.BOT_TOKEN);
     }
 }
