@@ -43,13 +43,9 @@ public class SeasonCallback extends Callback {
             this.onSeasonExists(optionalSeason.get(), page);
 
         } else {
-            AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
-                    .callbackQueryId(chatContext.getUpdate().getCallbackQuery().getId())
-                    .text("Такого сезона не существует. Попробуйте найти его заново.")
-                    .showAlert(false)
-                    .build();
-
-            new BotUtils(botContext).executeAlert(answerCallbackQuery);
+            new BotUtils(botContext).executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
+                    , "Такого сезона не существует. Попробуйте найти его заново."
+                    ,false);
 
             log.error("no season with {} id", seasonId);
         }

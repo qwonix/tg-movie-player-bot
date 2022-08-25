@@ -48,13 +48,9 @@ public class SeriesCallback extends Callback {
             this.onSeriesExists(optionalSeries.get(), page);
 
         } else {
-            AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
-                    .callbackQueryId(chatContext.getUpdate().getCallbackQuery().getId())
-                    .text("Такого сериала не существует. Попробуйте найти его заново.")
-                    .showAlert(false)
-                    .build();
-
-            new BotUtils(botContext).executeAlert(answerCallbackQuery);
+            new BotUtils(botContext).executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
+                    , "Такого сериала не существует. Попробуйте найти его заново."
+                    , false);
             log.error("no series with {} id", seriesId);
         }
     }

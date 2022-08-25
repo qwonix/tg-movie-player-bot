@@ -41,14 +41,9 @@ public class EpisodeCallback extends Callback {
             this.onEpisodeExists(optionalEpisode.get());
 
         } else {
-            AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
-                    .callbackQueryId(chatContext.getUpdate().getCallbackQuery().getId())
-                    .text("Такого видео не существует. Попробуйте найти его заново.")
-                    .showAlert(false)
-                    .build();
-
-            new BotUtils(botContext).executeAlert(answerCallbackQuery);
-
+            new BotUtils(botContext).executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
+                    , "Такого видео не существует. Попробуйте найти его заново."
+                    ,false);
             log.error("no video with {} id", episodeId);
         }
     }

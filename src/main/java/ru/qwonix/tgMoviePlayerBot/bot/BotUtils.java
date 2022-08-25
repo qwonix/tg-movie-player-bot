@@ -266,6 +266,16 @@ public class BotUtils {
         }
     }
 
+    public void executeAlertWithText(String callbackQueryId, String text, boolean showAlert) {
+        AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
+                .callbackQueryId(callbackQueryId)
+                .text(text)
+                .showAlert(showAlert)
+                .build();
+
+        this.executeAlert(answerCallbackQuery);
+    }
+
     private void editMedia(User user, int messageId, EditMessageMedia.EditMessageMediaBuilder editMessageMediaBuilder) {
         EditMessageMedia editMedia = editMessageMediaBuilder
                 .chatId(String.valueOf(user.getChatId()))

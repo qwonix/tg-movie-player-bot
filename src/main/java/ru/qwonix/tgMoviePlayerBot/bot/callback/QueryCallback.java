@@ -61,13 +61,9 @@ public class QueryCallback extends Callback {
     }
 
     public void handleCallback(String query, int page) {
-        AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
-                .callbackQueryId(chatContext.getUpdate().getCallbackQuery().getId())
-                .text("Поиск по названию находится в разработке :(")
-                .showAlert(false)
-                .build();
-
-        new BotUtils(botContext).executeAlert(answerCallbackQuery);
+        new BotUtils(botContext).executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
+                , "Поиск по названию находится в разработке :("
+                ,false);
 
         /*
         BotUtils botUtils = new BotUtils(botContext);
