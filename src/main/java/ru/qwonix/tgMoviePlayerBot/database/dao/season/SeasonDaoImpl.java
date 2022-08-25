@@ -25,13 +25,15 @@ public class SeasonDaoImpl implements SeasonDao {
         SeriesDao seriesDao = new SeriesDaoImpl(connectionBuilder);
         Optional<Series> series = seriesDao.find(seasonResultSet.getInt("series_id"));
 
+        LocalDate premiereReleaseDate = this.findPremiereReleaseDate(seasonResultSet.getInt("id"));
+        LocalDate finalReleaseDate = this.findFinalReleaseDate(seasonResultSet.getInt("id"));
         return Season.builder()
                 .id(seasonResultSet.getInt("id"))
                 .number(seasonResultSet.getInt("number"))
                 .description(seasonResultSet.getString("description"))
-                .premiereReleaseDate(seasonResultSet.getObject("premiere_release_date", LocalDate.class))
+                .premiereReleaseDate(premiereReleaseDate)
+                .finalReleaseDate(finalReleaseDate)
                 .totalEpisodesCount(seasonResultSet.getInt("total_episodes_count"))
-                .finalReleaseDate(seasonResultSet.getObject("final_release_date", LocalDate.class))
                 .previewFileId(seasonResultSet.getString("tg_preview_file_id"))
                 .series(series.orElse(null))
                 .build();
@@ -53,6 +55,47 @@ public class SeasonDaoImpl implements SeasonDao {
             connectionBuilder.releaseConnection(connection);
         }
         return seasons;
+    }
+
+
+    @Override
+    public LocalDate findPremiereReleaseDate(int seasonId) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("select min(release_date) as premiere_release_date from episode where season_id = ?")) {
+            preparedStatement.setInt(1, seasonId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+
+            return resultSet.getObject("premiere_release_date", LocalDate.class);
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+    }
+
+    @Override
+    public LocalDate findFinalReleaseDate(int seasonId) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("select" +
+                             " case" +
+                             "   when (select count(*) from episode where season_id = ?) =" +
+                             "   (select total_episodes_count from season where id = ?)" +
+                             " then (select max(release_date) from episode where season_id = ?)" +
+                             " end as final_release_date")) {
+            preparedStatement.setInt(1, seasonId);
+            preparedStatement.setInt(2, seasonId);
+            preparedStatement.setInt(3, seasonId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            return resultSet.getObject("final_release_date", LocalDate.class);
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
     }
 
     @Override
@@ -119,16 +162,14 @@ public class SeasonDaoImpl implements SeasonDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO season (number, description, premiere_release_date, final_release_date, total_episodes_count, series_id, tg_preview_file_id) " +
-                             "VALUES(?, ?, ?, ?, ?, ?)")) {
+                     connection.prepareStatement("INSERT INTO season (number, description, total_episodes_count, series_id, tg_preview_file_id) " +
+                             "VALUES(?, ?, ?, ?, ?)")) {
 
             preparedStatement.setInt(1, season.getNumber());
             preparedStatement.setString(2, season.getDescription());
-            preparedStatement.setObject(3, season.getPremiereReleaseDate());
-            preparedStatement.setObject(4, season.getFinalReleaseDate());
-            preparedStatement.setObject(5, season.getTotalEpisodesCount());
-            preparedStatement.setInt(6, season.getSeries().getId());
-            preparedStatement.setString(7, season.getPreviewFileId());
+            preparedStatement.setObject(3, season.getTotalEpisodesCount());
+            preparedStatement.setInt(4, season.getSeries().getId());
+            preparedStatement.setString(5, season.getPreviewFileId());
 
             preparedStatement.executeUpdate();
         } finally {
@@ -141,16 +182,14 @@ public class SeasonDaoImpl implements SeasonDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE season SET number=?, description=?, premiere_release_date=?, final_release_date=?, total_episodes_count=?, series_id=?, tg_preview_file_id=? WHERE id=?")) {
+                     connection.prepareStatement("UPDATE season SET number=?, description=?, total_episodes_count=?, series_id=?, tg_preview_file_id=? WHERE id=?")) {
 
             preparedStatement.setInt(1, season.getNumber());
             preparedStatement.setString(2, season.getDescription());
-            preparedStatement.setObject(3, season.getPremiereReleaseDate());
-            preparedStatement.setObject(4, season.getFinalReleaseDate());
-            preparedStatement.setObject(5, season.getTotalEpisodesCount());
-            preparedStatement.setLong(6, season.getSeries().getId());
-            preparedStatement.setString(7, season.getPreviewFileId());
-            preparedStatement.setLong(8, id);
+            preparedStatement.setObject(3, season.getTotalEpisodesCount());
+            preparedStatement.setLong(4, season.getSeries().getId());
+            preparedStatement.setString(5, season.getPreviewFileId());
+            preparedStatement.setLong(6, id);
 
             preparedStatement.executeUpdate();
         } finally {
