@@ -38,7 +38,7 @@ create table if not exists episode
 (
     id                 serial primary key,
     number             smallint     not null,
-    "name"             varchar(200) not null,
+    title              varchar(200) not null,
     description        text         not null,
     release_date       date         not null,
     "language"         varchar(50),
