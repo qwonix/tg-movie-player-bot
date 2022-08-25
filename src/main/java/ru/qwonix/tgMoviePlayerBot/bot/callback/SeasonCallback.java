@@ -125,7 +125,7 @@ public class SeasonCallback extends Callback {
 
         if (page == 0) {
             previous = InlineKeyboardButton.builder()
-                    .callbackData(SeasonCallback.toJson(seasonId, page).toString())
+                    .callbackData("NaN")
                     .text("×").build();
         } else {
             previous = InlineKeyboardButton.builder()
@@ -135,7 +135,7 @@ public class SeasonCallback extends Callback {
 
         if (pagesCount == page + 1) {
             next = InlineKeyboardButton.builder()
-                    .callbackData(SeasonCallback.toJson(seasonId, page).toString())
+                    .callbackData("NaN")
                     .text("×").build();
         } else {
             next = InlineKeyboardButton.builder()
@@ -144,7 +144,7 @@ public class SeasonCallback extends Callback {
         }
 
         InlineKeyboardButton current = InlineKeyboardButton.builder()
-                .callbackData(SeasonCallback.toJson(seasonId, page).toString())
+                .callbackData("NaN")
                 .text(page + 1 + "/" + pagesCount).build();
 
         return Arrays.asList(previous, current, next);

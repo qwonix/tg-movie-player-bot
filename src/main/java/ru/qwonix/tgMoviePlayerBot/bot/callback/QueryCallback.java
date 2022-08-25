@@ -35,7 +35,7 @@ public class QueryCallback extends Callback {
 
         if (page == 0) {
             previous = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, page).toString())
+                    .callbackData("NaN")
                     .text("×").build();
         } else {
             previous = InlineKeyboardButton.builder()
@@ -45,7 +45,7 @@ public class QueryCallback extends Callback {
 
         if (pagesCount == page + 1) {
             next = InlineKeyboardButton.builder()
-                    .callbackData(QueryCallback.toJson(query, page).toString())
+                    .callbackData("NaN")
                     .text("×").build();
         } else {
             next = InlineKeyboardButton.builder()
@@ -54,7 +54,7 @@ public class QueryCallback extends Callback {
         }
 
         InlineKeyboardButton current = InlineKeyboardButton.builder()
-                .callbackData(QueryCallback.toJson(query, page).toString())
+                .callbackData("NaN")
                 .text(page + 1 + "/" + pagesCount).build();
 
         return Arrays.asList(previous, current, next);

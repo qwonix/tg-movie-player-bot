@@ -75,9 +75,17 @@ public abstract class State {
     public void onCallback() {
         CallbackQuery callbackQuery = chatContext.getUpdate().getCallbackQuery();
 
-        log.info("user {} callback {}", chatContext.getUser(), callbackQuery.getData());
+        String data = callbackQuery.getData();
 
-        JSONObject jsonObject = Callback.fromCallbackJson(callbackQuery.getData());
+        if (data.equals("NaN")) {
+            log.info("user {} send empty callback", chatContext.getUser());
+            new BotUtils(botContext).confirmCallback(callbackQuery.getId());
+            return;
+        }
+
+        log.info("user {} callback {}", chatContext.getUser(), data);
+
+        JSONObject jsonObject = Callback.fromCallbackJson(data);
         DataType dataType = DataType.valueOf(jsonObject.getString("dataType"));
 
         Callback callback;

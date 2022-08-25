@@ -132,7 +132,7 @@ public class SeriesCallback extends Callback {
 
         if (page == 0) {
             previous = InlineKeyboardButton.builder()
-                    .callbackData(SeriesCallback.toJson(seriesId, page).toString())
+                    .callbackData("NaN")
                     .text("×").build();
         } else {
             previous = InlineKeyboardButton.builder()
@@ -142,7 +142,7 @@ public class SeriesCallback extends Callback {
 
         if (pagesCount == page + 1) {
             next = InlineKeyboardButton.builder()
-                    .callbackData(SeriesCallback.toJson(seriesId, page).toString())
+                    .callbackData("NaN")
                     .text("×").build();
         } else {
             next = InlineKeyboardButton.builder()
@@ -151,7 +151,7 @@ public class SeriesCallback extends Callback {
         }
 
         InlineKeyboardButton current = InlineKeyboardButton.builder()
-                .callbackData(SeriesCallback.toJson(seriesId, page).toString())
+                .callbackData("NaN")
                 .text(page + 1 + "/" + pagesCount).build();
 
         return Arrays.asList(previous, current, next);

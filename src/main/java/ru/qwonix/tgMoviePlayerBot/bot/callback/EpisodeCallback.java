@@ -109,7 +109,7 @@ public class EpisodeCallback extends Callback {
                     .text("›").build();
         } else {
             next = InlineKeyboardButton.builder()
-                    .callbackData(EpisodeCallback.toJSON(currentEpisodeId).toString())
+                    .callbackData("NaN")
                     .text("×").build();
         }
 
@@ -119,13 +119,13 @@ public class EpisodeCallback extends Callback {
                     .text("‹").build();
         } else {
             previous = InlineKeyboardButton.builder()
-                    .callbackData(EpisodeCallback.toJSON(currentEpisodeId).toString())
+                    .callbackData("NaN")
                     .text("×").build();
         }
 
         int seasonEpisodesCount = episodeService.countAllBySeason(currentEpisode.getSeason());
         InlineKeyboardButton current = InlineKeyboardButton.builder()
-                .callbackData(EpisodeCallback.toJSON(currentEpisodeId).toString())
+                .callbackData("NaN")
                 .text(currentEpisode.getNumber() + "/" + seasonEpisodesCount).build();
 
         return Collections.singletonList(Arrays.asList(previous, current, next));
