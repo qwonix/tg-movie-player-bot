@@ -81,6 +81,8 @@ public class BotUtils {
                 .replace("!", "\\!")
                 .replace("(", "\\(")
                 .replace(")", "\\)")
+                .replace("<", "\\<")
+                .replace(">", "\\>")
                 .replace(".", "\\.");
     }
 
@@ -130,6 +132,14 @@ public class BotUtils {
                 , SendMessage.builder()
                         .text(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2"));
+    }
+
+    public Integer sendMarkdownTextWithReplay(User user, String markdownMessage, int replayMessageId) {
+        return this.sendMessage(user
+                , SendMessage.builder()
+                        .text(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2")
+                        .replyToMessageId(replayMessageId));
     }
 
     public Integer sendMarkdownTextWithKeyBoardAndPhoto(User user, String markdownMessage, ReplyKeyboard keyboard, String photoFileId) {

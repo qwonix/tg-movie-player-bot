@@ -2,7 +2,6 @@ package ru.qwonix.tgMoviePlayerBot.bot.state;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -42,22 +41,35 @@ public abstract class State {
         Video video = update.getMessage().getVideo();
 
         log.info("user {} send video {}", chatContext.getUser(), video);
-        new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), "`" + video.getFileId() + "`");
+        BotUtils botUtils = new BotUtils(botContext);
+        if (chatContext.getUser().isAdmin()) {
+            botUtils.sendMarkdownTextWithReplay(chatContext.getUser()
+                    , "`" + video.getFileId() + "`"
+                    , update.getMessage().getMessageId());
+        } else {
+            botUtils.sendMarkdownText(chatContext.getUser()
+                    , "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
+
+        }
     }
 
 
     public void onPhoto() {
         Update update = chatContext.getUpdate();
-        List<PhotoSize> photos = update.getMessage().getPhoto();
+        BotUtils botUtils = new BotUtils(botContext);
 
-        log.info("user {} send {} photos", chatContext.getUser(), photos.size());
+        if (chatContext.getUser().isAdmin()) {
+            List<PhotoSize> photos = update.getMessage().getPhoto();
+            log.info("user {} send {} photos", chatContext.getUser(), photos.size());
 
-        for (PhotoSize photo : photos) {
-            log.info("photo fileId {} getFileUniqueId {} getFilePath {} getFileSize {}"
-                    , photo.getFileId(), photo.getFileUniqueId(), photo.getFilePath(), photo.getFileSize());
+            PhotoSize photoSize = photos.stream().max(Comparator.comparingInt(PhotoSize::getFileSize)).get();
+            botUtils.sendMarkdownTextWithReplay(chatContext.getUser()
+                    , "`" + photoSize.getFileId() + "`"
+                    , update.getMessage().getMessageId());
+        } else {
+            botUtils.sendMarkdownText(chatContext.getUser()
+                    , "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
         }
-        PhotoSize photoSize = photos.stream().max(Comparator.comparingInt(PhotoSize::getFileSize)).get();
-        new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), "`" + photoSize.getFileId() + "`");
     }
 
     public void onCallback() {
