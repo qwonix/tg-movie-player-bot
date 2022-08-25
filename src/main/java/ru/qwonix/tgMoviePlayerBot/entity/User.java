@@ -2,10 +2,11 @@ package ru.qwonix.tgMoviePlayerBot.entity;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 
-
+@ToString
 @Builder(toBuilder = true)
 @Data
 public class User {
