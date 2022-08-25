@@ -5,15 +5,17 @@ set search_path = "movie_player";
 
 create table if not exists "user"
 (
-    chat_id  bigint primary key,
-    "name"   varchar(64),
-    is_admin bool default false,
-    state    varchar(100)
+    chat_id         bigint primary key,
+    "name"          varchar(64),
+    is_admin        bool default false,
+    state           varchar(100),
+    tg_messages_ids json
 );
 
 create table if not exists series
 (
     id                 serial primary key,
+    "order"            int          not null,
     "name"             varchar(200) not null,
     description        text         not null,
     country            varchar(50),

@@ -41,9 +41,9 @@ public class SeriesServiceImpl implements SeriesService {
 
 
     @Override
-    public List<Series> findAll() {
+    public List<Series> findAllOrdered() {
         try {
-            return seriesDao.findAll();
+            return seriesDao.findAllOrdered();
         } catch (SQLException e) {
             log.error("sql exception", e);
         }

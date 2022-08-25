@@ -45,6 +45,24 @@ public class SeriesDaoImpl implements SeriesDao {
     }
 
     @Override
+    public List<Series> findAllOrdered() throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+        List<Series> serials = new ArrayList<>();
+        try (Statement statement = connection.createStatement()) {
+            String SQL = "SELECT * FROM series order by \"order\"";
+            ResultSet resultSet = statement.executeQuery(SQL);
+
+            while (resultSet.next()) {
+                Series series = convert(resultSet);
+                serials.add(series);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+        return serials;
+    }
+
+    @Override
     public int countAllByNameLike(String name) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
