@@ -2,7 +2,6 @@ package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
@@ -56,6 +55,7 @@ public class SeriesCallback extends Callback {
     }
 
     private void onSeriesExists(Series series, int page) {
+        BotUtils botUtils = new BotUtils(botContext);
         String text = String.format("*%s*\n", series.getName())
                 + '\n'
                 + String.format("_%s_", series.getDescription());
@@ -67,19 +67,28 @@ public class SeriesCallback extends Callback {
         List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()
                 .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
 
-        Map<String, String> keyboard = new LinkedHashMap<>();
-        for (Season season : seriesSeasons) {
-            JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
-            keyboard.put("Сезон " + season.getNumber(), callbackSeason.toString());
-        }
-        List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);
+        InlineKeyboardMarkup keyboard;
+        if (seriesSeasons.isEmpty()) {
+            botUtils.executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
+                    , "Информации о сезонах пока нет"
+                    , true);
+            keyboard = new InlineKeyboardMarkup(Collections.emptyList());
 
-        if (pagesCount > 1) {
-            List<InlineKeyboardButton> controlButtons = createControlButtons(series.getId(), pagesCount, page);
-            inlineKeyboard.add(controlButtons);
+        } else {
+            Map<String, String> keyboardMap = new LinkedHashMap<>();
+            for (Season season : seriesSeasons) {
+                JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
+                keyboardMap.put("Сезон " + season.getNumber(), callbackSeason.toString());
+            }
+            List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
+
+            if (pagesCount > 1) {
+                List<InlineKeyboardButton> controlButtons = createControlButtons(series.getId(), pagesCount, page);
+                inlineKeyboard.add(controlButtons);
+            }
+            keyboard = new InlineKeyboardMarkup(inlineKeyboard);
         }
 
-        BotUtils botUtils = new BotUtils(botContext);
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
 
         if (messagesIds.hasSeasonMessageId()) {
@@ -102,18 +111,19 @@ public class SeriesCallback extends Callback {
         if (messagesIds.hasSeriesMessageId()) {
             botUtils.editKeyBoardAndPhoto(chatContext.getUser()
                     , messagesIds.getSeriesMessageId()
-                    , new InlineKeyboardMarkup(inlineKeyboard)
+                    , keyboard
                     , series.getPreviewFileId());
         } else {
             Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
-                    , new InlineKeyboardMarkup(inlineKeyboard)
+                    , keyboard
                     , series.getPreviewFileId());
 
             messagesIds.setSeriesMessageId(seriesMessageId);
         }
 
         botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
+        botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());
     }
 
     private List<InlineKeyboardButton> createControlButtons(int seriesId, int pagesCount, int page) {

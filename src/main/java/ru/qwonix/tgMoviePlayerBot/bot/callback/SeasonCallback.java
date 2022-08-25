@@ -2,7 +2,6 @@ package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
@@ -45,7 +44,7 @@ public class SeasonCallback extends Callback {
         } else {
             new BotUtils(botContext).executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
                     , "Такого сезона не существует. Попробуйте найти его заново."
-                    ,false);
+                    , false);
 
             log.error("no season with {} id", seasonId);
         }
@@ -53,12 +52,34 @@ public class SeasonCallback extends Callback {
 
     private void onSeasonExists(Season season, int page) {
         EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
+        BotUtils botUtils = new BotUtils(botContext);
 
         int episodesCount = episodeService.countAllBySeason(season);
         int limit = 12;
         int pagesCount = (int) Math.ceil(episodesCount / (double) limit);
 
         List<Episode> seasonEpisodes = episodeService.findAllBySeasonOrderByNumberWithLimitAndPage(season, limit, page);
+
+        InlineKeyboardMarkup keyboard;
+        if (seasonEpisodes.isEmpty()) {
+            botUtils.executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
+                    , "Информации о сериях пока нет"
+                    , true);
+            keyboard = new InlineKeyboardMarkup(Collections.emptyList());
+        } else {
+            Map<String, String> keyboardMap = new LinkedHashMap<>();
+            for (Episode episode : seasonEpisodes) {
+                JSONObject episodeCallback = EpisodeCallback.toJSON(episode.getId());
+                keyboardMap.put("Серия " + episode.getNumber() + " «" + episode.getTitle() + "»", episodeCallback.toString());
+            }
+
+            List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
+            if (pagesCount > 1) {
+                List<InlineKeyboardButton> controlButtons = createControlButtons(season.getId(), pagesCount, page);
+                inlineKeyboard.add(controlButtons);
+            }
+            keyboard = new InlineKeyboardMarkup(inlineKeyboard);
+        }
 
         String seriesPremiereReleaseDate;
         if (season.getPremiereReleaseDate() == null) {
@@ -84,34 +105,19 @@ public class SeasonCallback extends Callback {
                 + String.format("*Премьера: _%s_*\n", seriesPremiereReleaseDate)
                 + String.format("*Финал: _%s_*\n", seriesFinalReleaseDate);
 
-
-        Map<String, String> keyboard = new LinkedHashMap<>();
-        for (Episode episode : seasonEpisodes) {
-            JSONObject episodeCallback = EpisodeCallback.toJSON(episode.getId());
-            keyboard.put("Серия " + episode.getNumber() + " «" + episode.getTitle() + "»", episodeCallback.toString());
-        }
-
-        List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboard);
-
-        if (pagesCount > 1) {
-            List<InlineKeyboardButton> controlButtons = createControlButtons(season.getId(), pagesCount, page);
-            inlineKeyboard.add(controlButtons);
-        }
-
-        BotUtils botUtils = new BotUtils(botContext);
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
 
         if (messagesIds.hasSeasonMessageId()) {
             botUtils.editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , messagesIds.getSeasonMessageId()
                     , text
-                    , new InlineKeyboardMarkup(inlineKeyboard)
+                    , keyboard
                     , season.getPreviewFileId());
 
         } else {
             Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
-                    , new InlineKeyboardMarkup(inlineKeyboard)
+                    , keyboard
                     , season.getPreviewFileId());
 
             messagesIds.setSeasonMessageId(seriesMessageId);

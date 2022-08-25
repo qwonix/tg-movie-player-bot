@@ -19,7 +19,7 @@ create table if not exists series
     "name"             varchar(200) not null,
     description        text         not null,
     country            varchar(50),
-    tg_preview_file_id char(100)
+    tg_preview_file_id varchar(100)
 );
 
 create table if not exists season
@@ -31,7 +31,7 @@ create table if not exists season
     final_release_date    date     not null,
     total_episodes_count  int      not null,
     series_id             int references series,
-    tg_preview_file_id    char(100)
+    tg_preview_file_id    varchar(100)
 );
 
 create table if not exists episode
@@ -45,6 +45,6 @@ create table if not exists episode
     country            varchar(50),
     duration           interval,
     season_id          int references season,
-    tg_video_file_id   char(100),
-    tg_preview_file_id char(100)
+    tg_video_file_id   varchar(100),
+    tg_preview_file_id varchar(100)
 );

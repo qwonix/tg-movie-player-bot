@@ -44,7 +44,7 @@ public abstract class State {
         BotUtils botUtils = new BotUtils(botContext);
         if (chatContext.getUser().isAdmin()) {
             botUtils.sendMarkdownTextWithReplay(chatContext.getUser()
-                    , "`" + video.getFileId() + "`"
+                    , "`" + video.getFileId() + "`" + '\n' + "duration (sec): `" + video.getDuration() + "`"
                     , update.getMessage().getMessageId());
         } else {
             botUtils.sendMarkdownText(chatContext.getUser()
