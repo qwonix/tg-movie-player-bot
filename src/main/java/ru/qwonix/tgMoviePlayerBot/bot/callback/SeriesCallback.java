@@ -8,6 +8,7 @@ import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
+import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
@@ -61,7 +62,7 @@ public class SeriesCallback extends Callback {
                 + String.format("_%s_", series.getDescription());
 
         int seasonsCount = botContext.getDatabaseContext().getSeasonService().countAllBySeries(series);
-        int limit = 1;
+        int limit = Integer.parseInt(BotConfig.getProperty(BotConfig.KEYBOARD_PAGE_SEASONS_MAX));
         int pagesCount = (int) Math.ceil(seasonsCount / (double) limit);
 
         List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()

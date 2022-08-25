@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
@@ -50,7 +51,7 @@ public class BotUtils {
     }
 
     public static List<List<InlineKeyboardButton>> createTwoRowsCallbackKeyboard(Map<String, String> buttons) {
-        if (buttons.size() < 6) {
+        if (buttons.size() < BotConfig.getIntProperty(BotConfig.KEYBOARD_COLUMNS_ROW_MAX)) {
             return createOneRowCallbackKeyboard(buttons);
         }
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();

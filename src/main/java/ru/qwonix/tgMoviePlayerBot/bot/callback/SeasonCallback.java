@@ -8,6 +8,7 @@ import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
+import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
@@ -55,7 +56,7 @@ public class SeasonCallback extends Callback {
         BotUtils botUtils = new BotUtils(botContext);
 
         int episodesCount = episodeService.countAllBySeason(season);
-        int limit = 12;
+        int limit = Integer.parseInt(BotConfig.getProperty(BotConfig.KEYBOARD_PAGE_EPISODES_MAX));
         int pagesCount = (int) Math.ceil(episodesCount / (double) limit);
 
         List<Episode> seasonEpisodes = episodeService.findAllBySeasonOrderByNumberWithLimitAndPage(season, limit, page);
