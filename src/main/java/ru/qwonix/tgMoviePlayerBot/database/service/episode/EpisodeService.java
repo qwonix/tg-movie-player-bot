@@ -2,9 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.database.service.episode;
 
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
-import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 

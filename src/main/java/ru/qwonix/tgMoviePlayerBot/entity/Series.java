@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 
 @ToString
@@ -16,6 +14,9 @@ public class Series {
     private int id;
     private String name;
     private LocalDate premiereReleaseDate;
+    private String description;
+    private String country;
+    private String previewFileId;
 
     public String getPremiereReleaseYearOrTBA() {
         String seriesPremiereReleaseDate;
@@ -27,8 +28,4 @@ public class Series {
         }
         return seriesPremiereReleaseDate;
     }
-
-    private String description;
-    private String country;
-    private String previewFileId;
 }

@@ -13,7 +13,6 @@ import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -59,27 +58,15 @@ public class SeasonCallback extends Callback {
         int limit = Integer.parseInt(BotConfig.getProperty(BotConfig.KEYBOARD_PAGE_EPISODES_MAX));
         int pagesCount = (int) Math.ceil(episodesCount / (double) limit);
 
-        List<Episode> seasonEpisodes = episodeService.findAllBySeasonOrderByNumberWithLimitAndPage(season, limit, page);
-
         InlineKeyboardMarkup keyboard;
+        List<Episode> seasonEpisodes = episodeService.findAllBySeasonOrderByNumberWithLimitAndPage(season, limit, page);
         if (seasonEpisodes.isEmpty()) {
             botUtils.executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
                     , "Информации о сериях пока нет"
                     , true);
             keyboard = new InlineKeyboardMarkup(Collections.emptyList());
         } else {
-            Map<String, String> keyboardMap = new LinkedHashMap<>();
-            for (Episode episode : seasonEpisodes) {
-                JSONObject episodeCallback = EpisodeCallback.toJSON(episode.getId());
-                keyboardMap.put("Серия " + episode.getNumber() + " «" + episode.getTitle() + "»", episodeCallback.toString());
-            }
-
-            List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
-            if (pagesCount > 1) {
-                List<InlineKeyboardButton> controlButtons = createControlButtons(season.getId(), pagesCount, page);
-                inlineKeyboard.add(controlButtons);
-            }
-            keyboard = new InlineKeyboardMarkup(inlineKeyboard);
+            keyboard = this.generateKeyboard(season, seasonEpisodes, page, pagesCount);
         }
 
         String text = String.format("*%s – %s сезон*\n", season.getSeries().getName(), season.getNumber())
@@ -109,6 +96,23 @@ public class SeasonCallback extends Callback {
         }
         botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
         botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());
+    }
+
+    private InlineKeyboardMarkup generateKeyboard(Season season, List<Episode> seasonEpisodes, int page, int pagesCount) {
+        InlineKeyboardMarkup keyboard;
+        Map<String, String> keyboardMap = new LinkedHashMap<>();
+        for (Episode episode : seasonEpisodes) {
+            JSONObject episodeCallback = EpisodeCallback.toJSON(episode.getId());
+            keyboardMap.put("Серия " + episode.getNumber() + " «" + episode.getTitle() + "»", episodeCallback.toString());
+        }
+
+        List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
+        if (pagesCount > 1) {
+            List<InlineKeyboardButton> controlButtons = createControlButtons(season.getId(), pagesCount, page);
+            inlineKeyboard.add(controlButtons);
+        }
+        keyboard = new InlineKeyboardMarkup(inlineKeyboard);
+        return keyboard;
     }
 
     @Override

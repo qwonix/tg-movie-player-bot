@@ -1,7 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
@@ -61,9 +60,7 @@ public class QueryCallback extends Callback {
     }
 
     public void handleCallback(String query, int page) {
-        new BotUtils(botContext).executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
-                , "Поиск по названию находится в разработке :("
-                ,false);
+        //new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), "Поиск по названию находится в разработке :(");
 
         /*
         BotUtils botUtils = new BotUtils(botContext);

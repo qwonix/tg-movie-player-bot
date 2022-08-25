@@ -17,6 +17,10 @@ public class Season {
     private int number;
     private String description;
     private LocalDate premiereReleaseDate;
+    private LocalDate finalReleaseDate;
+    private int totalEpisodesCount;
+    private Series series;
+    private String previewFileId;
 
     public String getFormattedPremiereReleaseDate() {
         String seriesPremiereReleaseDate;
@@ -40,9 +44,4 @@ public class Season {
         }
         return seriesFinalReleaseDate;
     }
-
-    private LocalDate finalReleaseDate;
-    private int totalEpisodesCount;
-    private Series series;
-    private String previewFileId;
 }

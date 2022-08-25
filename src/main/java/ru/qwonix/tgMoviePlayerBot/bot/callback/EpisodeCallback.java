@@ -2,7 +2,6 @@ package ru.qwonix.tgMoviePlayerBot.bot.callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
@@ -43,7 +42,7 @@ public class EpisodeCallback extends Callback {
         } else {
             new BotUtils(botContext).executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
                     , "Такого видео не существует. Попробуйте найти его заново."
-                    ,false);
+                    , false);
             log.error("no video with {} id", episodeId);
         }
     }

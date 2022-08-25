@@ -6,7 +6,6 @@ import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
-import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
 import java.sql.*;
 import java.time.Duration;
