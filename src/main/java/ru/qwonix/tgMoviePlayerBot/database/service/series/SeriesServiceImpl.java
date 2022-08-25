@@ -7,6 +7,7 @@ import ru.qwonix.tgMoviePlayerBot.database.dao.series.SeriesDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +49,16 @@ public class SeriesServiceImpl implements SeriesService {
             log.error("sql exception", e);
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public LocalDate findPremiereReleaseDate(Series series) {
+        try {
+            return seriesDao.findPremiereReleaseDate(series.getId());
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return null;
     }
 
 

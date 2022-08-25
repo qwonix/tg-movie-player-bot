@@ -2,6 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.database.service.series;
 
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,8 @@ public interface SeriesService {
     Optional<Series> find(int id);
 
     List<Series> findAllOrdered();
+
+    LocalDate findPremiereReleaseDate(Series series);
 
     List<Series> findAllWithLimitAndPage(int limit, int page);
 

@@ -128,24 +128,6 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
-    public LocalDate findPremiereReleaseDate(Series series) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT min(e.release_date) as premiere_date FROM episode e " +
-                             "inner join season s on s.id = e.season_id where s.series_id=?")) {
-            preparedStatement.setLong(1, series.getId());
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-
-            return resultSet.getObject("premiere_date", LocalDate.class);
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-    }
-
-    @Override
     public List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 

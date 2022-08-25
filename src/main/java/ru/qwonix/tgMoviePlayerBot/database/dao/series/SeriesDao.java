@@ -4,6 +4,7 @@ import ru.qwonix.tgMoviePlayerBot.database.dao.DefaultDao;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface SeriesDao extends DefaultDao<Series> {
@@ -16,4 +17,5 @@ public interface SeriesDao extends DefaultDao<Series> {
 
     List<Series> findAllWithLimitAndPage(int limit, int page) throws SQLException;
 
+    LocalDate findPremiereReleaseDate(int seriesId) throws SQLException;
 }

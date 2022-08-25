@@ -17,8 +17,6 @@ public interface EpisodeService {
 
     List<Episode> findAll();
 
-    LocalDate findPremiereReleaseDate(Series series);
-
     List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page);
 
     int countAllBySeason(Season season);
