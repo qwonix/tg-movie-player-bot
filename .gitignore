@@ -42,3 +42,4 @@ build/
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/
 /out/
+/src/main/java/ru/qwonix/tgMoviePlayerBot/test.java
