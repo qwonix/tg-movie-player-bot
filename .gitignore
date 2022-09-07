@@ -41,3 +41,4 @@ build/
 /src/main/resources/database.properties
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/
+/out/

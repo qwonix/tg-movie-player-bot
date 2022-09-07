@@ -13,6 +13,7 @@ import java.time.LocalDate;
 public class Episode {
     private int id;
     private int number;
+    private int productionCode;
     private String title;
     private String description;
     private LocalDate releaseDate;

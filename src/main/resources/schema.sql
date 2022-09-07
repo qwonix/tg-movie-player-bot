@@ -24,20 +24,19 @@ create table if not exists series
 
 create table if not exists season
 (
-    id                    serial primary key,
-    number                smallint not null,
-    description           text     not null,
-    premiere_release_date date     not null,
-    final_release_date    date     not null,
-    total_episodes_count  int      not null,
-    series_id             int references series,
-    tg_preview_file_id    varchar(100)
+    id                   serial primary key,
+    number               smallint not null,
+    description          text     not null,
+    total_episodes_count int      not null,
+    series_id            int references series,
+    tg_preview_file_id   varchar(100)
 );
 
 create table if not exists episode
 (
     id                 serial primary key,
     number             smallint     not null,
+    production_code    int unique,
     title              varchar(200) not null,
     description        text         not null,
     release_date       date         not null,
