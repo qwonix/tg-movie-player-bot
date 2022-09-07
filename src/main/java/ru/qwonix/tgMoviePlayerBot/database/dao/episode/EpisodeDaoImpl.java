@@ -30,7 +30,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
         return Episode.builder()
                 .id(episodeResultSet.getInt("id"))
                 .number(episodeResultSet.getInt("number"))
-                .productionCode(episodeResultSet.getInt("productionCode"))
+                .productionCode(episodeResultSet.getInt("production_code"))
                 .title(episodeResultSet.getString("title"))
                 .description(episodeResultSet.getString("description"))
                 .releaseDate(episodeResultSet.getObject("release_date", LocalDate.class))

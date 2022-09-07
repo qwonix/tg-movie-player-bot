@@ -95,11 +95,35 @@ public class BotUtils {
                         .replyMarkup(keyboard));
     }
 
+    public Integer sendVideoWithMarkdownTextKeyboard(User user, String markdownMessage, String fileId, InlineKeyboardMarkup keyboard) {
+        return this.sendVideo(user
+                , SendVideo.builder()
+                        .caption(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2")
+                        .disableNotification(true)
+                        .video(new InputFile(fileId))
+                        .replyMarkup(keyboard));
+    }
+
     public void editVideoWithKeyboard(User user, Integer messageId, String fileId, InlineKeyboardMarkup keyboard) {
         this.editMedia(user, messageId
                 , EditMessageMedia.builder()
                         .media(new InputMediaVideo(fileId))
                         .replyMarkup(keyboard));
+    }
+
+    public void editVideoWithMarkdownTextKeyboard(User user, Integer messageId, String markdownMessage, String fileId, InlineKeyboardMarkup keyboard) {
+        this.editMedia(user, messageId
+                , EditMessageMedia.builder()
+                        .media(new InputMediaVideo(fileId))
+                        .replyMarkup(keyboard));
+
+        this.editMessageCaption(user, messageId
+                , EditMessageCaption.builder()
+                        .caption(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2")
+                        .replyMarkup(keyboard));
+
     }
 
     public Integer sendText(User user, String text) {

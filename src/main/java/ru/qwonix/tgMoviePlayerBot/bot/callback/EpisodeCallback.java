@@ -8,6 +8,7 @@ import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
+import ru.qwonix.tgMoviePlayerBot.config.TelegramConfig;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 
@@ -65,8 +66,9 @@ public class EpisodeCallback extends Callback {
                     , text
                     , episode.getPreviewFileId());
 
-            botUtils.editVideoWithKeyboard(chatContext.getUser()
+            botUtils.editVideoWithMarkdownTextKeyboard(chatContext.getUser()
                     , messagesIds.getVideoMessageId()
+                    , "*Предоставлено @" + TelegramConfig.getProperty("telegram_bot.username").replaceAll("_", "\\\\_") + "*"
                     , episode.getVideoFileId()
                     , new InlineKeyboardMarkup(createControlButtons(episode)));
 
@@ -76,7 +78,8 @@ public class EpisodeCallback extends Callback {
                     , episode.getPreviewFileId());
             messagesIds.setEpisodeMessageId(episodeMessageId);
 
-            Integer videoMessageId = botUtils.sendVideoWithKeyboard(chatContext.getUser()
+            Integer videoMessageId = botUtils.sendVideoWithMarkdownTextKeyboard(chatContext.getUser()
+                    , "*Предоставлено @" + TelegramConfig.getProperty("telegram_bot.username").replaceAll("_", "\\\\_") + "*"
                     , episode.getVideoFileId()
                     , new InlineKeyboardMarkup(createControlButtons(episode)));
             messagesIds.setVideoMessageId(videoMessageId);
