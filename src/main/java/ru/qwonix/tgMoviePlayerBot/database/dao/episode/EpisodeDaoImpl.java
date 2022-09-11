@@ -203,7 +203,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
                      connection.prepareStatement("UPDATE episode " +
                              "SET number=?, production_code=?, title=?, description=?, release_date=?, language=?, country=?, duration=?, season_id=?, tg_video_file_id=?, tg_preview_file_id=? WHERE id=?")) {
             preparedStatement.setInt(1, episode.getNumber());
-            preparedStatement.setInt(2, episode.getNumber());
+            preparedStatement.setInt(2, episode.getProductionCode());
             preparedStatement.setString(3, episode.getTitle());
             preparedStatement.setString(4, episode.getDescription());
             preparedStatement.setObject(5, episode.getReleaseDate());

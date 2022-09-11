@@ -19,5 +19,5 @@ public interface EpisodeService {
 
     int countAllBySeason(Season season);
 
-    void insert(Episode episode);
+    void insertOrUpdate(Episode episode);
 }

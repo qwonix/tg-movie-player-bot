@@ -2,6 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.entity;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.Duration;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 @ToString
 @Builder(toBuilder = true)
 @Getter
+@Setter
 public class Episode {
     private int id;
     private int number;

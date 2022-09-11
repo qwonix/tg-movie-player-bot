@@ -81,9 +81,13 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
-    public void insert(Episode episode) {
+    public void insertOrUpdate(Episode episode) {
         try {
-            episodeDao.insert(episode);
+            if (episodeDao.find(episode.getId()).isPresent()) {
+                episodeDao.update(episode.getId(), episode);
+            } else {
+                episodeDao.insert(episode);
+            }
         } catch (SQLException e) {
             log.error("sql exception", e);
         }

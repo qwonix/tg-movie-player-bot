@@ -12,11 +12,15 @@ import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.SeriesCallback;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
+import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class BotCommand {
@@ -120,6 +124,30 @@ public class BotCommand {
                 log.warn("trying to become an admin: {}", user);
             }
         }
+    }
+
+    @Command("/export_video_videofileid")
+    public void export_video_videofileid(User user, String[] args) {
+        if (!user.isAdmin()) {
+            botUtils.sendMarkdownText(user, "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
+            return;
+        }
+        for (Episode e : databaseContext.getEpisodeService().findAll()) {
+            botUtils.sendVideoWithMarkdownText(user, String.valueOf(e.getId()), e.getVideoFileId());
+        }
+        log.info("export by {}", user);
+    }
+
+    @Command("/export_video_previewfileid")
+    public void export_video_previewid(User user, String[] args) {
+        if (!user.isAdmin()) {
+            botUtils.sendMarkdownText(user, "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
+            return;
+        }
+        for (Episode e : databaseContext.getEpisodeService().findAll()) {
+            botUtils.sendMarkdownTextWithPhoto(user, String.valueOf(e.getId()), e.getPreviewFileId());
+        }
+        log.info("export by {}", user);
     }
 
 }

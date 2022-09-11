@@ -3,7 +3,6 @@ package ru.qwonix.tgMoviePlayerBot.bot.callback;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
-import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 
 import java.util.Arrays;

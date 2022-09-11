@@ -95,6 +95,15 @@ public class BotUtils {
                         .replyMarkup(keyboard));
     }
 
+    public Integer sendVideoWithMarkdownText(User user, String markdownMessage, String fileId) {
+        return this.sendVideo(user
+                , SendVideo.builder()
+                        .caption(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2")
+                        .disableNotification(true)
+                        .video(new InputFile(fileId)));
+    }
+
     public Integer sendVideoWithMarkdownTextKeyboard(User user, String markdownMessage, String fileId, InlineKeyboardMarkup keyboard) {
         return this.sendVideo(user
                 , SendVideo.builder()

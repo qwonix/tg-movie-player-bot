@@ -68,7 +68,7 @@ public class EpisodeCallback extends Callback {
 
             botUtils.editVideoWithMarkdownTextKeyboard(chatContext.getUser()
                     , messagesIds.getVideoMessageId()
-                    , "*Предоставлено @" + TelegramConfig.getProperty("telegram_bot.username").replaceAll("_", "\\\\_") + "*"
+                    , "*|Предоставлено @" + TelegramConfig.getProperty("telegram_bot.username").replaceAll("_", "\\\\_") + "|*"
                     , episode.getVideoFileId()
                     , new InlineKeyboardMarkup(createControlButtons(episode)));
 
