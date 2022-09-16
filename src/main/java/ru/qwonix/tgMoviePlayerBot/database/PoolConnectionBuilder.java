@@ -47,7 +47,8 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
             try {
                 connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
             } catch (SQLException e) {
-                this.onUnavailableDatabase();
+                log.error("cannot connect to the database", e);
+                System.exit(1);
                 return null;
             }
 
@@ -57,7 +58,8 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
 
             connection = availableConnections.pop();
             if (!connection.isValid(2)) {
-                this.onUnavailableDatabase();
+                log.error("cannot connect to the database");
+                System.exit(1);
                 return null;
             }
 
@@ -69,11 +71,6 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
                 , availableConnections.size()
                 , usedConnections.size());
         return connection;
-    }
-
-    private void onUnavailableDatabase() throws SQLException {
-        log.error("cannot connect to the database");
-        System.exit(1);
     }
 
     @Override
