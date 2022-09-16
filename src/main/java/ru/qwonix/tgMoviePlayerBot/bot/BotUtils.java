@@ -90,7 +90,6 @@ public class BotUtils {
     public Integer sendVideoWithKeyboard(User user, String fileId, InlineKeyboardMarkup keyboard) {
         return this.sendVideo(user
                 , SendVideo.builder()
-                        .disableNotification(true)
                         .video(new InputFile(fileId))
                         .replyMarkup(keyboard));
     }
@@ -100,7 +99,6 @@ public class BotUtils {
                 , SendVideo.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
-                        .disableNotification(true)
                         .video(new InputFile(fileId)));
     }
 
@@ -109,7 +107,6 @@ public class BotUtils {
                 , SendVideo.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
-                        .disableNotification(true)
                         .video(new InputFile(fileId))
                         .replyMarkup(keyboard));
     }
@@ -146,6 +143,7 @@ public class BotUtils {
         return this.sendPhoto(user
                 , SendPhoto.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
+                        .disableNotification(true)
                         .parseMode("MarkdownV2")
                         .photo(new InputFile(photoFileId)));
     }
@@ -226,7 +224,10 @@ public class BotUtils {
     }
 
     private Integer sendPhoto(User user, SendPhoto.SendPhotoBuilder photoBuilder) {
-        SendPhoto photo = photoBuilder.chatId(String.valueOf(user.getChatId())).build();
+        SendPhoto photo = photoBuilder
+                .chatId(String.valueOf(user.getChatId()))
+                .disableNotification(true)
+                .build();
         try {
             Message execute = bot.execute(photo);
             return execute.getMessageId();
@@ -237,9 +238,12 @@ public class BotUtils {
     }
 
     private Integer sendVideo(User user, SendVideo.SendVideoBuilder videoBuilder) {
-        SendVideo photo = videoBuilder.chatId(String.valueOf(user.getChatId())).build();
+        SendVideo video = videoBuilder
+                .chatId(String.valueOf(user.getChatId()))
+                .disableNotification(true)
+                .build();
         try {
-            Message execute = bot.execute(photo);
+            Message execute = bot.execute(video);
             return execute.getMessageId();
         } catch (TelegramApiException e) {
             log.error("video sending error " + user, e);
