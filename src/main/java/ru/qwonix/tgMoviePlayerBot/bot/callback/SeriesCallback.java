@@ -71,7 +71,7 @@ public class SeriesCallback extends Callback {
         InlineKeyboardMarkup keyboard;
         if (seriesSeasons.isEmpty()) {
             botUtils.executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
-                    , "Информации о сезонах пока нет"
+                    , "Информации о сезонах нет"
                     , true);
             keyboard = new InlineKeyboardMarkup(Collections.emptyList());
 

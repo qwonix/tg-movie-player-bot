@@ -51,15 +51,19 @@ public class EpisodeCallback extends Callback {
     private void onEpisodeExists(Episode episode) {
         BotUtils botUtils = new BotUtils(botContext);
 
-        String text = String.format("`%s сезон %s серия` – *%s*\n", episode.getSeason().getNumber(), episode.getNumber(), episode.getTitle())
+        String text = String.format("_%s сезон %s серия_ – `%s`\n", episode.getSeason().getNumber(), episode.getNumber(), episode.getTitle())
                 + '\n'
                 + String.format("_%s_\n", episode.getDescription())
                 + '\n'
-                + String.format("Дата выхода: %s года\n", episode.getReleaseDate().format(
-                DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru"))))
-                + String.format("Страна: *%s* (_%s_)", episode.getCountry(), episode.getLanguage());
+                + String.format("*Дата выхода:* `%s года`\n", episode.getReleaseDate().format(
+                    DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru"))))
+                + String.format("*Страна:* `%s` (_%s_)", episode.getCountry(), episode.getLanguage());
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
+        String providedByText = "|| Предоставлено @"
+                + TelegramConfig.getProperty("telegram_bot.username").replaceAll("_", "\\\\_")
+                + " ||";
+
         if (messagesIds.hasEpisodeMessageId()) {
             botUtils.editMarkdownTextWithPhoto(chatContext.getUser()
                     , messagesIds.getEpisodeMessageId()
@@ -68,7 +72,7 @@ public class EpisodeCallback extends Callback {
 
             botUtils.editVideoWithMarkdownTextKeyboard(chatContext.getUser()
                     , messagesIds.getVideoMessageId()
-                    , "*|Предоставлено @" + TelegramConfig.getProperty("telegram_bot.username").replaceAll("_", "\\\\_") + "|*"
+                    , providedByText
                     , episode.getVideoFileId()
                     , new InlineKeyboardMarkup(createControlButtons(episode)));
 
@@ -79,7 +83,7 @@ public class EpisodeCallback extends Callback {
             messagesIds.setEpisodeMessageId(episodeMessageId);
 
             Integer videoMessageId = botUtils.sendVideoWithMarkdownTextKeyboard(chatContext.getUser()
-                    , "*Предоставлено @" + TelegramConfig.getProperty("telegram_bot.username").replaceAll("_", "\\\\_") + "*"
+                    , providedByText
                     , episode.getVideoFileId()
                     , new InlineKeyboardMarkup(createControlButtons(episode)));
             messagesIds.setVideoMessageId(videoMessageId);

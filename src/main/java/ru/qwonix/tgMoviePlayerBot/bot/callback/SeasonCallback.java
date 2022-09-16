@@ -62,20 +62,20 @@ public class SeasonCallback extends Callback {
         List<Episode> seasonEpisodes = episodeService.findAllBySeasonOrderByNumberWithLimitAndPage(season, limit, page);
         if (seasonEpisodes.isEmpty()) {
             botUtils.executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
-                    , "Информации о сериях пока нет"
+                    , "Информации о сериях нет"
                     , true);
             keyboard = new InlineKeyboardMarkup(Collections.emptyList());
         } else {
             keyboard = this.generateKeyboard(season, seasonEpisodes, page, pagesCount);
         }
 
-        String text = String.format("*%s – %s сезон*\n", season.getSeries().getName(), season.getNumber())
+        String text = String.format("*%s –* `%s сезон`\n", season.getSeries().getName(), season.getNumber())
                 + '\n'
                 + String.format("_%s_\n", season.getDescription())
                 + '\n'
-                + String.format("*Количество эпизодов*: *%d* / *%s*\n", episodesCount, season.getTotalEpisodesCount())
-                + String.format("*Премьера: _%s_*\n", season.getFormattedPremiereReleaseDate())
-                + String.format("*Финал: _%s_*\n", season.getFormattedFinalReleaseDate());
+                + String.format("*Количество эпизодов*: `%d` / *%s*\n", episodesCount, season.getTotalEpisodesCount())
+                + String.format("*Премьера:* `%s`\n", season.getFormattedPremiereReleaseDate())
+                + String.format("*Финал:* `%s`\n", season.getFormattedFinalReleaseDate());
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
 
@@ -103,7 +103,7 @@ public class SeasonCallback extends Callback {
         Map<String, String> keyboardMap = new LinkedHashMap<>();
         for (Episode episode : seasonEpisodes) {
             JSONObject episodeCallback = EpisodeCallback.toJSON(episode.getId());
-            keyboardMap.put("Серия " + episode.getNumber() + " «" + episode.getTitle() + "»", episodeCallback.toString());
+            keyboardMap.put(episode.getSeason().getNumber() + "×" + episode.getNumber() + " «" + episode.getTitle() + "»", episodeCallback.toString());
         }
 
         List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);

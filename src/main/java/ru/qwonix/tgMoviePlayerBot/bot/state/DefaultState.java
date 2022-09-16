@@ -25,6 +25,7 @@ public class DefaultState extends State {
         Update update = chatContext.getUpdate();
 
         String userMessageText = update.getMessage().getText();
+        log.info("user {} send text {}", user, userMessageText);
 
         String[] allArgs = userMessageText.split(" ");
         String command = allArgs[0].toLowerCase();
@@ -38,7 +39,7 @@ public class DefaultState extends State {
                 return;
             }
 
-            new BotUtils(botContext).sendText(user, "Используйте команды и кнопки, бот (пока) не имеет интерфейса общения");
+            new BotUtils(botContext).sendText(user, "Используйте команды и кнопки, бот не имеет интерфейса общения");
         } catch (IllegalAccessException e) {
             log.error("reflective access exception", e);
         } catch (InvocationTargetException e) {

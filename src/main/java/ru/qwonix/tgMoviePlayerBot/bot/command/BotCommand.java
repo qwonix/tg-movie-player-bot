@@ -50,7 +50,7 @@ public class BotCommand {
     @Command("/start")
     public void start(User user, String[] args) {
         KeyboardRow keyboardButtons = new KeyboardRow();
-        keyboardButtons.add(new KeyboardButton("/search"));
+        keyboardButtons.add(new KeyboardButton("/search (в разработке)"));
         keyboardButtons.add(new KeyboardButton("/all"));
 
         List<KeyboardRow> keyboardRows = Collections.singletonList(keyboardButtons);
@@ -61,7 +61,7 @@ public class BotCommand {
         replyKeyboardMarkup.setInputFieldPlaceholder("Выберите режим поиска");
 
         botUtils.sendMarkdownTextWithKeyBoard(user
-                , "Вы можете найти нужную серию по названию или использовать обычный выбор из списка:"
+                , "Вы можете найти нужную серию, используя команду /all"
                 , replyKeyboardMarkup);
 
         log.info("start by {}", user);
