@@ -29,7 +29,8 @@ public class Season {
             seriesPremiereReleaseDate = "TBA";
         } else {
             seriesPremiereReleaseDate = this.getPremiereReleaseDate()
-                    .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
+                    .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")))
+                    + " года";
         }
         return seriesPremiereReleaseDate;
     }
@@ -40,7 +41,9 @@ public class Season {
             seriesFinalReleaseDate = "TBA";
         } else {
             seriesFinalReleaseDate = this.getFinalReleaseDate()
-                    .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")));
+                    .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")))
+                    + " года";
+            ;
         }
         return seriesFinalReleaseDate;
     }

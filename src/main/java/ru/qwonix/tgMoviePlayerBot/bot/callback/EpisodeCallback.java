@@ -60,9 +60,9 @@ public class EpisodeCallback extends Callback {
                 + String.format("*Страна:* `%s` (_%s_)", episode.getCountry(), episode.getLanguage());
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
-        String providedByText = "|| Предоставлено @"
-                + TelegramConfig.getProperty("telegram_bot.username").replaceAll("_", "\\\\_")
-                + " ||";
+        String providedByText = "||*Предоставлено @"
+                + TelegramConfig.getProperty(TelegramConfig.BOT_USERNAME).replaceAll("_", "\\\\_")
+                + "*||";
 
         if (messagesIds.hasEpisodeMessageId()) {
             botUtils.editMarkdownTextWithPhoto(chatContext.getUser()

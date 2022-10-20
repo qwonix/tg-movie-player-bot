@@ -74,8 +74,8 @@ public class SeasonCallback extends Callback {
                 + String.format("_%s_\n", season.getDescription())
                 + '\n'
                 + String.format("*Количество эпизодов*: `%d` / *%s*\n", episodesCount, season.getTotalEpisodesCount())
-                + String.format("*Премьера:* `%s`\n", season.getFormattedPremiereReleaseDate())
-                + String.format("*Финал:* `%s`\n", season.getFormattedFinalReleaseDate());
+                + String.format("Премьера: `%s`\n", season.getFormattedPremiereReleaseDate())
+                + String.format("Финал: `%s`\n", season.getFormattedFinalReleaseDate());
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
 
