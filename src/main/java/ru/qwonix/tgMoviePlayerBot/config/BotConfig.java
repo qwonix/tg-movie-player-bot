@@ -5,6 +5,7 @@ import java.util.Properties;
 
 public abstract class BotConfig {
     public static final String ADMIN_PASSWORD = "admin.password";
+    public static final String BOT_NAME = "bot.name";
     public static final String KEYBOARD_PAGE_EPISODES_MAX = "keyboard.page.episodes.max";
     public static final String KEYBOARD_PAGE_SEASONS_MAX = "keyboard.page.seasons.max";
     public static final String KEYBOARD_COLUMNS_ROW_MAX = "keyboard.columns.row.max";
@@ -13,7 +14,7 @@ public abstract class BotConfig {
 
     public synchronized static String getProperty(String name) {
         if (properties.isEmpty()) {
-            try (InputStream is = DatabaseConfig.class.getClassLoader()
+            try (InputStream is = BotConfig.class.getClassLoader()
                     .getResourceAsStream("bot.properties")) {
                 properties.load(is);
             } catch (Exception ex) {
