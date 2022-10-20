@@ -11,7 +11,7 @@ public abstract class TelegramConfig {
 
     public synchronized static String getProperty(String name) {
         if (properties.isEmpty()) {
-            try (InputStream is = DatabaseConfig.class.getClassLoader()
+            try (InputStream is = TelegramConfig.class.getClassLoader()
                     .getResourceAsStream("telegram.properties")) {
                 properties.load(is);
             } catch (Exception ex) {
