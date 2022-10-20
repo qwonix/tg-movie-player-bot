@@ -9,18 +9,17 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
+import ru.qwonix.tgMoviePlayerBot.bot.callback.SeasonCallback;
 import ru.qwonix.tgMoviePlayerBot.bot.callback.SeriesCallback;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
+import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class BotCommand {
@@ -37,10 +36,12 @@ public class BotCommand {
 
     private final DatabaseContext databaseContext;
     private final BotUtils botUtils;
+    private final BotContext botContext;
 
     public BotCommand(BotContext botContext) {
         this.databaseContext = botContext.getDatabaseContext();
         this.botUtils = new BotUtils(botContext);
+        this.botContext = botContext;
     }
 
     public static Method getMethodForCommand(String command) {
@@ -69,7 +70,46 @@ public class BotCommand {
 
     @Command("/all")
     public void all(User user, String[] args) {
-        List<Series> allSeries = databaseContext.getSeriesService().findAllOrdered();
+        Optional<Series> optionalSeries = botContext.getDatabaseContext().getSeriesService().find(1);
+        Series series = optionalSeries.get();
+        int page = 0;
+
+        BotUtils botUtils = new BotUtils(botContext);
+        String text = String.format("*%s*\n", series.getName())
+                + '\n'
+                + String.format("_%s_", series.getDescription());
+
+        int seasonsCount = botContext.getDatabaseContext().getSeasonService().countAllBySeries(series);
+        int limit = Integer.parseInt(BotConfig.getProperty(BotConfig.KEYBOARD_PAGE_SEASONS_MAX));
+        int pagesCount = (int) Math.ceil(seasonsCount / (double) limit);
+
+        List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()
+                .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
+
+        InlineKeyboardMarkup keyboard;
+
+        Map<String, String> keyboardMap = new LinkedHashMap<>();
+        for (Season season : seriesSeasons) {
+            JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
+            keyboardMap.put("Сезон " + season.getNumber(), callbackSeason.toString());
+        }
+        List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
+
+        if (pagesCount > 1) {
+            List<InlineKeyboardButton> controlButtons = createControlButtons(series.getId(), pagesCount, page);
+            inlineKeyboard.add(controlButtons);
+        }
+        keyboard = new InlineKeyboardMarkup(inlineKeyboard);
+
+
+        Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(user
+                , text
+                , keyboard
+                , series.getPreviewFileId());
+
+
+
+        /*List<Series> allSeries = databaseContext.getSeriesService().findAllOrdered();
 
         StringBuilder sb = new StringBuilder();
         if (allSeries.isEmpty()) {
@@ -100,8 +140,41 @@ public class BotCommand {
                 user.getMessagesIds().reset();
                 databaseContext.getUserService().merge(user);
             }
-        }
+        }*/
     }
+
+
+    private List<InlineKeyboardButton> createControlButtons(int seriesId, int pagesCount, int page) {
+        InlineKeyboardButton previous;
+        InlineKeyboardButton next;
+
+        if (page == 0) {
+            previous = InlineKeyboardButton.builder()
+                    .callbackData("NaN")
+                    .text("×").build();
+        } else {
+            previous = InlineKeyboardButton.builder()
+                    .callbackData(SeriesCallback.toJson(seriesId, page - 1).toString())
+                    .text("‹").build();
+        }
+
+        if (pagesCount == page + 1) {
+            next = InlineKeyboardButton.builder()
+                    .callbackData("NaN")
+                    .text("×").build();
+        } else {
+            next = InlineKeyboardButton.builder()
+                    .callbackData(SeriesCallback.toJson(seriesId, page + 1).toString())
+                    .text("›").build();
+        }
+
+        InlineKeyboardButton current = InlineKeyboardButton.builder()
+                .callbackData("NaN")
+                .text(page + 1 + "/" + pagesCount).build();
+
+        return Arrays.asList(previous, current, next);
+    }
+
 
     @Command("/search")
     public void search(User user, String[] args) {
@@ -139,7 +212,7 @@ public class BotCommand {
     }
 
     @Command("/export_video_previewfileid")
-    public void export_video_previewid(User user, String[] args) {
+    public void export_video_previewfileid(User user, String[] args) {
         if (!user.isAdmin()) {
             botUtils.sendMarkdownText(user, "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
             return;
