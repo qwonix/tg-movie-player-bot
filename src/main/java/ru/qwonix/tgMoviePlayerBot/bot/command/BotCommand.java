@@ -70,6 +70,8 @@ public class BotCommand {
 
     @Command("/all")
     public void all(User user, String[] args) {
+        user.getMessagesIds().reset();
+        databaseContext.getUserService().merge(user);
         Optional<Series> optionalSeries = botContext.getDatabaseContext().getSeriesService().find(1);
         Series series = optionalSeries.get();
         int page = 0;
@@ -86,7 +88,6 @@ public class BotCommand {
         List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()
                 .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
 
-        InlineKeyboardMarkup keyboard;
 
         Map<String, String> keyboardMap = new LinkedHashMap<>();
         for (Season season : seriesSeasons) {
@@ -99,14 +100,12 @@ public class BotCommand {
             List<InlineKeyboardButton> controlButtons = createControlButtons(series.getId(), pagesCount, page);
             inlineKeyboard.add(controlButtons);
         }
-        keyboard = new InlineKeyboardMarkup(inlineKeyboard);
-
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(inlineKeyboard);
 
         Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(user
                 , text
                 , keyboard
                 , series.getPreviewFileId());
-
 
 
         /*List<Series> allSeries = databaseContext.getSeriesService().findAllOrdered();
