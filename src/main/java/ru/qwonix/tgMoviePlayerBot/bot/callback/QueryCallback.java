@@ -24,7 +24,7 @@ public class QueryCallback extends Callback {
         jsonData.put("query", query);
         jsonData.put("page", page);
 
-        return Callback.toCallbackJson(jsonData);
+        return Callback.toCallback(jsonData);
     }
 
     public static List<InlineKeyboardButton> createControlButtons(String query, int pagesCount, int page) {

@@ -104,8 +104,8 @@ public class BotCommand {
 
         Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(user
                 , text
-                , keyboard
-                , series.getPreviewFileId());
+                , series.getPreviewFileId()
+                , keyboard);
 
 
         /*List<Series> allSeries = databaseContext.getSeriesService().findAllOrdered();

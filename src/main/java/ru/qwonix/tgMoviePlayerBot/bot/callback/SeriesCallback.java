@@ -30,7 +30,7 @@ public class SeriesCallback extends Callback {
         jsonData.put("id", seriesId);
         jsonData.put("page", page);
 
-        return Callback.toCallbackJson(jsonData);
+        return Callback.toCallback(jsonData);
     }
 
     @Override
@@ -117,8 +117,8 @@ public class SeriesCallback extends Callback {
         } else {
             Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
-                    , keyboard
-                    , series.getPreviewFileId());
+                    , series.getPreviewFileId()
+                    , keyboard);
 
             messagesIds.setSeriesMessageId(seriesMessageId);
         }

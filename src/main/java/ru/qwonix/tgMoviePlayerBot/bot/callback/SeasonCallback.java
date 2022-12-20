@@ -31,7 +31,7 @@ public class SeasonCallback extends Callback {
         jsonData.put("id", seasonId);
         jsonData.put("page", page);
 
-        return Callback.toCallbackJson(jsonData);
+        return Callback.toCallback(jsonData);
     }
 
 
@@ -89,8 +89,8 @@ public class SeasonCallback extends Callback {
         } else {
             Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
-                    , keyboard
-                    , season.getPreviewFileId());
+                    , season.getPreviewFileId()
+                    , keyboard);
 
             messagesIds.setSeasonMessageId(seriesMessageId);
         }
@@ -102,7 +102,7 @@ public class SeasonCallback extends Callback {
         InlineKeyboardMarkup keyboard;
         Map<String, String> keyboardMap = new LinkedHashMap<>();
         for (Episode episode : seasonEpisodes) {
-            JSONObject episodeCallback = EpisodeCallback.toJSON(episode.getId());
+            JSONObject episodeCallback = EpisodeCallback.toCallback(episode.getId());
             keyboardMap.put(episode.getSeason().getNumber() + "×" + episode.getNumber() + " «" + episode.getTitle() + "»", episodeCallback.toString());
         }
 

@@ -3,7 +3,7 @@ package ru.qwonix.tgMoviePlayerBot.bot.callback;
 import org.json.JSONObject;
 
 public abstract class Callback {
-    public static JSONObject toCallbackJson(JSONObject callbackData) {
+    public static JSONObject toCallback(JSONObject callbackData) {
         JSONObject jsonCallback = new JSONObject();
 //        jsonCallback.put("action", Action.SELECT);
         jsonCallback.put("data", callbackData);
@@ -11,7 +11,7 @@ public abstract class Callback {
         return jsonCallback;
     }
 
-    public static JSONObject fromCallbackJson(String callbackData) {
+    public static JSONObject parseCallback(String callbackData) {
         JSONObject jsonCallback = new JSONObject(callbackData);
 
         return jsonCallback.getJSONObject("data");

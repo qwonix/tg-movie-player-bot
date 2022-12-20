@@ -88,18 +88,11 @@ public class BotUtils {
     }
 
     public Integer sendVideoWithKeyboard(User user, String fileId, InlineKeyboardMarkup keyboard) {
-        return this.sendVideo(user
-                , SendVideo.builder()
-                        .video(new InputFile(fileId))
-                        .replyMarkup(keyboard));
+        return this.sendVideoWithMarkdownTextKeyboard(user, null, fileId, keyboard);
     }
 
     public Integer sendVideoWithMarkdownText(User user, String markdownMessage, String fileId) {
-        return this.sendVideo(user
-                , SendVideo.builder()
-                        .caption(escapeMarkdownMessage(markdownMessage))
-                        .parseMode("MarkdownV2")
-                        .video(new InputFile(fileId)));
+        return this.sendVideoWithMarkdownTextKeyboard(user, markdownMessage, fileId, null);
     }
 
     public Integer sendVideoWithMarkdownTextKeyboard(User user, String markdownMessage, String fileId, InlineKeyboardMarkup keyboard) {
@@ -140,12 +133,39 @@ public class BotUtils {
     }
 
     public Integer sendMarkdownTextWithPhoto(User user, String markdownMessage, String photoFileId) {
+        return this.sendMarkdownTextWithKeyBoardAndPhoto(user, markdownMessage, photoFileId, null);
+    }
+
+    public Integer sendMarkdownTextWithKeyBoardAndPhoto(User user, String markdownMessage, String photoFileId, ReplyKeyboard keyboard) {
         return this.sendPhoto(user
                 , SendPhoto.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
-                        .disableNotification(true)
                         .parseMode("MarkdownV2")
-                        .photo(new InputFile(photoFileId)));
+                        .photo(new InputFile(photoFileId))
+                        .replyMarkup(keyboard));
+    }
+
+    public Integer sendMarkdownTextWithReplay(User user, String markdownMessage, int replayMessageId) {
+        return this.sendMessage(user
+                , SendMessage.builder()
+                        .text(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2")
+                        .replyToMessageId(replayMessageId));
+    }
+
+    public Integer sendMarkdownText(User user, String markdownMessage) {
+        return this.sendMessage(user
+                , SendMessage.builder()
+                        .text(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2"));
+    }
+
+    public Integer sendMarkdownTextWithKeyBoard(User user, String markdownMessage, ReplyKeyboard keyboard) {
+        return this.sendMessage(user
+                , SendMessage.builder()
+                        .text(escapeMarkdownMessage(markdownMessage))
+                        .parseMode("MarkdownV2")
+                        .replyMarkup(keyboard));
     }
 
     public void editMarkdownTextWithPhoto(User user, Integer messageId, String markdownMessage, String photoFileId) {
@@ -157,30 +177,6 @@ public class BotUtils {
                 , EditMessageCaption.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2"));
-    }
-
-    public Integer sendMarkdownText(User user, String markdownMessage) {
-        return this.sendMessage(user
-                , SendMessage.builder()
-                        .text(escapeMarkdownMessage(markdownMessage))
-                        .parseMode("MarkdownV2"));
-    }
-
-    public Integer sendMarkdownTextWithReplay(User user, String markdownMessage, int replayMessageId) {
-        return this.sendMessage(user
-                , SendMessage.builder()
-                        .text(escapeMarkdownMessage(markdownMessage))
-                        .parseMode("MarkdownV2")
-                        .replyToMessageId(replayMessageId));
-    }
-
-    public Integer sendMarkdownTextWithKeyBoardAndPhoto(User user, String markdownMessage, ReplyKeyboard keyboard, String photoFileId) {
-        return this.sendPhoto(user
-                , SendPhoto.builder()
-                        .caption(escapeMarkdownMessage(markdownMessage))
-                        .parseMode("MarkdownV2")
-                        .photo(new InputFile(photoFileId))
-                        .replyMarkup(keyboard));
     }
 
     public void editMarkdownTextWithKeyBoardAndPhoto(User user, int messageId, String markdownMessage, InlineKeyboardMarkup keyboard, String photoFileId) {
@@ -202,14 +198,6 @@ public class BotUtils {
 
         this.editMessageCaption(user, messageId
                 , EditMessageCaption.builder()
-                        .parseMode("MarkdownV2")
-                        .replyMarkup(keyboard));
-    }
-
-    public Integer sendMarkdownTextWithKeyBoard(User user, String markdownMessage, ReplyKeyboard keyboard) {
-        return this.sendMessage(user
-                , SendMessage.builder()
-                        .text(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
                         .replyMarkup(keyboard));
     }

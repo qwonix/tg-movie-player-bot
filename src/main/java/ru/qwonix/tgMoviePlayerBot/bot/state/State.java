@@ -140,7 +140,7 @@ public abstract class State {
 
         log.info("user {} callback {}", chatContext.getUser(), data);
 
-        JSONObject jsonObject = Callback.fromCallbackJson(data);
+        JSONObject jsonObject = Callback.parseCallback(data);
         DataType dataType = DataType.valueOf(jsonObject.getString("dataType"));
 
         Callback callback;

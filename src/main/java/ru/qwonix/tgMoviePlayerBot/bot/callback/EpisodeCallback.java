@@ -26,12 +26,12 @@ public class EpisodeCallback extends Callback {
         this.chatContext = chatContext;
     }
 
-    public static JSONObject toJSON(int episodeId) {
+    public static JSONObject toCallback(int episodeId) {
         JSONObject jsonData = new JSONObject();
         jsonData.put("dataType", DataType.EPISODE);
         jsonData.put("id", episodeId);
 
-        return Callback.toCallbackJson(jsonData);
+        return Callback.toCallback(jsonData);
     }
 
     public void handleCallback(int episodeId) {
