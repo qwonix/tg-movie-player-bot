@@ -21,5 +21,6 @@ public interface EpisodeDao extends DefaultDao<Episode> {
 
     int countAllBySeasonId(long seasonId) throws SQLException;
 
-    int countAllBySeason(Season season) throws SQLException;
+
+    Optional<Episode> findLast(int seasonId) throws SQLException;
 }

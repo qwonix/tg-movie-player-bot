@@ -128,7 +128,7 @@ public class EpisodeCallback extends Callback {
                     .text("×").build();
         }
 
-        int seasonEpisodesCount = episodeService.countAllBySeason(currentEpisode.getSeason());
+        int seasonEpisodesCount = episodeService.findLast(currentEpisode.getSeason()).get().getNumber();
         InlineKeyboardButton current = InlineKeyboardButton.builder()
                 .callbackData("NaN")
                 .text(currentEpisode.getNumber() + "/" + seasonEpisodesCount).build();

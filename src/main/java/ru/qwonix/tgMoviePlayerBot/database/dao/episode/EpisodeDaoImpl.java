@@ -187,6 +187,25 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
+    public Optional<Episode> findLast(int seasonId) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT * FROM episode where season_id=? order by number desc limit 1")) {
+            preparedStatement.setLong(1, seasonId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Episode episode = convert(resultSet);
+                return Optional.of(episode);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public void insert(Episode episode) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 

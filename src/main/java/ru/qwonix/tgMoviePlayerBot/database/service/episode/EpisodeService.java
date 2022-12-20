@@ -13,7 +13,8 @@ public interface EpisodeService {
 
     Optional<Episode> findPrevious(Episode episode);
 
-    Optional<Episode> findPrevious(int id);
+
+    Optional<Episode> findLast(Season season);
 
     List<Episode> findAll();
 
