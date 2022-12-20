@@ -101,17 +101,16 @@ public class EpisodeCallback extends Callback {
 
     private List<List<InlineKeyboardButton>> createControlButtons(Episode currentEpisode) {
         EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
-        int currentEpisodeId = currentEpisode.getId();
 
-        Optional<Episode> nextEpisode = episodeService.findNext(currentEpisodeId);
-        Optional<Episode> previousEpisode = episodeService.findPrevious(currentEpisodeId);
+        Optional<Episode> nextEpisode = episodeService.findNext(currentEpisode);
+        Optional<Episode> previousEpisode = episodeService.findPrevious(currentEpisode);
 
         InlineKeyboardButton previous;
         InlineKeyboardButton next;
 
         if (nextEpisode.isPresent()) {
             next = InlineKeyboardButton.builder()
-                    .callbackData(EpisodeCallback.toJSON(nextEpisode.get().getId()).toString())
+                    .callbackData(EpisodeCallback.toCallback(nextEpisode.get().getId()).toString())
                     .text("›").build();
         } else {
             next = InlineKeyboardButton.builder()
@@ -121,7 +120,7 @@ public class EpisodeCallback extends Callback {
 
         if (previousEpisode.isPresent()) {
             previous = InlineKeyboardButton.builder()
-                    .callbackData(EpisodeCallback.toJSON(previousEpisode.get().getId()).toString())
+                    .callbackData(EpisodeCallback.toCallback(previousEpisode.get().getId()).toString())
                     .text("‹").build();
         } else {
             previous = InlineKeyboardButton.builder()

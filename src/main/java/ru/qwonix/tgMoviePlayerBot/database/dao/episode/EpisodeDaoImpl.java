@@ -11,6 +11,7 @@ import java.sql.*;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,59 +83,39 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
-    public Optional<Episode> findNext(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("select * from episode " +
-                             "where number = (select number from episode where id = ?) + 1 " +
-                             "and season_id = (select season_id from episode where id = ?)")) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.setLong(2, id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Episode episode = convert(resultSet);
-                return Optional.of(episode);
+    public Optional<Episode> findNext(long episodeId, long seasonId) throws SQLException {
+        Iterator<Episode> iterator = this.findAllBySeasonIdOrderByNumberAsc(seasonId).iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getId() == episodeId) {
+                return iterator.hasNext() ? Optional.of(iterator.next()) : Optional.empty();
             }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
         }
 
         return Optional.empty();
     }
 
     @Override
-    public Optional<Episode> findPrevious(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+    public Optional<Episode> findPrevious(long episodeId, long seasonId) throws SQLException {
+        List<Episode> allBySeasonIdOrderByNumberDesc = this.findAllBySeasonIdOrderByNumberDesc(seasonId);
 
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("select * from episode " +
-                             "where number = (select number from episode where id = ?) - 1 " +
-                             "and season_id = (select season_id from episode where id = ?)")) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.setLong(2, id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Episode episode = convert(resultSet);
-                return Optional.of(episode);
+        Iterator<Episode> iterator = allBySeasonIdOrderByNumberDesc.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getId() == episodeId) {
+                return iterator.hasNext() ? Optional.of(iterator.next()) : Optional.empty();
             }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
         }
 
         return Optional.empty();
     }
 
     @Override
-    public List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page) throws SQLException {
+    public List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(long seasonId, int limit, int page) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         List<Episode> episodes = new ArrayList<>();
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT * FROM episode where season_id=? order by number limit ? offset ?")) {
-            preparedStatement.setLong(1, season.getId());
+            preparedStatement.setLong(1, seasonId);
             preparedStatement.setInt(2, limit);
             preparedStatement.setInt(3, limit * page);
 
@@ -150,12 +131,52 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
-    public int countAllBySeason(Season season) throws SQLException {
+    public List<Episode> findAllBySeasonIdOrderByNumberAsc(long seasonId) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        List<Episode> episodes = new ArrayList<>();
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT * FROM episode where season_id=? order by number asc")) {
+            preparedStatement.setLong(1, seasonId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Episode episode = convert(resultSet);
+                episodes.add(episode);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+        return episodes;
+    }
+
+    @Override
+    public List<Episode> findAllBySeasonIdOrderByNumberDesc(long seasonId) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        List<Episode> episodes = new ArrayList<>();
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT * FROM episode where season_id=? order by number desc")) {
+            preparedStatement.setLong(1, seasonId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Episode episode = convert(resultSet);
+                episodes.add(episode);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+        return episodes;
+    }
+
+    @Override
+    public int countAllBySeasonId(long seasonId) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT count(*) as count FROM episode where season_id=?")) {
-            preparedStatement.setLong(1, season.getId());
+            preparedStatement.setLong(1, seasonId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             resultSet.next();

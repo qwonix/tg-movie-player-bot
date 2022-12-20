@@ -9,11 +9,15 @@ import java.util.Optional;
 public interface EpisodeService {
     Optional<Episode> find(int id);
 
-    Optional<Episode> findNext(int id);
+    Optional<Episode> findNext(Episode episode);
+
+    Optional<Episode> findPrevious(Episode episode);
 
     Optional<Episode> findPrevious(int id);
 
     List<Episode> findAll();
+
+    List<Episode> findAllBySeasonOrderByNumber(Season season);
 
     List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page);
 

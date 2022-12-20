@@ -31,9 +31,9 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
-    public Optional<Episode> findNext(int id) {
+    public Optional<Episode> findNext(Episode episode) {
         try {
-            return episodeDao.findNext(id);
+            return episodeDao.findNext(episode.getId(), episode.getSeason().getId());
         } catch (SQLException e) {
             log.error("sql exception", e);
         }
@@ -41,9 +41,9 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
-    public Optional<Episode> findPrevious(int id) {
+    public Optional<Episode> findPrevious(Episode episode) {
         try {
-            return episodeDao.findPrevious(id);
+            return episodeDao.findPrevious(episode.getId(), episode.getSeason().getId());
         } catch (SQLException e) {
             log.error("sql exception", e);
         }
@@ -61,9 +61,20 @@ public class EpisodeServiceImpl implements EpisodeService {
     }
 
     @Override
+    public List<Episode> findAllBySeasonOrderByNumber(Season season) {
+        try {
+            return episodeDao.findAllBySeasonIdOrderByNumberAsc(season.getId());
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Collections.emptyList();
+
+    }
+
+    @Override
     public List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(Season season, int limit, int page) {
         try {
-            return episodeDao.findAllBySeasonOrderByNumberWithLimitAndPage(season, limit, page);
+            return episodeDao.findAllBySeasonOrderByNumberWithLimitAndPage(season.getId(), limit, page);
         } catch (SQLException e) {
             log.error("sql exception", e);
         }
@@ -73,7 +84,7 @@ public class EpisodeServiceImpl implements EpisodeService {
     @Override
     public int countAllBySeason(Season season) {
         try {
-            return episodeDao.countAllBySeason(season);
+            return episodeDao.countAllBySeasonId(season.getId());
         } catch (SQLException e) {
             log.error("sql exception", e);
         }
