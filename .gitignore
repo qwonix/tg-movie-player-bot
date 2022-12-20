@@ -3,6 +3,9 @@ target/
 !**/src/main/**/target/
 !**/src/MessagesIds/**/target/
 
+/tg_movie_player_debug_logs.log
+/tg_movie_player_logs.log
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
