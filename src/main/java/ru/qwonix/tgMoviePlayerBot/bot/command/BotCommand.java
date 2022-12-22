@@ -97,7 +97,7 @@ public class BotCommand {
         List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
 
         if (pagesCount > 1) {
-            List<InlineKeyboardButton> controlButtons = createControlButtons(series.getId(), pagesCount, page);
+            List<InlineKeyboardButton> controlButtons = SeriesCallback.createControlButtons(series.getId(), pagesCount, page);
             inlineKeyboard.add(controlButtons);
         }
         InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(inlineKeyboard);
@@ -141,39 +141,6 @@ public class BotCommand {
             }
         }*/
     }
-
-
-    private List<InlineKeyboardButton> createControlButtons(int seriesId, int pagesCount, int page) {
-        InlineKeyboardButton previous;
-        InlineKeyboardButton next;
-
-        if (page == 0) {
-            previous = InlineKeyboardButton.builder()
-                    .callbackData("NaN")
-                    .text("×").build();
-        } else {
-            previous = InlineKeyboardButton.builder()
-                    .callbackData(SeriesCallback.toJson(seriesId, page - 1).toString())
-                    .text("‹").build();
-        }
-
-        if (pagesCount == page + 1) {
-            next = InlineKeyboardButton.builder()
-                    .callbackData("NaN")
-                    .text("×").build();
-        } else {
-            next = InlineKeyboardButton.builder()
-                    .callbackData(SeriesCallback.toJson(seriesId, page + 1).toString())
-                    .text("›").build();
-        }
-
-        InlineKeyboardButton current = InlineKeyboardButton.builder()
-                .callbackData("NaN")
-                .text(page + 1 + "/" + pagesCount).build();
-
-        return Arrays.asList(previous, current, next);
-    }
-
 
     @Command("/search")
     public void search(User user, String[] args) {

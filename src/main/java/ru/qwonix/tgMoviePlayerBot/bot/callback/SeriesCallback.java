@@ -127,7 +127,7 @@ public class SeriesCallback extends Callback {
         botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());
     }
 
-    private List<InlineKeyboardButton> createControlButtons(int seriesId, int pagesCount, int page) {
+    public static List<InlineKeyboardButton> createControlButtons(int seriesId, int pagesCount, int page) {
         InlineKeyboardButton previous;
         InlineKeyboardButton next;
 
