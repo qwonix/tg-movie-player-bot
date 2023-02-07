@@ -9,8 +9,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
-import ru.qwonix.tgMoviePlayerBot.bot.callback.SeasonCallback;
-import ru.qwonix.tgMoviePlayerBot.bot.callback.SeriesCallback;
+import ru.qwonix.tgMoviePlayerBot.callback.SeasonCallback;
+import ru.qwonix.tgMoviePlayerBot.callback.SeriesCallback;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
@@ -91,7 +91,7 @@ public class BotCommand {
 
         Map<String, String> keyboardMap = new LinkedHashMap<>();
         for (Season season : seriesSeasons) {
-            JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
+            JSONObject callbackSeason = new SeasonCallback(season, 0).toCallback();
             keyboardMap.put("Сезон " + season.getNumber(), callbackSeason.toString());
         }
         List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);

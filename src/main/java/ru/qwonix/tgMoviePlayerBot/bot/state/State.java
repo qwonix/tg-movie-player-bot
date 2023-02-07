@@ -9,8 +9,9 @@ import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.bot.callback.*;
+import ru.qwonix.tgMoviePlayerBot.callback.*;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
+import ru.qwonix.tgMoviePlayerBot.exception.NoSuchCallbackException;
 
 import java.time.Duration;
 import java.util.Comparator;
@@ -146,26 +147,31 @@ public abstract class State {
         Callback callback;
         switch (dataType) {
             case EPISODE:
-                callback = new EpisodeCallback(botContext, chatContext);
+                callback = new EpisodeCallback(jsonObject);
                 break;
 
             case SEASON:
-                callback = new SeasonCallback(botContext, chatContext);
+                callback = new SeasonCallback(jsonObject);
                 break;
 
             case SERIES:
-                callback = new SeriesCallback(botContext, chatContext);
+                callback = new SeriesCallback(jsonObject);
                 break;
 
             case QUERY:
-                callback = new QueryCallback(botContext, chatContext);
-                break;
+//                callback = new QueryCallback(jsonObject);
 
             default:
                 log.info("no such case for {}", dataType);
                 return;
         }
-        callback.handleCallback(jsonObject);
+        try {
+            callback.handleCallback(botContext, chatContext);
+        } catch (NoSuchCallbackException e) {
+            new BotUtils(botContext).executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
+                    , e.getMessage()
+                    , false);
+        }
     }
 
 

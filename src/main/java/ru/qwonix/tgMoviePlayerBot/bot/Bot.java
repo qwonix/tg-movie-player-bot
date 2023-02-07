@@ -1,7 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.bot;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.qwonix.tgMoviePlayerBot.bot.state.DefaultState;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
@@ -17,74 +16,67 @@ public class Bot extends TelegramLongPollingBot {
         this.botContext = new BotContext(this);
     }
 
-    private static User convertTelegramUserToUser(org.telegram.telegrambots.meta.api.objects.User telegramUser) {
-        return User.builder()
-                .chatId(telegramUser.getId())
-                .name(telegramUser.getFirstName())
-                .messagesIds(new MessagesIds())
-                .build();
+    @Override
+    public void onClosing() {
+        super.onClosing();
+        System.out.println("onClosing()");
     }
 
+    @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasCallbackQuery()) {
-            this.onCallbackReceived(update);
-            return;
-        }
-
-        if (!update.hasMessage()) {
-            return;
-        } else if (update.getMessage().hasText()) {
-            this.onTextMessageReceived(update);
-        } else if (update.getMessage().hasVideo()) {
-            this.onVideoReceived(update);
-        } else if (update.getMessage().hasPhoto()) {
-            this.onPhotoReceived(update);
-        }
-    }
-
-    private User findUserFromUpdate(Update update) {
-        User user;
         org.telegram.telegrambots.meta.api.objects.User telegramUser;
-
         if (update.hasCallbackQuery()) {
-            CallbackQuery callbackQuery = update.getCallbackQuery();
-            telegramUser = callbackQuery.getFrom();
+            telegramUser = update.getCallbackQuery().getFrom();
         } else if (update.hasMessage()) {
             telegramUser = update.getMessage().getFrom();
         } else {
             throw new IllegalArgumentException("update has no user");
         }
 
-        Optional<User> optionalUser = botContext.getDatabaseContext()
-                .getUserService()
-                .findUser(telegramUser.getId());
+        Optional<User> optionalUser = botContext.getDatabaseContext().getUserService().
+                findUser(telegramUser.getId());
+        User user;
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+        } else {
+            user = User.builder()
+                    .chatId(telegramUser.getId())
+                    .name(telegramUser.getFirstName())
+                    .build();
+            botContext.getDatabaseContext().getUserService().merge(user);
+        }
 
-        user = optionalUser.orElseGet(() -> {
-            User newUser = convertTelegramUserToUser(telegramUser);
-            botContext.getDatabaseContext().getUserService().merge(newUser);
-            return newUser;
-        });
-        return user;
+        if (update.hasCallbackQuery()) {
+            this.onCallbackReceived(update, user);
+            return;
+        }
+
+        if (!update.hasMessage()) {
+            return;
+        } else if (update.getMessage().hasText()) {
+            this.onTextMessageReceived(update, user);
+        } else if (update.getMessage().hasVideo()) {
+            this.onVideoReceived(update, user);
+        } else if (update.getMessage().hasPhoto()) {
+            this.onPhotoReceived(update, user);
+        }
     }
 
-    private void onVideoReceived(Update update) {
-        User user = findUserFromUpdate(update);
+    private void onVideoReceived(Update update, User user) {
         ChatContext chatContext = new ChatContext(user, update);
         State state = State.getState(user.getStateType(), chatContext, botContext);
 
         state.onVideo();
     }
 
-    private void onPhotoReceived(Update update) {
-        User user = findUserFromUpdate(update);
+    private void onPhotoReceived(Update update, User user) {
         ChatContext chatContext = new ChatContext(user, update);
         State state = State.getState(user.getStateType(), chatContext, botContext);
 
         state.onPhoto();
     }
 
-    private void onTextMessageReceived(Update update) {
-        User user = findUserFromUpdate(update);
+    private void onTextMessageReceived(Update update, User user) {
         ChatContext chatContext = new ChatContext(user, update);
         State state = State.getState(user.getStateType(), chatContext, botContext);
 
@@ -96,8 +88,7 @@ public class Bot extends TelegramLongPollingBot {
         state.onText();
     }
 
-    private void onCallbackReceived(Update update) {
-        User user = findUserFromUpdate(update);
+    private void onCallbackReceived(Update update, User user) {
         ChatContext chatContext = new ChatContext(user, update);
         State state = State.getState(user.getStateType(), chatContext, botContext);
 

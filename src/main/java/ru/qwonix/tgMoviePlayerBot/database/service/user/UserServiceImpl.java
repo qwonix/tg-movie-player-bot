@@ -19,6 +19,8 @@ public class UserServiceImpl implements UserService {
         userDao = new UserDaoImpl(connectionBuilder);
     }
 
+
+
     @Override
     public User makeAdmin(User user) {
         User admin = user.toBuilder().isAdmin(true).build();

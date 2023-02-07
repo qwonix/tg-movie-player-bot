@@ -18,6 +18,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
+import ru.qwonix.tgMoviePlayerBot.config.TelegramConfig;
 import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
@@ -32,6 +33,10 @@ import java.util.stream.Stream;
 public class BotUtils {
     private final Bot bot;
     private final DatabaseContext databaseContext;
+
+    public final static String PROVIDED_BY_TEXT = "||*Предоставлено @"
+            + TelegramConfig.getProperty(TelegramConfig.BOT_USERNAME).replaceAll("_", "\\\\_")
+            + "*||";
 
     public BotUtils(BotContext botContext) {
         this.bot = botContext.getBot();

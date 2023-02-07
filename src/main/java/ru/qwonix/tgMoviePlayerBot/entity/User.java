@@ -16,5 +16,5 @@ public class User {
     private boolean isAdmin = false;
     @Builder.Default
     private State.StateType stateType = State.StateType.DEFAULT;
-    private MessagesIds messagesIds;
+    private MessagesIds messagesIds = new MessagesIds();
 }
