@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 
 @ToString
 @Builder(toBuilder = true)
@@ -23,6 +24,8 @@ public class Episode {
     private String country;
     private Duration duration;
     private Season season;
-    private String videoFileId;
+
+    private List<Video> videos;
+
     private String previewFileId;
 }

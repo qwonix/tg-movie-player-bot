@@ -23,4 +23,6 @@ public interface EpisodeDao extends DefaultDao<Episode> {
 
 
     Optional<Episode> findLast(int seasonId) throws SQLException;
+
+    Optional<Episode> findByVideo(int videoId) throws SQLException;
 }

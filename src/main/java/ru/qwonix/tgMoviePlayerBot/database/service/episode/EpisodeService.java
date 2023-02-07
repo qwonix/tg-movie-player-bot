@@ -2,12 +2,15 @@ package ru.qwonix.tgMoviePlayerBot.database.service.episode;
 
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
+import ru.qwonix.tgMoviePlayerBot.entity.Video;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface EpisodeService {
     Optional<Episode> find(int id);
+
+    Optional<Episode> findByVideo(Video video);
 
     Optional<Episode> findNext(Episode episode);
 

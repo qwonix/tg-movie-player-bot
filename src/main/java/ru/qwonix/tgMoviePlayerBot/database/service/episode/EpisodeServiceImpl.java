@@ -6,6 +6,7 @@ import ru.qwonix.tgMoviePlayerBot.database.dao.episode.EpisodeDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.episode.EpisodeDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
+import ru.qwonix.tgMoviePlayerBot.entity.Video;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -24,6 +25,16 @@ public class EpisodeServiceImpl implements EpisodeService {
     public Optional<Episode> find(int id) {
         try {
             return episodeDao.find(id);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Episode> findByVideo(Video video) {
+        try {
+            return episodeDao.findByVideo(video.getId());
         } catch (SQLException e) {
             log.error("sql exception", e);
         }

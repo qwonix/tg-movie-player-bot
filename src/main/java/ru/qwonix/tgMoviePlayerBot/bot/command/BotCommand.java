@@ -165,28 +165,28 @@ public class BotCommand {
         }
     }
 
-    @Command("/export_video_videofileid")
-    public void export_video_videofileid(User user, String[] args) {
-        if (!user.isAdmin()) {
-            botUtils.sendMarkdownText(user, "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
-            return;
-        }
-        for (Episode e : databaseContext.getEpisodeService().findAll()) {
-            botUtils.sendVideoWithMarkdownText(user, String.valueOf(e.getId()), e.getVideoFileId());
-        }
-        log.info("export by {}", user);
-    }
-
-    @Command("/export_video_previewfileid")
-    public void export_video_previewfileid(User user, String[] args) {
-        if (!user.isAdmin()) {
-            botUtils.sendMarkdownText(user, "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
-            return;
-        }
-        for (Episode e : databaseContext.getEpisodeService().findAll()) {
-            botUtils.sendMarkdownTextWithPhoto(user, String.valueOf(e.getId()), e.getPreviewFileId());
-        }
-        log.info("export by {}", user);
-    }
+//    @Command("/export_video_videofileid")
+//    public void export_video_videofileid(User user, String[] args) {
+//        if (!user.isAdmin()) {
+//            botUtils.sendMarkdownText(user, "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
+//            return;
+//        }
+//        for (Episode e : databaseContext.getEpisodeService().findAll()) {
+//            botUtils.sendVideoWithMarkdownText(user, String.valueOf(e.getId()), e.getVideoFileId());
+//        }
+//        log.info("export by {}", user);
+//    }
+//
+//    @Command("/export_video_previewfileid")
+//    public void export_video_previewfileid(User user, String[] args) {
+//        if (!user.isAdmin()) {
+//            botUtils.sendMarkdownText(user, "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
+//            return;
+//        }
+//        for (Episode e : databaseContext.getEpisodeService().findAll()) {
+//            botUtils.sendMarkdownTextWithPhoto(user, String.valueOf(e.getId()), e.getPreviewFileId());
+//        }
+//        log.info("export by {}", user);
+//    }
 
 }

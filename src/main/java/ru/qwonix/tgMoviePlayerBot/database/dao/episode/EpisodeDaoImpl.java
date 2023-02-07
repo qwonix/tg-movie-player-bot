@@ -4,8 +4,11 @@ import org.postgresql.util.PGInterval;
 import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDaoImpl;
+import ru.qwonix.tgMoviePlayerBot.database.dao.video.VideoDao;
+import ru.qwonix.tgMoviePlayerBot.database.dao.video.VideoDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
+import ru.qwonix.tgMoviePlayerBot.entity.Video;
 
 import java.sql.*;
 import java.time.Duration;
@@ -25,8 +28,10 @@ public class EpisodeDaoImpl implements EpisodeDao {
     @Override
     public Episode convert(ResultSet episodeResultSet) throws SQLException {
         SeasonDao seasonDao = new SeasonDaoImpl(connectionBuilder);
+        VideoDao videoDao = new VideoDaoImpl(connectionBuilder);
 
         Optional<Season> season = seasonDao.find(episodeResultSet.getInt("season_id"));
+        List<Video> videos = videoDao.findAllByEpisodeId(episodeResultSet.getInt("id"));
         PGInterval duration = (PGInterval) episodeResultSet.getObject("duration");
         return Episode.builder()
                 .id(episodeResultSet.getInt("id"))
@@ -39,7 +44,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
                 .country(episodeResultSet.getString("country"))
                 .duration(Duration.ofSeconds(duration.getWholeSeconds()))
                 .season(season.orElse(null))
-                .videoFileId(episodeResultSet.getString("tg_video_file_id"))
+                .videos(videos)
                 .previewFileId(episodeResultSet.getString("tg_preview_file_id"))
                 .build();
     }
@@ -206,13 +211,32 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
+    public Optional<Episode> findByVideo(int videoId) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT * FROM episode where id = (select episode_id from video where id=?)")) {
+            preparedStatement.setLong(1, videoId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Episode episode = convert(resultSet);
+                return Optional.of(episode);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public void insert(Episode episode) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         PGInterval interval = new PGInterval();
         interval.setSeconds(episode.getDuration().getSeconds());
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO episode (number, production_code, title, description, release_date, language, country, duration, season_id, tg_video_file_id, tg_preview_file_id) " +
+                     connection.prepareStatement("INSERT INTO episode (number, production_code, title, description, release_date, language, country, duration, season_id, tg_preview_file_id) " +
                              "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
 
             preparedStatement.setInt(1, episode.getNumber());
@@ -224,8 +248,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
             preparedStatement.setString(7, episode.getCountry());
             preparedStatement.setObject(8, interval);
             preparedStatement.setInt(9, episode.getSeason().getId());
-            preparedStatement.setString(10, episode.getVideoFileId());
-            preparedStatement.setString(11, episode.getPreviewFileId());
+            preparedStatement.setString(10, episode.getPreviewFileId());
 
             preparedStatement.executeUpdate();
         } finally {
@@ -241,7 +264,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
         interval.setSeconds(episode.getDuration().getSeconds());
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("UPDATE episode " +
-                             "SET number=?, production_code=?, title=?, description=?, release_date=?, language=?, country=?, duration=?, season_id=?, tg_video_file_id=?, tg_preview_file_id=? WHERE id=?")) {
+                             "SET number=?, production_code=?, title=?, description=?, release_date=?, language=?, country=?, duration=?, season_id=?, tg_preview_file_id=? WHERE id=?")) {
             preparedStatement.setInt(1, episode.getNumber());
             preparedStatement.setInt(2, episode.getProductionCode());
             preparedStatement.setString(3, episode.getTitle());
@@ -251,10 +274,9 @@ public class EpisodeDaoImpl implements EpisodeDao {
             preparedStatement.setString(7, episode.getCountry());
             preparedStatement.setObject(8, interval);
             preparedStatement.setInt(9, episode.getSeason().getId());
-            preparedStatement.setString(10, episode.getVideoFileId());
-            preparedStatement.setString(11, episode.getPreviewFileId());
+            preparedStatement.setString(10, episode.getPreviewFileId());
 
-            preparedStatement.setLong(12, id);
+            preparedStatement.setLong(11, id);
 
             preparedStatement.executeUpdate();
         } finally {

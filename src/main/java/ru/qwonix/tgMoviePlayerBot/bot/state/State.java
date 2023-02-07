@@ -9,11 +9,11 @@ import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
+import ru.qwonix.tgMoviePlayerBot.callback.VideoCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.*;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchCallbackException;
 
-import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -52,29 +52,6 @@ public abstract class State {
         Video video = update.getMessage().getVideo();
 
         log.info("user {} send video {}", chatContext.getUser(), video);
-
-        if (update.getMessage().getCaption() != null) {
-            String text = update.getMessage().getCaption();
-
-            try {
-                int episodeId = Integer.parseInt(text);
-                Integer duration = video.getDuration();
-                String fileId = video.getFileId();
-                Optional<Episode> episodeOptional = botContext.getDatabaseContext().getEpisodeService().find(episodeId);
-                if (episodeOptional.isPresent()) {
-                    Episode episode = episodeOptional.get();
-                    episode.setDuration(Duration.ofSeconds(duration));
-                    episode.setVideoFileId(fileId);
-                    botContext.getDatabaseContext().getEpisodeService().insertOrUpdate(episode);
-
-                    log.info("video {} file id and duration has been updated", episode);
-                    return;
-                }
-
-            } catch (NumberFormatException e) {
-                log.info("can not parse episode id");
-            }
-        }
 
         if (chatContext.getUser().isAdmin()) {
             botUtils.sendMarkdownTextWithReplay(chatContext.getUser()
@@ -146,6 +123,10 @@ public abstract class State {
 
         Callback callback;
         switch (dataType) {
+            case VIDEO:
+                callback = new VideoCallback(jsonObject);
+                break;
+
             case EPISODE:
                 callback = new EpisodeCallback(jsonObject);
                 break;

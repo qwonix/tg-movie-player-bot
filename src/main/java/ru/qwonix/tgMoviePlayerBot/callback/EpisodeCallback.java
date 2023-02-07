@@ -10,13 +10,12 @@ import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
+import ru.qwonix.tgMoviePlayerBot.entity.Video;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchEpisodeException;
+import ru.qwonix.tgMoviePlayerBot.exception.NoSuchVideoException;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 
 @Slf4j
@@ -46,7 +45,7 @@ public class EpisodeCallback extends Callback {
 
 
     @Override
-    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchEpisodeException {
+    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchEpisodeException, NoSuchVideoException {
         BotUtils botUtils = new BotUtils(botContext);
 
         EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
@@ -55,14 +54,30 @@ public class EpisodeCallback extends Callback {
         if (optionalEpisode.isPresent()) {
             episode = optionalEpisode.get();
         } else {
-            throw new NoSuchEpisodeException("Такого видео не существует. Попробуйте найти его заново.");
+            throw new NoSuchEpisodeException("Такого эпизода не существует. Попробуйте найти его заново.");
+        }
+
+        Optional<Video> maxPriorityOptionalVideo = botContext.getDatabaseContext().getVideoService()
+                .findMaxPriorityByEpisode(episode);
+
+        Video maxPriorityVideo;
+        if (maxPriorityOptionalVideo.isPresent()) {
+            maxPriorityVideo = maxPriorityOptionalVideo.get();
+        } else {
+            throw new NoSuchVideoException("no max priority video");
         }
 
         Optional<Episode> nextEpisode = episodeService.findNext(episode);
         Optional<Episode> previousEpisode = episodeService.findPrevious(episode);
+        int seasonEpisodesCount = episodeService.countAllBySeason(episode.getSeason());
 
-        InlineKeyboardMarkup keyboard = createControlButtons(episode, nextEpisode, previousEpisode
-                , episodeService.countAllBySeason(episode.getSeason()));
+        List<List<InlineKeyboardButton>> controlButtons
+                = createControlButtons(episode, nextEpisode, previousEpisode, seasonEpisodesCount);
+
+        List<List<InlineKeyboardButton>> videoVersions = VideoCallback.createVideosButtons(episode.getVideos());
+        controlButtons.addAll(videoVersions);
+
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(controlButtons);
 
         String episodeText = createText(episode);
 
@@ -76,7 +91,7 @@ public class EpisodeCallback extends Callback {
             botUtils.editVideoWithMarkdownTextKeyboard(chatContext.getUser()
                     , messagesIds.getVideoMessageId()
                     , BotUtils.PROVIDED_BY_TEXT
-                    , episode.getVideoFileId()
+                    , maxPriorityVideo.getVideoFileId()
                     , keyboard);
 
         } else {
@@ -87,7 +102,7 @@ public class EpisodeCallback extends Callback {
 
             Integer videoMessageId = botUtils.sendVideoWithMarkdownTextKeyboard(chatContext.getUser()
                     , BotUtils.PROVIDED_BY_TEXT
-                    , episode.getVideoFileId()
+                    , maxPriorityVideo.getVideoFileId()
                     , keyboard);
             messagesIds.setVideoMessageId(videoMessageId);
         }
@@ -108,7 +123,7 @@ public class EpisodeCallback extends Callback {
     }
 
 
-    private static InlineKeyboardMarkup createControlButtons(
+    public static List<List<InlineKeyboardButton>> createControlButtons(
             Episode currentEpisode
             , Optional<Episode> nextEpisode
             , Optional<Episode> previousEpisode
@@ -140,7 +155,7 @@ public class EpisodeCallback extends Callback {
                 .callbackData("NaN")
                 .text(currentEpisode.getNumber() + "/" + seasonEpisodesCount).build();
 
-        return new InlineKeyboardMarkup(Collections.singletonList(Arrays.asList(previous, current, next)));
+        return new ArrayList<>(Collections.singletonList(Arrays.asList(previous, current, next)));
     }
 
 }
