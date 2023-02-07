@@ -84,6 +84,12 @@ public class VideoCallback extends Callback {
                     , BotUtils.PROVIDED_BY_TEXT
                     , video.getVideoFileId()
                     , keyboard);
+        } else {
+            Integer videoMessageId = botUtils.sendVideoWithMarkdownTextKeyboard(chatContext.getUser()
+                    , BotUtils.PROVIDED_BY_TEXT
+                    , video.getVideoFileId()
+                    , keyboard);
+            messagesIds.setVideoMessageId(videoMessageId);
         }
 
         botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());

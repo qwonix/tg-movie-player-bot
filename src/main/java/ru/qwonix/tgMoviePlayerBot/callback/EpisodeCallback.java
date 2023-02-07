@@ -2,7 +2,6 @@ package ru.qwonix.tgMoviePlayerBot.callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
@@ -56,7 +55,6 @@ public class EpisodeCallback extends Callback {
         } else {
             throw new NoSuchEpisodeException("Такого эпизода не существует. Попробуйте найти его заново.");
         }
-
         Optional<Video> maxPriorityOptionalVideo = botContext.getDatabaseContext().getVideoService()
                 .findMaxPriorityByEpisode(episode);
 
@@ -67,18 +65,6 @@ public class EpisodeCallback extends Callback {
             throw new NoSuchVideoException("no max priority video");
         }
 
-        Optional<Episode> nextEpisode = episodeService.findNext(episode);
-        Optional<Episode> previousEpisode = episodeService.findPrevious(episode);
-        int seasonEpisodesCount = episodeService.countAllBySeason(episode.getSeason());
-
-        List<List<InlineKeyboardButton>> controlButtons
-                = createControlButtons(episode, nextEpisode, previousEpisode, seasonEpisodesCount);
-
-        List<List<InlineKeyboardButton>> videoVersions = VideoCallback.createVideosButtons(episode.getVideos());
-        controlButtons.addAll(videoVersions);
-
-        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(controlButtons);
-
         String episodeText = createText(episode);
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
@@ -87,25 +73,14 @@ public class EpisodeCallback extends Callback {
                     , messagesIds.getEpisodeMessageId()
                     , episodeText
                     , episode.getPreviewFileId());
-
-            botUtils.editVideoWithMarkdownTextKeyboard(chatContext.getUser()
-                    , messagesIds.getVideoMessageId()
-                    , BotUtils.PROVIDED_BY_TEXT
-                    , maxPriorityVideo.getVideoFileId()
-                    , keyboard);
-
         } else {
             Integer episodeMessageId = botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
                     , episodeText
                     , episode.getPreviewFileId());
             messagesIds.setEpisodeMessageId(episodeMessageId);
-
-            Integer videoMessageId = botUtils.sendVideoWithMarkdownTextKeyboard(chatContext.getUser()
-                    , BotUtils.PROVIDED_BY_TEXT
-                    , maxPriorityVideo.getVideoFileId()
-                    , keyboard);
-            messagesIds.setVideoMessageId(videoMessageId);
         }
+
+        new VideoCallback(maxPriorityVideo).handleCallback(botContext, chatContext);
 
         botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
         botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());
