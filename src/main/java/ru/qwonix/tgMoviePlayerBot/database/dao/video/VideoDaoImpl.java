@@ -125,8 +125,21 @@ public class VideoDaoImpl implements VideoDao {
 
     @Override
     public Optional<Video> findMaxPriorityByEpisode(int episodeId) throws SQLException {
-        Optional<Video> max = findAllByEpisodeId(episodeId).stream().max(Comparator.comparingInt(Video::getPriority));
+        Connection connection = connectionBuilder.getConnection();
 
-        return max;
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("select * from video where priority = (select max(priority) from video where episode_id=?)")) {
+            preparedStatement.setLong(1, episodeId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Video video = convert(resultSet);
+                return Optional.of(video);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+
+        return Optional.empty();
     }
 }
