@@ -1,12 +1,10 @@
 package ru.qwonix.tgMoviePlayerBot.database.dao.video;
 
-import ru.qwonix.tgMoviePlayerBot.callback.VideoCallback;
 import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.Video;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,7 +126,7 @@ public class VideoDaoImpl implements VideoDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("select * from video where priority = (select max(priority) from video where episode_id=?)")) {
+                     connection.prepareStatement("select * from video where episode_id = ? order by priority limit 1")) {
             preparedStatement.setLong(1, episodeId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
