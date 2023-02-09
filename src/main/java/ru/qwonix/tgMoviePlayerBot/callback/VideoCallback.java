@@ -104,7 +104,7 @@ public class VideoCallback extends Callback {
         Map<String, String> keyboardMap = new LinkedHashMap<>();
         for (Video video : episodeVideos) {
             JSONObject videoCallback = new VideoCallback(video).toCallback();
-            String text = (video.getResolution() + " " + video.getAudioLanguage() + " " + video.getSubtitlesLanguage());
+            String text = String.format("%dр subs:%s dub:%s", video.getResolution(), video.getSubtitlesLanguage(), video.getAudioLanguage());
 
             keyboardMap.put(text, videoCallback.toString());
         }
