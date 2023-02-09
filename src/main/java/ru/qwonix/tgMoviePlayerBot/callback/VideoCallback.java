@@ -72,7 +72,10 @@ public class VideoCallback extends Callback {
         List<List<InlineKeyboardButton>> controlButtons
                 = EpisodeCallback.createControlButtons(episode, nextEpisode, previousEpisode, seasonEpisodesCount);
 
-        List<List<InlineKeyboardButton>> videoVersions = VideoCallback.createVideosButtons(episode.getVideos());
+        List<Video> episodeVideos = episode.getVideos();
+        episodeVideos.remove(video);
+
+        List<List<InlineKeyboardButton>> videoVersions = VideoCallback.createVideosButtons(episodeVideos);
         controlButtons.addAll(videoVersions);
 
         InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(controlButtons);
