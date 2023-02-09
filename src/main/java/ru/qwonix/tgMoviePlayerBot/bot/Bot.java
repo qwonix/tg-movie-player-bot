@@ -25,6 +25,9 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         org.telegram.telegrambots.meta.api.objects.User telegramUser;
+        if (update.hasMyChatMember()) {
+            throw new IllegalArgumentException("change status " + update.getMyChatMember().getFrom());
+        }
         if (update.hasCallbackQuery()) {
             telegramUser = update.getCallbackQuery().getFrom();
         } else if (update.hasMessage()) {
