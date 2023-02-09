@@ -22,7 +22,7 @@ public class EpisodeCallback extends Callback {
     private final int episodeId;
 
     public EpisodeCallback(JSONObject callbackData) {
-        this.episodeId = callbackData.getInt("id");
+        this(callbackData.getInt("id"));
     }
 
     public EpisodeCallback(int episodeId) {
@@ -30,7 +30,7 @@ public class EpisodeCallback extends Callback {
     }
 
     public EpisodeCallback(Episode episode) {
-        this.episodeId = episode.getId();
+        this(episode.getId());
     }
 
     @Override

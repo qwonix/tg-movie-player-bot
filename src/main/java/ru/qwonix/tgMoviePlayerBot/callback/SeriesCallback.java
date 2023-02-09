@@ -28,8 +28,7 @@ public class SeriesCallback extends Callback {
     }
 
     public SeriesCallback(JSONObject callbackData) {
-        this.seriesId = callbackData.getInt("id");
-        this.page = callbackData.getInt("page");
+        this(callbackData.getInt("id"), callbackData.getInt("page"));
     }
 
     @Override

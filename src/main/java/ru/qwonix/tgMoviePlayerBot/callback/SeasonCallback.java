@@ -29,18 +29,11 @@ public class SeasonCallback extends Callback {
     }
 
     public SeasonCallback(Season season, int page) {
-        this.seasonId = season.getId();
-        this.page = page;
-    }
-
-    public SeasonCallback(int seasonId) {
-        this.seasonId = seasonId;
-        this.page = 0;
+        this(season.getId(), page);
     }
 
     public SeasonCallback(JSONObject callbackData) {
-        this.seasonId = callbackData.getInt("id");
-        this.page = callbackData.getInt("page");
+        this(callbackData.getInt("id"), callbackData.getInt("page"));
     }
 
     @Override

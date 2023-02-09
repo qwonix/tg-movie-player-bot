@@ -29,11 +29,11 @@ public class VideoCallback extends Callback {
     }
 
     public VideoCallback(Video video) {
-        this.videoId = video.getId();
+        this(video.getId());
     }
 
     public VideoCallback(JSONObject callbackData) {
-        this.videoId = callbackData.getInt("id");
+        this(callbackData.getInt("id"));
     }
 
     @Override
