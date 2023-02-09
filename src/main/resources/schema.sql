@@ -34,13 +34,13 @@ create table if not exists season
 
 create table if not exists video
 (
-    id                serial primary key,
-    resolution        int         not null,
-    audioLanguage     varchar(100),
-    subtitlesLanguage varchar(50) ,
-    videoFileId       text        not null,
-    priority          int,
-    episode_id        int references episode
+    id                 serial primary key,
+    resolution         int  not null,
+    audio_language     varchar(100),
+    subtitles_language varchar(50),
+    video_file_id      text not null,
+    priority           int,
+    episode_id         int references episode
 );
 
 create table if not exists episode

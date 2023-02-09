@@ -20,9 +20,9 @@ public class VideoDaoImpl implements VideoDao {
         return Video.builder()
                 .id(episodeResultSet.getInt("id"))
                 .resolution(episodeResultSet.getInt("resolution"))
-                .audioLanguage(episodeResultSet.getString("audioLanguage"))
-                .subtitlesLanguage(episodeResultSet.getString("subtitlesLanguage"))
-                .videoFileId(episodeResultSet.getString("videoFileId"))
+                .audioLanguage(episodeResultSet.getString("audio_language"))
+                .subtitlesLanguage(episodeResultSet.getString("subtitles_language"))
+                .videoFileId(episodeResultSet.getString("video_file_id"))
                 .priority(episodeResultSet.getInt("priority"))
                 .build();
     }
