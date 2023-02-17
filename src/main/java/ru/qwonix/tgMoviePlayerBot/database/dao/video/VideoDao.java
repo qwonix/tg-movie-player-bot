@@ -15,7 +15,6 @@ public interface VideoDao extends DefaultDao<Video> {
 
     List<Video> findAllByEpisodeId(int episodeId) throws SQLException;
 
-    List<Video> findAllByVideoId(int episodeId) throws SQLException;
 
     Optional<Video> findMaxPriorityByEpisode(int episodeId) throws SQLException;
 }

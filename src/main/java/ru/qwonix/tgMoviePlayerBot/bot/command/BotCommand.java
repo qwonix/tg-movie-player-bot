@@ -13,7 +13,6 @@ import ru.qwonix.tgMoviePlayerBot.callback.SeasonCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.SeriesCallback;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
-import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
@@ -77,7 +76,7 @@ public class BotCommand {
         int page = 0;
 
         BotUtils botUtils = new BotUtils(botContext);
-        String text = String.format("*%s*\n", series.getName())
+        String text = String.format("*%s*\n", series.getTitle())
                 + '\n'
                 + String.format("_%s_", series.getDescription());
 
@@ -104,7 +103,7 @@ public class BotCommand {
 
         Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(user
                 , text
-                , series.getPreviewFileId()
+                , series.getPreviewTgFileId()
                 , keyboard);
 
 

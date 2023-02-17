@@ -31,11 +31,11 @@ public class SeasonDaoImpl implements SeasonDao {
                 .id(seasonResultSet.getInt("id"))
                 .number(seasonResultSet.getInt("number"))
                 .description(seasonResultSet.getString("description"))
+                .totalEpisodesCount(seasonResultSet.getInt("total_episodes_count"))
+                .previewTgFileId(seasonResultSet.getString("preview_tg_file_id"))
+                .series(series.orElse(null))
                 .premiereReleaseDate(premiereReleaseDate)
                 .finalReleaseDate(finalReleaseDate)
-                .totalEpisodesCount(seasonResultSet.getInt("total_episodes_count"))
-                .previewFileId(seasonResultSet.getString("tg_preview_file_id"))
-                .series(series.orElse(null))
                 .build();
     }
 
@@ -162,14 +162,14 @@ public class SeasonDaoImpl implements SeasonDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO season (number, description, total_episodes_count, series_id, tg_preview_file_id) " +
+                     connection.prepareStatement("INSERT INTO season (number, description, total_episodes_count, series_id, preview_tg_file_id) " +
                              "VALUES(?, ?, ?, ?, ?)")) {
 
             preparedStatement.setInt(1, season.getNumber());
             preparedStatement.setString(2, season.getDescription());
             preparedStatement.setObject(3, season.getTotalEpisodesCount());
             preparedStatement.setInt(4, season.getSeries().getId());
-            preparedStatement.setString(5, season.getPreviewFileId());
+            preparedStatement.setString(5, season.getPreviewTgFileId());
 
             preparedStatement.executeUpdate();
         } finally {
@@ -182,13 +182,13 @@ public class SeasonDaoImpl implements SeasonDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE season SET number=?, description=?, total_episodes_count=?, series_id=?, tg_preview_file_id=? WHERE id=?")) {
+                     connection.prepareStatement("UPDATE season SET number=?, description=?, total_episodes_count=?, series_id=?, preview_tg_file_id=? WHERE id=?")) {
 
             preparedStatement.setInt(1, season.getNumber());
             preparedStatement.setString(2, season.getDescription());
             preparedStatement.setObject(3, season.getTotalEpisodesCount());
             preparedStatement.setLong(4, season.getSeries().getId());
-            preparedStatement.setString(5, season.getPreviewFileId());
+            preparedStatement.setString(5, season.getPreviewTgFileId());
             preparedStatement.setLong(6, id);
 
             preparedStatement.executeUpdate();

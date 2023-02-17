@@ -12,11 +12,13 @@ import java.time.LocalDate;
 @Data
 public class Series {
     private int id;
-    private String name;
-    private LocalDate premiereReleaseDate;
+    private String title;
     private String description;
     private String country;
-    private String previewFileId;
+    private String previewTgFileId;
+    private Show show;
+
+    private LocalDate premiereReleaseDate;
 
     public String getPremiereReleaseYearOrTBA() {
         String seriesPremiereReleaseDate;

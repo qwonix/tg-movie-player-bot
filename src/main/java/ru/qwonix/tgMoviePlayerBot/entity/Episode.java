@@ -23,9 +23,8 @@ public class Episode {
     private String language;
     private String country;
     private Duration duration;
+    private String previewTgFileId;
     private Season season;
 
     private List<Video> videos;
-
-    private String previewFileId;
 }

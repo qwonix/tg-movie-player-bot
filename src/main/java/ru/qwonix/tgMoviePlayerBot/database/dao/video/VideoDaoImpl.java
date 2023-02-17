@@ -16,14 +16,14 @@ public class VideoDaoImpl implements VideoDao {
     }
 
     @Override
-    public Video convert(ResultSet episodeResultSet) throws SQLException {
+    public Video convert(ResultSet resultSet) throws SQLException {
         return Video.builder()
-                .id(episodeResultSet.getInt("id"))
-                .resolution(episodeResultSet.getInt("resolution"))
-                .audioLanguage(episodeResultSet.getString("audio_language"))
-                .subtitlesLanguage(episodeResultSet.getString("subtitles_language"))
-                .videoFileId(episodeResultSet.getString("video_file_id"))
-                .priority(episodeResultSet.getInt("priority"))
+                .id(resultSet.getInt("id"))
+                .videoTgFileId(resultSet.getString("video_tg_file_id"))
+                .resolution(resultSet.getInt("resolution"))
+                .audioLanguage(resultSet.getString("audio_language"))
+                .subtitlesLanguage(resultSet.getString("subtitles_language"))
+                .priority(resultSet.getInt("priority"))
                 .build();
     }
 
@@ -85,29 +85,14 @@ public class VideoDaoImpl implements VideoDao {
         Connection connection = connectionBuilder.getConnection();
 
         List<Video> videos = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM video where episode_id=?")) {
-            preparedStatement.setLong(1, episodeId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                Video video = convert(resultSet);
-                videos.add(video);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return videos;
-    }
-
-    @Override
-    public List<Video> findAllByVideoId(int videoId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<Video> videos = new ArrayList<>();
+//        try (PreparedStatement preparedStatement
+//                     = connection.prepareStatement("SELECT * FROM video where video_tg_file_id in " +
+//                "(select video_tg_file_id from episode_video where episode_id = ?)")) {
         try (PreparedStatement preparedStatement
-                     = connection.prepareStatement("SELECT * FROM video where episode_id = " +
-                "(select episode_id from video where id = ?)")) {
-            preparedStatement.setLong(1, videoId);
+                     = connection.prepareStatement("select * from video " +
+                "inner join episode_video ev on video.id = ev.video_id " +
+                "where episode_id = ?")) {
+            preparedStatement.setLong(1, episodeId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -126,7 +111,9 @@ public class VideoDaoImpl implements VideoDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("select * from video where episode_id = ? order by priority limit 1")) {
+                     connection.prepareStatement("select * from video " +
+                             "inner join episode_video ev on video.id = ev.video_id " +
+                             "where episode_id = ? order by priority limit 1")) {
             preparedStatement.setLong(1, episodeId);
 
             ResultSet resultSet = preparedStatement.executeQuery();

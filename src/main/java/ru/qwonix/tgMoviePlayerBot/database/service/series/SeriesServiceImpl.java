@@ -41,15 +41,6 @@ public class SeriesServiceImpl implements SeriesService {
     }
 
 
-    @Override
-    public List<Series> findAllOrdered() {
-        try {
-            return seriesDao.findAllOrdered();
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
-    }
 
     @Override
     public LocalDate findPremiereReleaseDate(Series series) {

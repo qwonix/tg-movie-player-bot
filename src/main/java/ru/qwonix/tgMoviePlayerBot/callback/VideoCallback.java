@@ -71,7 +71,6 @@ public class VideoCallback extends Callback {
 
         List<List<InlineKeyboardButton>> controlButtons
                 = EpisodeCallback.createControlButtons(episode, nextEpisode, previousEpisode, seasonEpisodesCount);
-
         List<Video> episodeVideos = episode.getVideos();
         episodeVideos.remove(video);
 
@@ -85,12 +84,12 @@ public class VideoCallback extends Callback {
             botUtils.editVideoWithMarkdownTextKeyboard(chatContext.getUser()
                     , messagesIds.getVideoMessageId()
                     , BotUtils.PROVIDED_BY_TEXT
-                    , video.getVideoFileId()
+                    , video.getVideoTgFileId()
                     , keyboard);
         } else {
             Integer videoMessageId = botUtils.sendVideoWithMarkdownTextKeyboard(chatContext.getUser()
                     , BotUtils.PROVIDED_BY_TEXT
-                    , video.getVideoFileId()
+                    , video.getVideoTgFileId()
                     , keyboard);
             messagesIds.setVideoMessageId(videoMessageId);
         }

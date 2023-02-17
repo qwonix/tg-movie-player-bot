@@ -43,9 +43,9 @@ public class EpisodeDaoImpl implements EpisodeDao {
                 .language(episodeResultSet.getString("language"))
                 .country(episodeResultSet.getString("country"))
                 .duration(Duration.ofSeconds(duration.getWholeSeconds()))
-                .season(season.orElse(null))
+                .previewTgFileId(episodeResultSet.getString("preview_tg_file_id"))
                 .videos(videos)
-                .previewFileId(episodeResultSet.getString("tg_preview_file_id"))
+                .season(season.orElse(null))
                 .build();
     }
 
@@ -215,7 +215,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM episode where id = (select episode_id from video where id=?)")) {
+                     connection.prepareStatement("SELECT * FROM episode where id = (select episode_id from episode_video where video_id=?)")) {
             preparedStatement.setLong(1, videoId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -248,7 +248,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
             preparedStatement.setString(7, episode.getCountry());
             preparedStatement.setObject(8, interval);
             preparedStatement.setInt(9, episode.getSeason().getId());
-            preparedStatement.setString(10, episode.getPreviewFileId());
+            preparedStatement.setString(10, episode.getPreviewTgFileId());
 
             preparedStatement.executeUpdate();
         } finally {
@@ -274,7 +274,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
             preparedStatement.setString(7, episode.getCountry());
             preparedStatement.setObject(8, interval);
             preparedStatement.setInt(9, episode.getSeason().getId());
-            preparedStatement.setString(10, episode.getPreviewFileId());
+            preparedStatement.setString(10, episode.getPreviewTgFileId());
 
             preparedStatement.setLong(11, id);
 

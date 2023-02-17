@@ -83,12 +83,12 @@ public class SeasonCallback extends Callback {
                     , messagesIds.getSeasonMessageId()
                     , text
                     , keyboard
-                    , season.getPreviewFileId());
+                    , season.getPreviewTgFileId());
 
         } else {
             Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
-                    , season.getPreviewFileId()
+                    , season.getPreviewTgFileId()
                     , keyboard);
 
             messagesIds.setSeasonMessageId(seriesMessageId);
@@ -98,7 +98,7 @@ public class SeasonCallback extends Callback {
     }
 
     private static String createText(Season season, int episodesCount) {
-        return String.format("*%s –* `%s сезон`\n", season.getSeries().getName(), season.getNumber())
+        return String.format("*%s –* `%s сезон`\n", season.getSeries().getTitle(), season.getNumber())
                 + '\n'
                 + String.format("_%s_\n", season.getDescription())
                 + '\n'

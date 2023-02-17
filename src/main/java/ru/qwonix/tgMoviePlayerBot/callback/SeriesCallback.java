@@ -104,11 +104,11 @@ public class SeriesCallback extends Callback {
             botUtils.editKeyBoardAndPhoto(chatContext.getUser()
                     , messagesIds.getSeriesMessageId()
                     , keyboard
-                    , series.getPreviewFileId());
+                    , series.getPreviewTgFileId());
         } else {
             Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , text
-                    , series.getPreviewFileId()
+                    , series.getPreviewTgFileId()
                     , keyboard);
 
             messagesIds.setSeriesMessageId(seriesMessageId);
@@ -119,7 +119,7 @@ public class SeriesCallback extends Callback {
     }
 
     private static String createText(Series series) {
-        return String.format("*%s*\n", series.getName())
+        return String.format("*%s*\n", series.getTitle())
                 + '\n'
                 + String.format("_%s_", series.getDescription());
     }

@@ -87,7 +87,7 @@ public abstract class State {
                 Optional<Episode> episodeOptional = botContext.getDatabaseContext().getEpisodeService().find(episodeId);
                 if (episodeOptional.isPresent()) {
                     Episode episode = episodeOptional.get();
-                    episode.setPreviewFileId(fileId);
+                    episode.setPreviewTgFileId(fileId);
                     botContext.getDatabaseContext().getEpisodeService().insertOrUpdate(episode);
 
                     log.info("video {} preview file id has been updated", episode);

@@ -72,11 +72,11 @@ public class EpisodeCallback extends Callback {
             botUtils.editMarkdownTextWithPhoto(chatContext.getUser()
                     , messagesIds.getEpisodeMessageId()
                     , episodeText
-                    , episode.getPreviewFileId());
+                    , episode.getPreviewTgFileId());
         } else {
             Integer episodeMessageId = botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
                     , episodeText
-                    , episode.getPreviewFileId());
+                    , episode.getPreviewTgFileId());
             messagesIds.setEpisodeMessageId(episodeMessageId);
         }
 

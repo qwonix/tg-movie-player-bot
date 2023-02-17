@@ -1,7 +1,10 @@
 package ru.qwonix.tgMoviePlayerBot.database.dao.series;
 
 import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.dao.show.ShowDao;
+import ru.qwonix.tgMoviePlayerBot.database.dao.show.ShowDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
+import ru.qwonix.tgMoviePlayerBot.entity.Show;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -17,16 +20,21 @@ public class SeriesDaoImpl implements SeriesDao {
     }
 
     @Override
-    public Series convert(ResultSet seriesResultSet) throws SQLException {
+    public Series convert(ResultSet resultSet) throws SQLException {
+        ShowDao showDao = new ShowDaoImpl(connectionBuilder);
+        Optional<Show> show = showDao.find(resultSet.getInt("show_id"));
+
         return Series.builder()
-                .id(seriesResultSet.getInt("id"))
-                .name(seriesResultSet.getString("name"))
-                .description(seriesResultSet.getString("description"))
-                .premiereReleaseDate(this.findPremiereReleaseDate(seriesResultSet.getInt("id")))
-                .country(seriesResultSet.getString("country"))
-                .previewFileId(seriesResultSet.getString("tg_preview_file_id"))
+                .id(resultSet.getInt("id"))
+                .title(resultSet.getString("title"))
+                .description(resultSet.getString("description"))
+                .country(resultSet.getString("country"))
+                .previewTgFileId(resultSet.getString("tg_preview_file_id"))
+                .premiereReleaseDate(this.findPremiereReleaseDate(resultSet.getInt("id")))
+                .show(show.orElse(null))
                 .build();
     }
+
 
     @Override
     public List<Series> findAll() throws SQLException {
@@ -46,30 +54,13 @@ public class SeriesDaoImpl implements SeriesDao {
         return serials;
     }
 
-    @Override
-    public List<Series> findAllOrdered() throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-        List<Series> serials = new ArrayList<>();
-        try (Statement statement = connection.createStatement()) {
-            String SQL = "SELECT * FROM series order by \"order\"";
-            ResultSet resultSet = statement.executeQuery(SQL);
-
-            while (resultSet.next()) {
-                Series series = convert(resultSet);
-                serials.add(series);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return serials;
-    }
 
     @Override
     public int countAllByNameLike(String name) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT count(*) as match FROM series where lower(name) like ?")) {
+                     connection.prepareStatement("SELECT count(*) as match FROM series where lower(title) like ?")) {
             preparedStatement.setString(1, "%" + name.toLowerCase() + "%");
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -87,7 +78,7 @@ public class SeriesDaoImpl implements SeriesDao {
 
         List<Series> serials = new ArrayList<>();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM series where lower(name) like ? limit ? offset ?")) {
+                     connection.prepareStatement("SELECT * FROM series where lower(title) like ? limit ? offset ?")) {
             preparedStatement.setString(1, "%" + name.toLowerCase() + "%");
             preparedStatement.setInt(2, limit);
             preparedStatement.setInt(3, limit * page);
@@ -168,12 +159,12 @@ public class SeriesDaoImpl implements SeriesDao {
     public void insert(Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement
-                     = connection.prepareStatement("INSERT INTO series (name, description, country, tg_preview_file_id) " +
+                     = connection.prepareStatement("INSERT INTO series (title, description, country, tg_preview_file_id) " +
                 "VALUES(?, ?, ?, ?)")) {
-            preparedStatement.setString(1, series.getName());
+            preparedStatement.setString(1, series.getTitle());
             preparedStatement.setString(2, series.getDescription());
             preparedStatement.setString(3, series.getCountry());
-            preparedStatement.setString(4, series.getPreviewFileId());
+            preparedStatement.setString(4, series.getPreviewTgFileId());
 
             preparedStatement.executeUpdate();
         }
@@ -185,11 +176,11 @@ public class SeriesDaoImpl implements SeriesDao {
     public void update(long id, Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE series SET name=?, description=?, country=?, tg_preview_file_id=? WHERE id=?")) {
-            preparedStatement.setString(1, series.getName());
+                     connection.prepareStatement("UPDATE series SET title=?, description=?, country=?, tg_preview_file_id=? WHERE id=?")) {
+            preparedStatement.setString(1, series.getTitle());
             preparedStatement.setString(2, series.getDescription());
             preparedStatement.setString(3, series.getCountry());
-            preparedStatement.setString(4, series.getPreviewFileId());
+            preparedStatement.setString(4, series.getPreviewTgFileId());
             preparedStatement.setLong(5, id);
             preparedStatement.executeUpdate();
         } finally {

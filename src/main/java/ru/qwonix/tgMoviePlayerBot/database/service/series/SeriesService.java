@@ -12,8 +12,6 @@ public interface SeriesService {
 
     Optional<Series> find(int id);
 
-    List<Series> findAllOrdered();
-
     LocalDate findPremiereReleaseDate(Series series);
 
     List<Series> findAllWithLimitAndPage(int limit, int page);

@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface SeriesDao extends DefaultDao<Series> {
 
-    List<Series> findAllOrdered() throws SQLException;
-
     int countAllByNameLike(String name) throws SQLException;
 
     List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page) throws SQLException;

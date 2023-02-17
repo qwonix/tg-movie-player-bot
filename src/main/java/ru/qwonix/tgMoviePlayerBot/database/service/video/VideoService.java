@@ -13,6 +13,4 @@ public interface VideoService {
 
     Optional<Video> findMaxPriorityByEpisode(Episode episode);
 
-    List<Video> findAllByVideo(Video video);
-
 }

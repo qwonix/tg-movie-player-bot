@@ -16,11 +16,12 @@ public class Season {
     private int id;
     private int number;
     private String description;
+    private int totalEpisodesCount;
+    private String previewTgFileId;
+    private Series series;
+
     private LocalDate premiereReleaseDate;
     private LocalDate finalReleaseDate;
-    private int totalEpisodesCount;
-    private Series series;
-    private String previewFileId;
 
     public String getFormattedPremiereReleaseDate() {
         String seriesPremiereReleaseDate;
