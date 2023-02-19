@@ -10,7 +10,6 @@ import org.json.JSONObject;
 @Data
 public class MessagesIds {
     private Integer seriesMessageId;
-    private Integer movieMessageId;
     private Integer seasonMessageId;
     private Integer episodeMessageId;
     private Integer videoMessageId;
@@ -22,10 +21,6 @@ public class MessagesIds {
         Integer seriesMessageId = jsonObject.optInt("seriesMessageId");
         if (seriesMessageId == 0) seriesMessageId = null;
         MessagesIds.setSeriesMessageId(seriesMessageId);
-
-        Integer movieMessageId = jsonObject.optInt("movieMessageId");
-        if (movieMessageId == 0) movieMessageId = null;
-        MessagesIds.setMovieMessageId(movieMessageId);
 
         Integer seasonMessageId = jsonObject.optInt("seasonMessageId");
         if (seasonMessageId == 0) seasonMessageId = null;
@@ -45,7 +40,6 @@ public class MessagesIds {
     public JSONObject toJson() {
         JSONObject jsonData = new JSONObject();
         jsonData.put("seriesMessageId", seriesMessageId);
-        jsonData.put("movieMessageId", movieMessageId);
         jsonData.put("seasonMessageId", seasonMessageId);
         jsonData.put("episodeMessageId", episodeMessageId);
         jsonData.put("videoMessageId", videoMessageId);
@@ -55,10 +49,6 @@ public class MessagesIds {
 
     public boolean hasSeriesMessageId() {
         return seriesMessageId != null;
-    }
-
-    public boolean hasMovieMessageId() {
-        return movieMessageId != null;
     }
 
     public boolean hasSeasonMessageId() {
@@ -75,7 +65,6 @@ public class MessagesIds {
 
     public void reset() {
         this.setSeriesMessageId(null);
-        this.setMovieMessageId(null);
         this.setSeasonMessageId(null);
         this.setEpisodeMessageId(null);
         this.setVideoMessageId(null);

@@ -55,16 +55,30 @@ public class MovieCallback extends Callback {
         String movieText = createText(movie);
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
-        if (messagesIds.hasMovieMessageId()) {
+        if (messagesIds.hasSeasonMessageId()) {
+            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeasonMessageId());
+        }
+        if (messagesIds.hasEpisodeMessageId()) {
+            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
+        }
+        if (messagesIds.hasVideoMessageId()) {
+            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
+        }
+        if (messagesIds.hasSeriesMessageId()) {
+            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeriesMessageId());
+        }
+        messagesIds.reset();
+
+        if (messagesIds.hasEpisodeMessageId()) {
             botUtils.editMarkdownTextWithPhoto(chatContext.getUser()
-                    , messagesIds.getMovieMessageId()
+                    , messagesIds.getEpisodeMessageId()
                     , movieText
                     , movie.getPreviewTgFileId());
         } else {
             Integer movieMessageId = botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
                     , movieText
                     , movie.getPreviewTgFileId());
-            messagesIds.setMovieMessageId(movieMessageId);
+            messagesIds.setEpisodeMessageId(movieMessageId);
         }
 
         new VideoCallback(movie.getVideo()).handleCallback(botContext, chatContext);
