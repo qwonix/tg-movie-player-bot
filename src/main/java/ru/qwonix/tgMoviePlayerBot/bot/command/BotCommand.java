@@ -9,13 +9,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
+import ru.qwonix.tgMoviePlayerBot.callback.MovieCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.SeasonCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.SeriesCallback;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
-import ru.qwonix.tgMoviePlayerBot.entity.Season;
-import ru.qwonix.tgMoviePlayerBot.entity.Series;
-import ru.qwonix.tgMoviePlayerBot.entity.User;
+import ru.qwonix.tgMoviePlayerBot.entity.*;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -71,6 +70,14 @@ public class BotCommand {
     public void all(User user, String[] args) {
         user.getMessagesIds().reset();
         databaseContext.getUserService().merge(user);
+
+        Map<String, String> keyboardMap = new LinkedHashMap<>();
+
+        for (Movie movie : databaseContext.getMovieService().findByShow(Show.builder().id(1).build())) {
+            JSONObject callbackSeason = new MovieCallback(movie).toCallback();
+            keyboardMap.put(movie.getTitle(), callbackSeason.toString());
+        }
+
         Optional<Series> optionalSeries = botContext.getDatabaseContext().getSeriesService().find(1);
         Series series = optionalSeries.get();
         int page = 0;
@@ -88,7 +95,6 @@ public class BotCommand {
                 .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
 
 
-        Map<String, String> keyboardMap = new LinkedHashMap<>();
         for (Season season : seriesSeasons) {
             JSONObject callbackSeason = new SeasonCallback(season, 0).toCallback();
             keyboardMap.put("Сезон " + season.getNumber(), callbackSeason.toString());
