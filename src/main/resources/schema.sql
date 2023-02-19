@@ -15,19 +15,38 @@ create table if not exists "user"
 create table if not exists show
 (
     id                 serial primary key,
-    title              varchar(150),
+    title              varchar(150) not null,
     description        text not null,
-    preview_tg_file_id varchar(100)
+    preview_tg_file_id varchar(100) not null
 );
 
+create table if not exists video
+(
+    id                 serial primary key,
+    video_tg_file_id   varchar(100) not null unique,
+    resolution         int          not null,
+    audio_language     varchar(100),
+    subtitles_language varchar(100),
+    priority           int not null
+);
+
+create table if not exists movie
+(
+    id                 serial primary key,
+    title              varchar(150) not null,
+    description        text not null,
+    preview_tg_file_id varchar(100) not null,
+    video_id           int references video not null,
+    show_id            int references show not null
+);
 create table if not exists series
 (
     id                 serial primary key,
     title              varchar(200) not null,
     description        text         not null,
     country            varchar(50),
-    preview_tg_file_id varchar(100),
-    show_id            int references show
+    preview_tg_file_id varchar(100) not null,
+    show_id            int references show not null
 );
 
 create table if not exists season
@@ -36,8 +55,8 @@ create table if not exists season
     number               smallint not null,
     description          text     not null,
     total_episodes_count int      not null,
-    preview_tg_file_id   varchar(100),
-    series_id            int references series
+    preview_tg_file_id   varchar(100) not null,
+    series_id            int references series not null
 );
 
 create table if not exists episode
@@ -51,19 +70,9 @@ create table if not exists episode
     "language"         varchar(50),
     country            varchar(50),
     duration           interval,
-    preview_tg_file_id varchar(100),
-    season_id          int references season,
+    preview_tg_file_id varchar(100) not null,
+    season_id          int references season not null,
     unique (production_code, season_id)
-);
-
-create table if not exists video
-(
-    id                 serial primary key,
-    video_tg_file_id   varchar(100) primary key,
-    resolution         int not null,
-    audio_language     varchar(100),
-    subtitles_language varchar(100),
-    priority           int
 );
 
 create table if not exists episode_video

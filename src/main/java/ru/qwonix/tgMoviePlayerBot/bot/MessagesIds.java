@@ -9,26 +9,31 @@ import org.json.JSONObject;
 @NoArgsConstructor
 @Data
 public class MessagesIds {
-    private Integer episodeMessageId;
-    private Integer seasonMessageId;
     private Integer seriesMessageId;
+    private Integer movieMessageId;
+    private Integer seasonMessageId;
+    private Integer episodeMessageId;
     private Integer videoMessageId;
 
     public static MessagesIds fromJson(String json) {
         JSONObject jsonObject = new JSONObject(json);
         MessagesIds MessagesIds = new MessagesIds();
 
-        Integer episodeMessageId = jsonObject.optInt("episodeMessageId");
-        if (episodeMessageId == 0) episodeMessageId = null;
-        MessagesIds.setEpisodeMessageId(episodeMessageId);
+        Integer seriesMessageId = jsonObject.optInt("seriesMessageId");
+        if (seriesMessageId == 0) seriesMessageId = null;
+        MessagesIds.setSeriesMessageId(seriesMessageId);
+
+        Integer movieMessageId = jsonObject.optInt("movieMessageId");
+        if (movieMessageId == 0) movieMessageId = null;
+        MessagesIds.setMovieMessageId(movieMessageId);
 
         Integer seasonMessageId = jsonObject.optInt("seasonMessageId");
         if (seasonMessageId == 0) seasonMessageId = null;
         MessagesIds.setSeasonMessageId(seasonMessageId);
 
-        Integer seriesMessageId = jsonObject.optInt("seriesMessageId");
-        if (seriesMessageId == 0) seriesMessageId = null;
-        MessagesIds.setSeriesMessageId(seriesMessageId);
+        Integer episodeMessageId = jsonObject.optInt("episodeMessageId");
+        if (episodeMessageId == 0) episodeMessageId = null;
+        MessagesIds.setEpisodeMessageId(episodeMessageId);
 
         Integer videoMessageId = jsonObject.optInt("videoMessageId");
         if (videoMessageId == 0) videoMessageId = null;
@@ -39,24 +44,29 @@ public class MessagesIds {
 
     public JSONObject toJson() {
         JSONObject jsonData = new JSONObject();
-        jsonData.put("videoMessageId", videoMessageId);
-        jsonData.put("episodeMessageId", episodeMessageId);
-        jsonData.put("seasonMessageId", seasonMessageId);
         jsonData.put("seriesMessageId", seriesMessageId);
+        jsonData.put("movieMessageId", movieMessageId);
+        jsonData.put("seasonMessageId", seasonMessageId);
+        jsonData.put("episodeMessageId", episodeMessageId);
+        jsonData.put("videoMessageId", videoMessageId);
 
         return jsonData;
     }
 
-    public boolean hasEpisodeMessageId() {
-        return episodeMessageId != null;
+    public boolean hasSeriesMessageId() {
+        return seriesMessageId != null;
+    }
+
+    public boolean hasMovieMessageId() {
+        return movieMessageId != null;
     }
 
     public boolean hasSeasonMessageId() {
         return seasonMessageId != null;
     }
 
-    public boolean hasSeriesMessageId() {
-        return seriesMessageId != null;
+    public boolean hasEpisodeMessageId() {
+        return episodeMessageId != null;
     }
 
     public boolean hasVideoMessageId() {
@@ -64,9 +74,10 @@ public class MessagesIds {
     }
 
     public void reset() {
-        this.setVideoMessageId(null);
-        this.setEpisodeMessageId(null);
-        this.setSeasonMessageId(null);
         this.setSeriesMessageId(null);
+        this.setMovieMessageId(null);
+        this.setSeasonMessageId(null);
+        this.setEpisodeMessageId(null);
+        this.setVideoMessageId(null);
     }
 }

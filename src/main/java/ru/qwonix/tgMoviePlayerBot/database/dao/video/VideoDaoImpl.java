@@ -127,4 +127,41 @@ public class VideoDaoImpl implements VideoDao {
 
         return Optional.empty();
     }
+
+    @Override
+    public List<Video> findAllVideoByVideoId(int videoId) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        List<Video> videos = new ArrayList<>();
+        try (PreparedStatement preparedStatement
+                     = connection.prepareStatement("select * from video where id in " +
+                "(select video_id from episode_video where episode_id = (select episode_id from episode_video where video_id = ?))")) {
+            preparedStatement.setLong(1, videoId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Video video = convert(resultSet);
+                videos.add(video);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+
+        if (videos.isEmpty()) {
+            try (PreparedStatement preparedStatement
+                         = connection.prepareStatement("select * from video where id = ?")) {
+                preparedStatement.setLong(1, videoId);
+
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    Video video = convert(resultSet);
+                    videos.add(video);
+                }
+            } finally {
+                connectionBuilder.releaseConnection(connection);
+            }
+        }
+
+        return videos;
+    }
 }

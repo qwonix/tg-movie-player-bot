@@ -5,6 +5,7 @@ import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.database.dao.series.SeriesDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.series.SeriesDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
+import ru.qwonix.tgMoviePlayerBot.entity.Show;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -40,6 +41,15 @@ public class SeriesServiceImpl implements SeriesService {
         return Optional.empty();
     }
 
+    @Override
+    public List<Series> findByShow(Show show) {
+        try {
+            return seriesDao.findByShowId(show.getId());
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Collections.emptyList();
+    }
 
 
     @Override

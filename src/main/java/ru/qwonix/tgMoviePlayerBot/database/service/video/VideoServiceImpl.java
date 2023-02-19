@@ -51,4 +51,14 @@ public class VideoServiceImpl implements VideoService {
         }
         return Optional.empty();
     }
+
+    @Override
+    public List<Video> findAllVideoByVideo(Video video) {
+        try {
+            return videoDao.findAllVideoByVideoId(video.getId());
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+        return Collections.emptyList();
+    }
 }

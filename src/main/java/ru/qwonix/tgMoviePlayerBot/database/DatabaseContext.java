@@ -5,6 +5,8 @@ import ru.qwonix.tgMoviePlayerBot.config.DatabaseConfig;
 import ru.qwonix.tgMoviePlayerBot.database.dao.DaoException;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieService;
+import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
 import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesService;
@@ -22,6 +24,7 @@ public class DatabaseContext {
 
     private final UserService userService;
     private final SeriesService seriesService;
+    private final MovieService movieService;
     private final SeasonService seasonService;
     private final EpisodeService episodeService;
     private final VideoService videoService;
@@ -49,6 +52,7 @@ public class DatabaseContext {
     public DatabaseContext() {
         userService = new UserServiceImpl(connectionBuilder);
         seriesService = new SeriesServiceImpl(connectionBuilder);
+        movieService = new MovieServiceImpl(connectionBuilder);
         seasonService = new SeasonServiceImpl(connectionBuilder);
         episodeService = new EpisodeServiceImpl(connectionBuilder);
         videoService = new VideoServiceImpl(connectionBuilder) {

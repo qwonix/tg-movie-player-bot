@@ -29,7 +29,7 @@ public class SeriesDaoImpl implements SeriesDao {
                 .title(resultSet.getString("title"))
                 .description(resultSet.getString("description"))
                 .country(resultSet.getString("country"))
-                .previewTgFileId(resultSet.getString("tg_preview_file_id"))
+                .previewTgFileId(resultSet.getString("preview_tg_file_id"))
                 .premiereReleaseDate(this.findPremiereReleaseDate(resultSet.getInt("id")))
                 .show(show.orElse(null))
                 .build();
@@ -136,6 +136,27 @@ public class SeriesDaoImpl implements SeriesDao {
     }
 
     @Override
+    public List<Series> findByShowId(int showId) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        List<Series> serials = new ArrayList<>();
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("SELECT * FROM series where show_id = ?")) {
+            preparedStatement.setLong(1, showId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Series series = convert(resultSet);
+                serials.add(series);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+        return serials;
+    }
+
+    @Override
     public Optional<Series> find(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -159,7 +180,7 @@ public class SeriesDaoImpl implements SeriesDao {
     public void insert(Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement
-                     = connection.prepareStatement("INSERT INTO series (title, description, country, tg_preview_file_id) " +
+                     = connection.prepareStatement("INSERT INTO series (title, description, country, preview_tg_file_id) " +
                 "VALUES(?, ?, ?, ?)")) {
             preparedStatement.setString(1, series.getTitle());
             preparedStatement.setString(2, series.getDescription());
@@ -176,7 +197,7 @@ public class SeriesDaoImpl implements SeriesDao {
     public void update(long id, Series series) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
         try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE series SET title=?, description=?, country=?, tg_preview_file_id=? WHERE id=?")) {
+                     connection.prepareStatement("UPDATE series SET title=?, description=?, country=?, preview_tg_file_id=? WHERE id=?")) {
             preparedStatement.setString(1, series.getTitle());
             preparedStatement.setString(2, series.getDescription());
             preparedStatement.setString(3, series.getCountry());

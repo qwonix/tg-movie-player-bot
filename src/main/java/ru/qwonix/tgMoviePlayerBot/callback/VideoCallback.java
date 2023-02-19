@@ -14,10 +14,7 @@ import ru.qwonix.tgMoviePlayerBot.entity.Video;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchEpisodeException;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchVideoException;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 @Slf4j
@@ -46,7 +43,7 @@ public class VideoCallback extends Callback {
     }
 
     @Override
-    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchVideoException, NoSuchEpisodeException {
+    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchVideoException {
         BotUtils botUtils = new BotUtils(botContext);
         EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
         Optional<Video> optionalVideo = botContext.getDatabaseContext().getVideoService().find(videoId);
@@ -57,27 +54,29 @@ public class VideoCallback extends Callback {
             throw new NoSuchVideoException("Такого видео не существует. Попробуйте найти его заново.");
         }
 
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+
+        List<Video> videos = botContext.getDatabaseContext().getVideoService().findAllVideoByVideo(video);
+        videos.remove(video);
+
+        buttons.addAll(VideoCallback.createVideosButtons(videos));
+
         Optional<Episode> optionalEpisode = episodeService.findByVideo(video);
-        Episode episode;
         if (optionalEpisode.isPresent()) {
-            episode = optionalEpisode.get();
-        } else {
-            throw new NoSuchEpisodeException("Нету эпизода с таким видео");
+            Episode episode = optionalEpisode.get();
+            Optional<Episode> nextEpisode = episodeService.findNext(episode);
+            Optional<Episode> previousEpisode = episodeService.findPrevious(episode);
+            int seasonEpisodesCount = episodeService.countAllBySeason(episode.getSeason());
+
+            List<List<InlineKeyboardButton>> controlButtons
+                    = EpisodeCallback.createControlButtons(episode, nextEpisode, previousEpisode, seasonEpisodesCount);
+            buttons.addAll(controlButtons);
         }
 
-        Optional<Episode> nextEpisode = episodeService.findNext(episode);
-        Optional<Episode> previousEpisode = episodeService.findPrevious(episode);
-        int seasonEpisodesCount = episodeService.countAllBySeason(episode.getSeason());
-
-        List<List<InlineKeyboardButton>> controlButtons
-                = EpisodeCallback.createControlButtons(episode, nextEpisode, previousEpisode, seasonEpisodesCount);
-        List<Video> episodeVideos = episode.getVideos();
-        episodeVideos.remove(video);
-
-        List<List<InlineKeyboardButton>> videoVersions = VideoCallback.createVideosButtons(episodeVideos);
-        controlButtons.addAll(videoVersions);
-
-        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(controlButtons);
+        InlineKeyboardMarkup keyboard = null;
+        if (!buttons.isEmpty()) {
+            keyboard = new InlineKeyboardMarkup(buttons);
+        }
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
         if (messagesIds.hasVideoMessageId()) {

@@ -9,7 +9,6 @@ import org.telegram.telegrambots.meta.api.objects.Video;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.callback.VideoCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.*;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchCallbackException;
@@ -137,6 +136,10 @@ public abstract class State {
 
             case SERIES:
                 callback = new SeriesCallback(jsonObject);
+                break;
+
+            case MOVIE:
+                callback = new MovieCallback(jsonObject);
                 break;
 
             case QUERY:
