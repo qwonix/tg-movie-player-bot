@@ -184,7 +184,7 @@ public class BotUtils {
                         .parseMode("MarkdownV2"));
     }
 
-    public void editMarkdownTextWithKeyBoardAndPhoto(User user, int messageId, String markdownMessage, InlineKeyboardMarkup keyboard, String photoFileId) {
+    public void editMarkdownTextWithKeyBoardAndPhoto(User user, int messageId, String markdownMessage, String photoFileId, InlineKeyboardMarkup keyboard) {
         this.editMedia(user, messageId
                 , EditMessageMedia.builder()
                         .media(new InputMediaPhoto(photoFileId)));

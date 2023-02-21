@@ -96,8 +96,8 @@ public class SeasonCallback extends Callback {
             botUtils.editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , messagesIds.getSeasonMessageId()
                     , text
-                    , keyboard
-                    , season.getPreviewTgFileId());
+                    , season.getPreviewTgFileId()
+                    , keyboard);
 
         } else {
             Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()

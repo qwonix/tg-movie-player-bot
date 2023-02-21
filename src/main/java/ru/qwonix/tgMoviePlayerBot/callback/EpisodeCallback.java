@@ -2,6 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
@@ -62,21 +63,32 @@ public class EpisodeCallback extends Callback {
         if (maxPriorityOptionalVideo.isPresent()) {
             maxPriorityVideo = maxPriorityOptionalVideo.get();
         } else {
-            throw new NoSuchVideoException("no max priority video");
+            throw new NoSuchVideoException("Видео не найдено. Попробуйте заново.");
         }
 
+        Optional<Episode> nextEpisode = episodeService.findNext(episode);
+        Optional<Episode> previousEpisode = episodeService.findPrevious(episode);
+        int seasonEpisodesCount = episodeService.countAllBySeason(episode.getSeason());
+
+        List<List<InlineKeyboardButton>> controlButtons
+                = EpisodeCallback.createControlButtons(episode, nextEpisode, previousEpisode, seasonEpisodesCount);
+
         String episodeText = createText(episode);
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(controlButtons);
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
         if (messagesIds.hasEpisodeMessageId()) {
-            botUtils.editMarkdownTextWithPhoto(chatContext.getUser()
+            botUtils.editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , messagesIds.getEpisodeMessageId()
                     , episodeText
-                    , episode.getPreviewTgFileId());
+                    , episode.getPreviewTgFileId()
+                    , keyboard);
         } else {
-            Integer episodeMessageId = botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
+            Integer episodeMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
                     , episodeText
-                    , episode.getPreviewTgFileId());
+                    , episode.getPreviewTgFileId()
+                    , keyboard
+            );
             messagesIds.setEpisodeMessageId(episodeMessageId);
         }
 
