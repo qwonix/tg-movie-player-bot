@@ -68,44 +68,53 @@ public class BotCommand {
 
     @Command("/all")
     public void all(User user, String[] args) {
+        BotUtils botUtils = new BotUtils(botContext);
         user.getMessagesIds().reset();
         databaseContext.getUserService().merge(user);
+        List<List<InlineKeyboardButton>> moviesKeyboard;
+        {
+            Map<String, String> keyboardMap = new LinkedHashMap<>();
 
-        Map<String, String> keyboardMap = new LinkedHashMap<>();
-
-        for (Movie movie : databaseContext.getMovieService().findByShow(Show.builder().id(1).build())) {
-            JSONObject callbackSeason = new MovieCallback(movie).toCallback();
-            keyboardMap.put(movie.getTitle(), callbackSeason.toString());
+            for (Movie movie : databaseContext.getMovieService().findByShow(Show.builder().id(1).build())) {
+                JSONObject callbackSeason = new MovieCallback(movie).toCallback();
+                keyboardMap.put(movie.getTitle(), callbackSeason.toString());
+            }
+            moviesKeyboard = BotUtils.createOneRowCallbackKeyboard(keyboardMap);
         }
 
         Optional<Series> optionalSeries = botContext.getDatabaseContext().getSeriesService().find(1);
         Series series = optionalSeries.get();
         int page = 0;
 
-        BotUtils botUtils = new BotUtils(botContext);
         String text = String.format("*%s*\n", series.getTitle())
                 + '\n'
                 + String.format("_%s_", series.getDescription());
 
-        int seasonsCount = botContext.getDatabaseContext().getSeasonService().countAllBySeries(series);
-        int limit = Integer.parseInt(BotConfig.getProperty(BotConfig.KEYBOARD_PAGE_SEASONS_MAX));
-        int pagesCount = (int) Math.ceil(seasonsCount / (double) limit);
+        List<List<InlineKeyboardButton>> seasonsKeyboard;
 
-        List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()
-                .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
+        {
+            Map<String, String> keyboardMap = new LinkedHashMap<>();
 
+            int seasonsCount = botContext.getDatabaseContext().getSeasonService().countAllBySeries(series);
+            int limit = Integer.parseInt(BotConfig.getProperty(BotConfig.KEYBOARD_PAGE_SEASONS_MAX));
+            int pagesCount = (int) Math.ceil(seasonsCount / (double) limit);
+            List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()
+                    .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
 
-        for (Season season : seriesSeasons) {
-            JSONObject callbackSeason = new SeasonCallback(season, 0).toCallback();
-            keyboardMap.put("Сезон " + season.getNumber(), callbackSeason.toString());
+            for (Season season : seriesSeasons) {
+                JSONObject callbackSeason = new SeasonCallback(season, 0).toCallback();
+                keyboardMap.put("Сезон " + season.getNumber(), callbackSeason.toString());
+            }
+            seasonsKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
+
+            if (pagesCount > 1) {
+                List<InlineKeyboardButton> controlButtons = SeriesCallback.createControlButtons(series.getId(), pagesCount, page);
+                seasonsKeyboard.add(controlButtons);
+            }
         }
-        List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
 
-        if (pagesCount > 1) {
-            List<InlineKeyboardButton> controlButtons = SeriesCallback.createControlButtons(series.getId(), pagesCount, page);
-            inlineKeyboard.add(controlButtons);
-        }
-        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(inlineKeyboard);
+        moviesKeyboard.addAll(seasonsKeyboard);
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(moviesKeyboard);
 
         Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(user
                 , text
