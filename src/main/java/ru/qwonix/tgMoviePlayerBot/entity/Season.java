@@ -44,7 +44,6 @@ public class Season {
             seriesFinalReleaseDate = this.getFinalReleaseDate()
                     .format(DateTimeFormatter.ofPattern("d MMMM y", Locale.forLanguageTag("ru")))
                     + " года";
-            ;
         }
         return seriesFinalReleaseDate;
     }

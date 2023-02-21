@@ -40,7 +40,7 @@ public class MovieCallback extends Callback {
     }
 
     @Override
-    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchEpisodeException, NoSuchMovieException, NoSuchVideoException {
+    public void handleCallback(BotContext botContext, ChatContext chatContext) throws  NoSuchMovieException, NoSuchVideoException {
         BotUtils botUtils = new BotUtils(botContext);
 
         MovieService movieService = botContext.getDatabaseContext().getMovieService();
@@ -70,12 +70,12 @@ public class MovieCallback extends Callback {
         messagesIds.reset();
 
         if (messagesIds.hasEpisodeMessageId()) {
-            botUtils.editMarkdownTextWithPhoto(chatContext.getUser()
+            botUtils.editPhotoWithMarkdownText(chatContext.getUser()
                     , messagesIds.getEpisodeMessageId()
                     , movieText
                     , movie.getPreviewTgFileId());
         } else {
-            Integer movieMessageId = botUtils.sendMarkdownTextWithPhoto(chatContext.getUser()
+            Integer movieMessageId = botUtils.sendPhotoWithMarkdownText(chatContext.getUser()
                     , movieText
                     , movie.getPreviewTgFileId());
             messagesIds.setEpisodeMessageId(movieMessageId);

@@ -93,14 +93,14 @@ public class SeasonCallback extends Callback {
         messagesIds.reset();
 
         if (messagesIds.hasSeasonMessageId()) {
-            botUtils.editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+            botUtils.editPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
                     , messagesIds.getSeasonMessageId()
                     , text
                     , season.getPreviewTgFileId()
                     , keyboard);
 
         } else {
-            Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+            Integer seriesMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
                     , text
                     , season.getPreviewTgFileId()
                     , keyboard);

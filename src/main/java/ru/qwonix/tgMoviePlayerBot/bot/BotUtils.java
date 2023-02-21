@@ -19,7 +19,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.config.TelegramConfig;
-import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import java.util.stream.Stream;
 @Slf4j
 public class BotUtils {
     private final Bot bot;
-    private final DatabaseContext databaseContext;
 
     public final static String PROVIDED_BY_TEXT = "||*Предоставлено @"
             + TelegramConfig.getProperty(TelegramConfig.BOT_USERNAME).replaceAll("_", "\\\\_")
@@ -40,7 +38,6 @@ public class BotUtils {
 
     public BotUtils(BotContext botContext) {
         this.bot = botContext.getBot();
-        this.databaseContext = botContext.getDatabaseContext();
     }
 
     public static List<List<InlineKeyboardButton>> createOneRowCallbackKeyboard(Map<String, String> buttons) {
@@ -93,14 +90,14 @@ public class BotUtils {
     }
 
     public Integer sendVideoWithKeyboard(User user, String fileId, InlineKeyboardMarkup keyboard) {
-        return this.sendVideoWithMarkdownTextKeyboard(user, null, fileId, keyboard);
+        return this.sendVideoWithMarkdownTextAndKeyboard(user, null, fileId, keyboard);
     }
 
     public Integer sendVideoWithMarkdownText(User user, String markdownMessage, String fileId) {
-        return this.sendVideoWithMarkdownTextKeyboard(user, markdownMessage, fileId, null);
+        return this.sendVideoWithMarkdownTextAndKeyboard(user, markdownMessage, fileId, null);
     }
 
-    public Integer sendVideoWithMarkdownTextKeyboard(User user, String markdownMessage, String fileId, InlineKeyboardMarkup keyboard) {
+    public Integer sendVideoWithMarkdownTextAndKeyboard(User user, String markdownMessage, String fileId, InlineKeyboardMarkup keyboard) {
         return this.sendVideo(user
                 , SendVideo.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
@@ -109,82 +106,54 @@ public class BotUtils {
                         .replyMarkup(keyboard));
     }
 
-    public void editVideoWithKeyboard(User user, Integer messageId, String fileId, InlineKeyboardMarkup keyboard) {
-        this.editMedia(user, messageId
-                , EditMessageMedia.builder()
-                        .media(new InputMediaVideo(fileId))
-                        .replyMarkup(keyboard));
+    public Integer sendPhotoWithMarkdownText(User user, String markdownMessage, String photoFileId) {
+        return this.sendPhotoWithMarkdownTextKeyBoardReply(user, markdownMessage, photoFileId, null, null);
     }
 
-    public void editVideoWithMarkdownTextKeyboard(User user, Integer messageId, String markdownMessage, String fileId, InlineKeyboardMarkup keyboard) {
-        this.editMedia(user, messageId
-                , EditMessageMedia.builder()
-                        .media(new InputMediaVideo(fileId))
-                        .replyMarkup(keyboard));
-
-        this.editMessageCaption(user, messageId
-                , EditMessageCaption.builder()
-                        .caption(escapeMarkdownMessage(markdownMessage))
-                        .parseMode("MarkdownV2")
-                        .replyMarkup(keyboard));
-
+    public Integer sendPhotoWithMarkdownTextAndKeyboard(User user, String markdownMessage, String photoFileId, ReplyKeyboard keyboard) {
+        return this.sendPhotoWithMarkdownTextKeyBoardReply(user, markdownMessage, photoFileId, keyboard, null);
     }
 
-    public Integer sendText(User user, String text) {
-        return this.sendMessage(user
-                , SendMessage.builder()
-                        .chatId(String.valueOf(user.getChatId()))
-                        .text(text));
-    }
-
-    public Integer sendMarkdownTextWithPhoto(User user, String markdownMessage, String photoFileId) {
-        return this.sendMarkdownTextWithKeyBoardAndPhoto(user, markdownMessage, photoFileId, null);
-    }
-
-    public Integer sendMarkdownTextWithKeyBoardAndPhoto(User user, String markdownMessage, String photoFileId, ReplyKeyboard keyboard) {
+    public Integer sendPhotoWithMarkdownTextKeyBoardReply(User user, String markdownMessage, String photoFileId, ReplyKeyboard keyboard, Integer replayMessageId) {
         return this.sendPhoto(user
                 , SendPhoto.builder()
                         .caption(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
                         .photo(new InputFile(photoFileId))
-                        .replyMarkup(keyboard));
-    }
-
-    public Integer sendMarkdownTextWithReplay(User user, String markdownMessage, int replayMessageId) {
-        return this.sendMessage(user
-                , SendMessage.builder()
-                        .text(escapeMarkdownMessage(markdownMessage))
-                        .parseMode("MarkdownV2")
+                        .replyMarkup(keyboard)
                         .replyToMessageId(replayMessageId));
     }
 
     public Integer sendMarkdownText(User user, String markdownMessage) {
-        return this.sendMessage(user
-                , SendMessage.builder()
-                        .text(escapeMarkdownMessage(markdownMessage))
-                        .parseMode("MarkdownV2"));
+        return this.sendMarkdownTextWithKeyboardAndReplay(user, markdownMessage, null, null);
     }
 
     public Integer sendMarkdownTextWithKeyBoard(User user, String markdownMessage, ReplyKeyboard keyboard) {
+        return this.sendMarkdownTextWithKeyboardAndReplay(user, markdownMessage, keyboard, null);
+    }
+
+    public Integer sendMarkdownTextWithReplay(User user, String markdownMessage, Integer replayMessageId) {
+        return this.sendMarkdownTextWithKeyboardAndReplay(user, markdownMessage, null, replayMessageId);
+    }
+
+    public Integer sendMarkdownTextWithKeyboardAndReplay(User user, String markdownMessage, ReplyKeyboard keyboard, Integer replayMessageId) {
         return this.sendMessage(user
                 , SendMessage.builder()
                         .text(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
-                        .replyMarkup(keyboard));
+                        .replyMarkup(keyboard)
+                        .replyToMessageId(replayMessageId));
     }
 
-    public void editMarkdownTextWithPhoto(User user, Integer messageId, String markdownMessage, String photoFileId) {
-        this.editMedia(user, messageId
-                , EditMessageMedia.builder()
-                        .media(new InputMediaPhoto(photoFileId)));
-
-        this.editMessageCaption(user, messageId
-                , EditMessageCaption.builder()
-                        .caption(escapeMarkdownMessage(markdownMessage))
-                        .parseMode("MarkdownV2"));
+    public void editPhotoWithMarkdownText(User user, Integer messageId, String markdownMessage, String photoFileId) {
+        this.editPhotoWithMarkdownTextAndKeyboard(user, messageId, markdownMessage, photoFileId, null);
     }
 
-    public void editMarkdownTextWithKeyBoardAndPhoto(User user, int messageId, String markdownMessage, String photoFileId, InlineKeyboardMarkup keyboard) {
+    public void editPhotoWithKeyboard(User user, int messageId, InlineKeyboardMarkup keyboard, String photoFileId) {
+        this.editPhotoWithMarkdownTextAndKeyboard(user, messageId, null, photoFileId, keyboard);
+    }
+
+    public void editPhotoWithMarkdownTextAndKeyboard(User user, int messageId, String markdownMessage, String photoFileId, InlineKeyboardMarkup keyboard) {
         this.editMedia(user, messageId
                 , EditMessageMedia.builder()
                         .media(new InputMediaPhoto(photoFileId)));
@@ -196,14 +165,25 @@ public class BotUtils {
                         .replyMarkup(keyboard));
     }
 
-    public void editKeyBoardAndPhoto(User user, int messageId, InlineKeyboardMarkup keyboard, String photoFileId) {
+    public void editVideoWithMarkdownTextAndKeyboard(User user, Integer messageId, String markdownMessage, String fileId, InlineKeyboardMarkup keyboard) {
         this.editMedia(user, messageId
                 , EditMessageMedia.builder()
-                        .media(new InputMediaPhoto(photoFileId)));
+                        .media(new InputMediaVideo(fileId))
+                        .replyMarkup(keyboard));
 
         this.editMessageCaption(user, messageId
                 , EditMessageCaption.builder()
+                        .caption(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
+                        .replyMarkup(keyboard));
+
+    }
+
+
+    public void editVideoWithKeyboard(User user, Integer messageId, String fileId, InlineKeyboardMarkup keyboard) {
+        this.editMedia(user, messageId
+                , EditMessageMedia.builder()
+                        .media(new InputMediaVideo(fileId))
                         .replyMarkup(keyboard));
     }
 
@@ -214,6 +194,20 @@ public class BotUtils {
                         .text(escapeMarkdownMessage(markdownMessage))
                         .parseMode("MarkdownV2")
                         .replyMarkup(keyboard));
+    }
+
+    public void confirmCallback(String callbackQueryId) {
+        this.executeAlertWithText(callbackQueryId, null, null);
+    }
+
+    public void executeAlertWithText(String callbackQueryId, String text, Boolean showAlert) {
+        AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
+                .callbackQueryId(callbackQueryId)
+                .text(text)
+                .showAlert(showAlert)
+                .build();
+
+        this.executeAlert(answerCallbackQuery);
     }
 
     private Integer sendPhoto(User user, SendPhoto.SendPhotoBuilder photoBuilder) {
@@ -244,6 +238,17 @@ public class BotUtils {
         return null;
     }
 
+    private Integer sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
+        SendMessage message = messageBuilder.chatId(String.valueOf(user.getChatId())).build();
+        try {
+            Message execute = bot.execute(message);
+            return execute.getMessageId();
+        } catch (TelegramApiException e) {
+            log.error("message sending error " + user, e);
+        }
+        return null;
+    }
+
     private void editMessage(User user, int messageId, EditMessageText.EditMessageTextBuilder editMessageTextBuilder) {
         EditMessageText editMessage = editMessageTextBuilder
                 .chatId(String.valueOf(user.getChatId()))
@@ -270,24 +275,6 @@ public class BotUtils {
         }
     }
 
-    private Integer sendMessage(User user, SendMessage.SendMessageBuilder messageBuilder) {
-        SendMessage message = messageBuilder.chatId(String.valueOf(user.getChatId())).build();
-        try {
-            Message execute = bot.execute(message);
-            return execute.getMessageId();
-        } catch (TelegramApiException e) {
-            log.error("message sending error " + user, e);
-        }
-        return null;
-    }
-
-    public void confirmCallback(String callbackQueryId) {
-        AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
-                .callbackQueryId(callbackQueryId)
-                .showAlert(false)
-                .build();
-        this.executeAlert(answerCallbackQuery);
-    }
 
     public void executeAlert(AnswerCallbackQuery answerCallbackQuery) {
         try {
@@ -295,16 +282,6 @@ public class BotUtils {
         } catch (TelegramApiException e) {
             log.error("execute alert sending error ", e);
         }
-    }
-
-    public void executeAlertWithText(String callbackQueryId, String text, boolean showAlert) {
-        AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
-                .callbackQueryId(callbackQueryId)
-                .text(text)
-                .showAlert(showAlert)
-                .build();
-
-        this.executeAlert(answerCallbackQuery);
     }
 
     private void editMedia(User user, int messageId, EditMessageMedia.EditMessageMediaBuilder editMessageMediaBuilder) {

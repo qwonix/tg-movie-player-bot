@@ -78,13 +78,13 @@ public class EpisodeCallback extends Callback {
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
         if (messagesIds.hasEpisodeMessageId()) {
-            botUtils.editMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+            botUtils.editPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
                     , messagesIds.getEpisodeMessageId()
                     , episodeText
                     , episode.getPreviewTgFileId()
                     , keyboard);
         } else {
-            Integer episodeMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+            Integer episodeMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
                     , episodeText
                     , episode.getPreviewTgFileId()
                     , keyboard

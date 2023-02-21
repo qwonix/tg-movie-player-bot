@@ -116,7 +116,7 @@ public class BotCommand {
         moviesKeyboard.addAll(seasonsKeyboard);
         InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(moviesKeyboard);
 
-        Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(user
+        Integer seriesMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(user
                 , text
                 , series.getPreviewTgFileId()
                 , keyboard);
@@ -171,7 +171,7 @@ public class BotCommand {
             String adminPassword = BotConfig.getProperty(BotConfig.ADMIN_PASSWORD);
             if (args[0].equals(adminPassword)) {
                 user = databaseContext.getUserService().makeAdmin(user);
-                botUtils.sendText(user, "Вы получили права админа! /admin для доступа в меню");
+                botUtils.sendMarkdownText(user, "Вы получили права админа! /admin для доступа в меню");
                 log.warn("became an admin: {}", user);
             } else {
                 log.warn("trying to become an admin: {}", user);

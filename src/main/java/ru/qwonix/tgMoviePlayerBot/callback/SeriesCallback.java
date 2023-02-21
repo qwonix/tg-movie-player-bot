@@ -98,12 +98,12 @@ public class SeriesCallback extends Callback {
         messagesIds.reset();
 
         if (messagesIds.hasSeriesMessageId()) {
-            botUtils.editKeyBoardAndPhoto(chatContext.getUser()
+            botUtils.editPhotoWithKeyboard(chatContext.getUser()
                     , messagesIds.getSeriesMessageId()
                     , keyboard
                     , series.getPreviewTgFileId());
         } else {
-            Integer seriesMessageId = botUtils.sendMarkdownTextWithKeyBoardAndPhoto(chatContext.getUser()
+            Integer seriesMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
                     , text
                     , series.getPreviewTgFileId()
                     , keyboard);

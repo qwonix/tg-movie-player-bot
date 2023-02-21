@@ -39,7 +39,7 @@ public class DefaultState extends State {
                 return;
             }
 
-            new BotUtils(botContext).sendText(user, "Используйте команды и кнопки, бот не имеет интерфейса общения");
+            new BotUtils(botContext).sendMarkdownText(user, "Используйте команды и кнопки, бот не имеет интерфейса общения");
         } catch (IllegalAccessException e) {
             log.error("reflective access exception", e);
         } catch (InvocationTargetException e) {

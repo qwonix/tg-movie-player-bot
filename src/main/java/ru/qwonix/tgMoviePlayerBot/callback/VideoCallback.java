@@ -8,10 +8,7 @@ import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
-import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
-import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Video;
-import ru.qwonix.tgMoviePlayerBot.exception.NoSuchEpisodeException;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchVideoException;
 
 import java.util.*;
@@ -45,7 +42,6 @@ public class VideoCallback extends Callback {
     @Override
     public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchVideoException {
         BotUtils botUtils = new BotUtils(botContext);
-        EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
         Optional<Video> optionalVideo = botContext.getDatabaseContext().getVideoService().find(videoId);
         Video video;
         if (optionalVideo.isPresent()) {
@@ -54,24 +50,10 @@ public class VideoCallback extends Callback {
             throw new NoSuchVideoException("Такого видео не существует. Попробуйте найти его заново.");
         }
 
-        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
-
         List<Video> videos = botContext.getDatabaseContext().getVideoService().findAllVideoByVideo(video);
         videos.remove(video);
 
-        buttons.addAll(VideoCallback.createVideosButtons(videos));
-
-        Optional<Episode> optionalEpisode = episodeService.findByVideo(video);
-        if (optionalEpisode.isPresent()) {
-            Episode episode = optionalEpisode.get();
-            Optional<Episode> nextEpisode = episodeService.findNext(episode);
-            Optional<Episode> previousEpisode = episodeService.findPrevious(episode);
-            int seasonEpisodesCount = episodeService.countAllBySeason(episode.getSeason());
-
-            List<List<InlineKeyboardButton>> controlButtons
-                    = EpisodeCallback.createControlButtons(episode, nextEpisode, previousEpisode, seasonEpisodesCount);
-            buttons.addAll(controlButtons);
-        }
+        List<List<InlineKeyboardButton>> buttons = VideoCallback.createVideosButtons(videos);
 
         InlineKeyboardMarkup keyboard = null;
         if (!buttons.isEmpty()) {
@@ -80,13 +62,13 @@ public class VideoCallback extends Callback {
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
         if (messagesIds.hasVideoMessageId()) {
-            botUtils.editVideoWithMarkdownTextKeyboard(chatContext.getUser()
+            botUtils.editVideoWithMarkdownTextAndKeyboard(chatContext.getUser()
                     , messagesIds.getVideoMessageId()
                     , BotUtils.PROVIDED_BY_TEXT
                     , video.getVideoTgFileId()
                     , keyboard);
         } else {
-            Integer videoMessageId = botUtils.sendVideoWithMarkdownTextKeyboard(chatContext.getUser()
+            Integer videoMessageId = botUtils.sendVideoWithMarkdownTextAndKeyboard(chatContext.getUser()
                     , BotUtils.PROVIDED_BY_TEXT
                     , video.getVideoTgFileId()
                     , keyboard);
