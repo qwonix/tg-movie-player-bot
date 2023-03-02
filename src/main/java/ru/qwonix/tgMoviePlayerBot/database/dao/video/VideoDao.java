@@ -11,8 +11,6 @@ import java.util.Optional;
 public interface VideoDao extends DefaultDao<Video> {
     Video convert(ResultSet userResultSet) throws SQLException;
 
-    List<Video> findAll() throws SQLException;
-
     List<Video> findAllByEpisodeId(int episodeId) throws SQLException;
 
     List<Video> findAllByMovieId(int episodeId) throws SQLException;

@@ -5,9 +5,10 @@ import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Optional;
 
 
@@ -27,24 +28,6 @@ public class UserDaoImpl implements UserDao {
                 .stateType(State.StateType.valueOf(userResultSet.getString("state")))
                 .messagesIds(MessagesIds.fromJson(userResultSet.getString("tg_messages_ids")))
                 .build();
-    }
-
-    @Override
-    public List<User> findAll() throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<User> users = new ArrayList<>();
-        try (Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM \"user\"");
-
-            while (resultSet.next()) {
-                User user = convert(resultSet);
-                users.add(user);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return users;
     }
 
     @Override
@@ -103,19 +86,5 @@ public class UserDaoImpl implements UserDao {
             connectionBuilder.releaseConnection(connection);
         }
 
-    }
-
-    @Override
-    public void delete(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("DELETE FROM \"user\" WHERE chat_id=?")) {
-            preparedStatement.setLong(1, id);
-
-            preparedStatement.executeUpdate();
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
     }
 }

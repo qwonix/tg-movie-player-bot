@@ -10,12 +10,10 @@ import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.callback.*;
-import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchCallbackException;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 public abstract class State {
@@ -75,28 +73,6 @@ public abstract class State {
         List<PhotoSize> photos = update.getMessage().getPhoto();
         log.info("user {} send {} photos", chatContext.getUser(), photos.size());
         PhotoSize photoSize = photos.stream().max(Comparator.comparingInt(PhotoSize::getFileSize)).get();
-
-        if (update.getMessage().getCaption() != null) {
-            String text = update.getMessage().getCaption();
-
-            try {
-                int episodeId = Integer.parseInt(text);
-
-                String fileId = photoSize.getFileId();
-                Optional<Episode> episodeOptional = botContext.getDatabaseContext().getEpisodeService().find(episodeId);
-                if (episodeOptional.isPresent()) {
-                    Episode episode = episodeOptional.get();
-                    episode.setPreviewTgFileId(fileId);
-                    botContext.getDatabaseContext().getEpisodeService().insertOrUpdate(episode);
-
-                    log.info("video {} preview file id has been updated", episode);
-                    return;
-                }
-
-            } catch (NumberFormatException e) {
-                log.info("can not parse episode id");
-            }
-        }
 
         botUtils.sendMarkdownTextWithReplay(chatContext.getUser()
                 , "`" + photoSize.getFileId() + "`"

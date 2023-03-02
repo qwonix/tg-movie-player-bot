@@ -33,17 +33,6 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public List<Video> findAll() {
-        try {
-            return videoDao.findAll();
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
-    }
-
-
-    @Override
     public Optional<Video> findMaxPriorityByEpisode(Episode episode) {
         try {
             return videoDao.findMaxPriorityByEpisodeId(episode.getId());

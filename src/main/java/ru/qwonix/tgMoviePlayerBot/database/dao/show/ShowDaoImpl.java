@@ -3,9 +3,10 @@ package ru.qwonix.tgMoviePlayerBot.database.dao.show;
 import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.Show;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Optional;
 
 public class ShowDaoImpl implements ShowDao {
@@ -25,24 +26,6 @@ public class ShowDaoImpl implements ShowDao {
                 .build();
     }
 
-    @Override
-    public List<Show> findAll() throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-        List<Show> serials = new ArrayList<>();
-        try (Statement statement = connection.createStatement()) {
-            String SQL = "SELECT * FROM show";
-            ResultSet resultSet = statement.executeQuery(SQL);
-
-            while (resultSet.next()) {
-                Show show = convert(resultSet);
-                serials.add(show);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return serials;
-    }
-
 
     @Override
     public Optional<Show> find(long id) throws SQLException {
@@ -51,42 +34,6 @@ public class ShowDaoImpl implements ShowDao {
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT * FROM show WHERE id=?")) {
             preparedStatement.setLong(1, id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Show show = convert(resultSet);
-                return Optional.of(show);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-
-        return Optional.empty();
-    }
-
-    @Override
-    public void insert(Show show) throws SQLException {
-
-    }
-
-    @Override
-    public void update(long id, Show show) throws SQLException {
-
-    }
-
-    @Override
-    public void delete(long id) throws SQLException {
-
-    }
-
-    @Override
-    public Optional<Show> findBySeries(long seriesId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM show WHERE id = " +
-                             "(select show_id from series where id = ?)")) {
-            preparedStatement.setLong(1, seriesId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {

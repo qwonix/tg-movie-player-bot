@@ -20,9 +20,4 @@ public interface EpisodeDao extends DefaultDao<Episode> {
     List<Episode> findAllBySeasonIdOrderByNumberDesc(long seasonId) throws SQLException;
 
     int countAllBySeasonId(long seasonId) throws SQLException;
-
-
-    Optional<Episode> findLast(int seasonId) throws SQLException;
-
-    Optional<Episode> findByVideo(int videoId) throws SQLException;
 }

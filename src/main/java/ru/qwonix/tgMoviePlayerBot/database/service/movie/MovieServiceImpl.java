@@ -21,16 +21,6 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public boolean exists(Movie movie) {
-        try {
-            return movieDao.find(movie.getId()).isPresent();
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return false;
-    }
-
-    @Override
     public Optional<Movie> find(int id) {
         try {
             return movieDao.find(id);

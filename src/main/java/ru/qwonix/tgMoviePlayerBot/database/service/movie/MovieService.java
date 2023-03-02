@@ -8,8 +8,6 @@ import java.util.Optional;
 
 public interface MovieService {
 
-    boolean exists(Movie movie);
-
     Optional<Movie> find(int id);
 
     List<Movie> findByShow(Show show);

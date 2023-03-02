@@ -9,7 +9,10 @@ import ru.qwonix.tgMoviePlayerBot.entity.Movie;
 import ru.qwonix.tgMoviePlayerBot.entity.Show;
 import ru.qwonix.tgMoviePlayerBot.entity.Video;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,25 +43,6 @@ public class MovieDaoImpl implements MovieDao {
 
 
     @Override
-    public List<Movie> findAll() throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-        List<Movie> serials = new ArrayList<>();
-        try (Statement statement = connection.createStatement()) {
-            String SQL = "SELECT * FROM movie";
-            ResultSet resultSet = statement.executeQuery(SQL);
-
-            while (resultSet.next()) {
-                Movie movie = convert(resultSet);
-                serials.add(movie);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return serials;
-    }
-
-
-    @Override
     public Optional<Movie> find(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -78,20 +62,6 @@ public class MovieDaoImpl implements MovieDao {
         return Optional.empty();
     }
 
-    @Override
-    public void insert(Movie movie) throws SQLException {
-
-    }
-
-    @Override
-    public void update(long id, Movie movie) throws SQLException {
-
-    }
-
-    @Override
-    public void delete(long id) throws SQLException {
-
-    }
 
     @Override
     public List<Movie> findByShowId(int showId) throws SQLException {

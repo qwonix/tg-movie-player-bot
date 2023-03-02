@@ -2,7 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.database;
 
 import lombok.Data;
 import ru.qwonix.tgMoviePlayerBot.config.DatabaseConfig;
-import ru.qwonix.tgMoviePlayerBot.database.dao.DaoException;
+import ru.qwonix.tgMoviePlayerBot.exception.DaoException;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieService;

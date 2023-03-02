@@ -2,10 +2,10 @@ package ru.qwonix.tgMoviePlayerBot.bot.state;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.qwonix.tgMoviePlayerBot.bot.BotCommand;
 import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
-import ru.qwonix.tgMoviePlayerBot.bot.BotCommand;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.lang.reflect.InvocationTargetException;

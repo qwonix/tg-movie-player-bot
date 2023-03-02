@@ -3,7 +3,10 @@ package ru.qwonix.tgMoviePlayerBot.database.dao.video;
 import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
 import ru.qwonix.tgMoviePlayerBot.entity.Video;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,24 +32,6 @@ public class VideoDaoImpl implements VideoDao {
     }
 
     @Override
-    public List<Video> findAll() throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<Video> videos = new ArrayList<>();
-        try (Statement statement = connection.createStatement()) {
-            String SQL = "SELECT * FROM video";
-            ResultSet resultSet = statement.executeQuery(SQL);
-            while (resultSet.next()) {
-                Video video = convert(resultSet);
-                videos.add(video);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return videos;
-    }
-
-    @Override
     public Optional<Video> find(long id) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
@@ -64,21 +49,6 @@ public class VideoDaoImpl implements VideoDao {
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public void insert(Video video) throws SQLException {
-
-    }
-
-    @Override
-    public void update(long id, Video video) throws SQLException {
-
-    }
-
-    @Override
-    public void delete(long id) throws SQLException {
-
     }
 
 
@@ -115,15 +85,15 @@ public class VideoDaoImpl implements VideoDao {
     }
 
 
-    @Override
-    public Optional<Video> findMaxPriorityByEpisodeId(int episodeId) throws SQLException {
+    private Optional<Video> findMaxPriorityByEntityIdAndEntityType(int entityId, String entityType) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("select * from video " +
                              "inner join video_entity ve on video.id = ve.video_id " +
-                             "where entity_id = ? and entity_type='episode' order by priority limit 1")) {
-            preparedStatement.setLong(1, episodeId);
+                             "where entity_id = ? and entity_type = ? order by priority limit 1")) {
+            preparedStatement.setLong(1, entityId);
+            preparedStatement.setString(2, entityType);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -139,24 +109,12 @@ public class VideoDaoImpl implements VideoDao {
 
     @Override
     public Optional<Video> findMaxPriorityByMovieId(int movieId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        return findMaxPriorityByEntityIdAndEntityType(movieId, "movie");
+    }
 
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("select * from video " +
-                             "inner join video_entity ve on video.id = ve.video_id " +
-                             "where entity_id = ? and entity_type='movie' order by priority limit 1")) {
-            preparedStatement.setLong(1, movieId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Video video = convert(resultSet);
-                return Optional.of(video);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-
-        return Optional.empty();
+    @Override
+    public Optional<Video> findMaxPriorityByEpisodeId(int episodeId) throws SQLException {
+        return findMaxPriorityByEntityIdAndEntityType(episodeId, "episode");
     }
 
     @Override

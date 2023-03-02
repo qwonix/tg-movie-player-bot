@@ -6,10 +6,11 @@ import ru.qwonix.tgMoviePlayerBot.database.dao.show.ShowDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 import ru.qwonix.tgMoviePlayerBot.entity.Show;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class SeriesDaoImpl implements SeriesDao {
@@ -35,88 +36,6 @@ public class SeriesDaoImpl implements SeriesDao {
                 .build();
     }
 
-
-    @Override
-    public List<Series> findAll() throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-        List<Series> serials = new ArrayList<>();
-        try (Statement statement = connection.createStatement()) {
-            String SQL = "SELECT * FROM series";
-            ResultSet resultSet = statement.executeQuery(SQL);
-
-            while (resultSet.next()) {
-                Series series = convert(resultSet);
-                serials.add(series);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return serials;
-    }
-
-
-    @Override
-    public int countAllByNameLike(String name) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT count(*) as match FROM series where lower(title) like ?")) {
-            preparedStatement.setString(1, "%" + name.toLowerCase() + "%");
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            resultSet.next();
-            return resultSet.getInt("match");
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-    }
-
-    @Override
-    public List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<Series> serials = new ArrayList<>();
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM series where lower(title) like ? limit ? offset ?")) {
-            preparedStatement.setString(1, "%" + name.toLowerCase() + "%");
-            preparedStatement.setInt(2, limit);
-            preparedStatement.setInt(3, limit * page);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                Series series = convert(resultSet);
-                serials.add(series);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return serials;
-    }
-
-    @Override
-    public List<Series> findAllWithLimitAndPage(int limit, int page) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<Series> serials = new ArrayList<>();
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM series limit ? offset ?")) {
-            preparedStatement.setInt(1, limit);
-            preparedStatement.setInt(2, limit * page);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                Series series = convert(resultSet);
-                serials.add(series);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return serials;
-    }
-
     @Override
     public LocalDate findPremiereReleaseDate(int seriesId) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
@@ -133,27 +52,6 @@ public class SeriesDaoImpl implements SeriesDao {
         } finally {
             connectionBuilder.releaseConnection(connection);
         }
-    }
-
-    @Override
-    public List<Series> findByShowId(int showId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        List<Series> serials = new ArrayList<>();
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("SELECT * FROM series where show_id = ?")) {
-            preparedStatement.setLong(1, showId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                Series series = convert(resultSet);
-                serials.add(series);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return serials;
     }
 
     @Override
@@ -174,50 +72,5 @@ public class SeriesDaoImpl implements SeriesDao {
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public void insert(Series series) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-        try (PreparedStatement preparedStatement
-                     = connection.prepareStatement("INSERT INTO series (title, description, country, preview_tg_file_id) " +
-                "VALUES(?, ?, ?, ?)")) {
-            preparedStatement.setString(1, series.getTitle());
-            preparedStatement.setString(2, series.getDescription());
-            preparedStatement.setString(3, series.getCountry());
-            preparedStatement.setString(4, series.getPreviewTgFileId());
-
-            preparedStatement.executeUpdate();
-        }
-
-        connectionBuilder.releaseConnection(connection);
-    }
-
-    @Override
-    public void update(long id, Series series) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE series SET title=?, description=?, country=?, preview_tg_file_id=? WHERE id=?")) {
-            preparedStatement.setString(1, series.getTitle());
-            preparedStatement.setString(2, series.getDescription());
-            preparedStatement.setString(3, series.getCountry());
-            preparedStatement.setString(4, series.getPreviewTgFileId());
-            preparedStatement.setLong(5, id);
-            preparedStatement.executeUpdate();
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-    }
-
-    @Override
-    public void delete(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("DELETE FROM series WHERE id=?")) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.executeUpdate();
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
     }
 }

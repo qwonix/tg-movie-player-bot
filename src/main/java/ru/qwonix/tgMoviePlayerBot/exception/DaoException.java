@@ -1,9 +1,6 @@
-package ru.qwonix.tgMoviePlayerBot.database.dao;
+package ru.qwonix.tgMoviePlayerBot.exception;
 
 public class DaoException extends Exception {
-    public DaoException() {
-    }
-
     public DaoException(String message) {
         super(message);
     }

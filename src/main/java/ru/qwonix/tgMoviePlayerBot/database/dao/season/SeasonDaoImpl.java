@@ -6,7 +6,10 @@ import ru.qwonix.tgMoviePlayerBot.database.dao.series.SeriesDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,27 +42,8 @@ public class SeasonDaoImpl implements SeasonDao {
                 .build();
     }
 
-    @Override
-    public List<Season> findAll() throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
 
-        List<Season> seasons = new ArrayList<>();
-        try (Statement statement = connection.createStatement()) {
-            String SQL = "SELECT * FROM season";
-            ResultSet resultSet = statement.executeQuery(SQL);
-            while (resultSet.next()) {
-                Season season = convert(resultSet);
-                seasons.add(season);
-            }
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-        return seasons;
-    }
-
-
-    @Override
-    public LocalDate findPremiereReleaseDate(int seasonId) throws SQLException {
+    private LocalDate findPremiereReleaseDate(int seasonId) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
@@ -75,8 +59,7 @@ public class SeasonDaoImpl implements SeasonDao {
         }
     }
 
-    @Override
-    public LocalDate findFinalReleaseDate(int seasonId) throws SQLException {
+    private LocalDate findFinalReleaseDate(int seasonId) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
@@ -157,56 +140,5 @@ public class SeasonDaoImpl implements SeasonDao {
         return Optional.empty();
     }
 
-    @Override
-    public void insert(Season season) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
 
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("INSERT INTO season (number, description, total_episodes_count, series_id, preview_tg_file_id) " +
-                             "VALUES(?, ?, ?, ?, ?)")) {
-
-            preparedStatement.setInt(1, season.getNumber());
-            preparedStatement.setString(2, season.getDescription());
-            preparedStatement.setObject(3, season.getTotalEpisodesCount());
-            preparedStatement.setInt(4, season.getSeries().getId());
-            preparedStatement.setString(5, season.getPreviewTgFileId());
-
-            preparedStatement.executeUpdate();
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-    }
-
-    @Override
-    public void update(long id, Season season) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("UPDATE season SET number=?, description=?, total_episodes_count=?, series_id=?, preview_tg_file_id=? WHERE id=?")) {
-
-            preparedStatement.setInt(1, season.getNumber());
-            preparedStatement.setString(2, season.getDescription());
-            preparedStatement.setObject(3, season.getTotalEpisodesCount());
-            preparedStatement.setLong(4, season.getSeries().getId());
-            preparedStatement.setString(5, season.getPreviewTgFileId());
-            preparedStatement.setLong(6, id);
-
-            preparedStatement.executeUpdate();
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-    }
-
-    @Override
-    public void delete(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
-
-        try (PreparedStatement preparedStatement =
-                     connection.prepareStatement("DELETE FROM season WHERE id=?")) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.executeUpdate();
-        } finally {
-            connectionBuilder.releaseConnection(connection);
-        }
-    }
 }

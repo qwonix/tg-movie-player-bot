@@ -22,16 +22,6 @@ public class SeriesServiceImpl implements SeriesService {
     }
 
     @Override
-    public boolean exists(Series series) {
-        try {
-            return seriesDao.find(series.getId()).isPresent();
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return false;
-    }
-
-    @Override
     public Optional<Series> find(int id) {
         try {
             return seriesDao.find(id);
@@ -39,57 +29,5 @@ public class SeriesServiceImpl implements SeriesService {
             log.error("sql exception", e);
         }
         return Optional.empty();
-    }
-
-    @Override
-    public List<Series> findByShow(Show show) {
-        try {
-            return seriesDao.findByShowId(show.getId());
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
-    }
-
-
-    @Override
-    public LocalDate findPremiereReleaseDate(Series series) {
-        try {
-            return seriesDao.findPremiereReleaseDate(series.getId());
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return null;
-    }
-
-
-    @Override
-    public List<Series> findAllWithLimitAndPage(int limit, int page) {
-        try {
-            return seriesDao.findAllWithLimitAndPage(limit, page);
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Series> findAllByNameLikeWithLimitAndPage(String name, int limit, int page) {
-        try {
-            return seriesDao.findAllByNameLikeWithLimitAndPage(name, limit, page);
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return Collections.emptyList();
-    }
-
-    @Override
-    public int countAllByNameLike(String name) {
-        try {
-            return seriesDao.countAllByNameLike(name);
-        } catch (SQLException e) {
-            log.error("sql exception", e);
-        }
-        return -1;
     }
 }
