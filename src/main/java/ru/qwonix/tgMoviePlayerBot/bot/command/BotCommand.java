@@ -69,6 +69,7 @@ public class BotCommand {
     @Command("/all")
     public void all(User user, String[] args) {
         BotUtils botUtils = new BotUtils(botContext);
+        botUtils.deleteMessageIds(user, user.getMessagesIds());
         user.getMessagesIds().reset();
         databaseContext.getUserService().merge(user);
         List<List<InlineKeyboardButton>> moviesKeyboard;

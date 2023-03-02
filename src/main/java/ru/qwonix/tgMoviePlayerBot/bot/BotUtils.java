@@ -89,6 +89,21 @@ public class BotUtils {
                 .replace(".", "\\.");
     }
 
+    public void deleteMessageIds(User user, MessagesIds messagesIds) {
+        if (messagesIds.hasSeasonMessageId()) {
+            deleteMessage(user, messagesIds.getSeasonMessageId());
+        }
+        if (messagesIds.hasEpisodeMessageId()) {
+            deleteMessage(user, messagesIds.getEpisodeMessageId());
+        }
+        if (messagesIds.hasVideoMessageId()) {
+            deleteMessage(user, messagesIds.getVideoMessageId());
+        }
+        if (messagesIds.hasSeriesMessageId()) {
+            deleteMessage(user, messagesIds.getSeriesMessageId());
+        }
+    }
+
     public Integer sendVideoWithKeyboard(User user, String fileId, InlineKeyboardMarkup keyboard) {
         return this.sendVideoWithMarkdownTextAndKeyboard(user, null, fileId, keyboard);
     }
@@ -298,14 +313,15 @@ public class BotUtils {
     }
 
 
-    public void deleteMessage(User user, Integer messageId) {
+    public Boolean deleteMessage(User user, Integer messageId) {
         DeleteMessage deleteMessage = DeleteMessage.builder()
                 .chatId(String.valueOf(user.getChatId()))
                 .messageId(messageId).build();
         try {
-            bot.execute(deleteMessage);
+            return bot.execute(deleteMessage);
         } catch (TelegramApiException e) {
             log.error("message deleting error " + user, e);
         }
+        return Boolean.FALSE;
     }
 }

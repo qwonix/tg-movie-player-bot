@@ -67,17 +67,12 @@ public class MovieCallback extends Callback {
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
         if (messagesIds.hasSeasonMessageId()) {
             botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeasonMessageId());
-        }
-        if (messagesIds.hasEpisodeMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
-        }
-        if (messagesIds.hasVideoMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
+            messagesIds.setSeasonMessageId(null);
         }
         if (messagesIds.hasSeriesMessageId()) {
             botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeriesMessageId());
+            messagesIds.setSeriesMessageId(null);
         }
-        messagesIds.reset();
 
         if (messagesIds.hasEpisodeMessageId()) {
             botUtils.editPhotoWithMarkdownText(chatContext.getUser()

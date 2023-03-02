@@ -3,11 +3,13 @@ package ru.qwonix.tgMoviePlayerBot.bot;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.json.JSONObject;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@ToString
 public class MessagesIds {
     private Integer seriesMessageId;
     private Integer seasonMessageId;

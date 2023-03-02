@@ -82,20 +82,18 @@ public class SeriesCallback extends Callback {
         String text = createText(series);
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
-
         if (messagesIds.hasSeasonMessageId()) {
             botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeasonMessageId());
+            messagesIds.setSeasonMessageId(null);
         }
         if (messagesIds.hasEpisodeMessageId()) {
             botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
+            messagesIds.setEpisodeMessageId(null);
         }
         if (messagesIds.hasVideoMessageId()) {
             botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
+            messagesIds.setVideoMessageId(null);
         }
-        if (messagesIds.hasSeriesMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeriesMessageId());
-        }
-        messagesIds.reset();
 
         if (messagesIds.hasSeriesMessageId()) {
             botUtils.editPhotoWithKeyboard(chatContext.getUser()

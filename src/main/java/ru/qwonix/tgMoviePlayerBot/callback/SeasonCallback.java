@@ -78,19 +78,14 @@ public class SeasonCallback extends Callback {
         String text = createText(season, totalEpisodesCountInSeason);
 
         MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
-        if (messagesIds.hasSeasonMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeasonMessageId());
-        }
         if (messagesIds.hasEpisodeMessageId()) {
             botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
+            messagesIds.setEpisodeMessageId(null);
         }
         if (messagesIds.hasVideoMessageId()) {
             botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
+            messagesIds.setVideoMessageId(null);
         }
-        if (messagesIds.hasSeriesMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeriesMessageId());
-        }
-        messagesIds.reset();
 
         if (messagesIds.hasSeasonMessageId()) {
             botUtils.editPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
