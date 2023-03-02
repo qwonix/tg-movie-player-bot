@@ -13,13 +13,8 @@ public class Bot extends TelegramLongPollingBot {
     private final BotContext botContext;
 
     public Bot() {
-        this.botContext = new BotContext(this);
-    }
-
-    @Override
-    public void onClosing() {
-        super.onClosing();
-        System.out.println("onClosing()");
+        super(TelegramConfig.getProperty(TelegramConfig.BOT_TOKEN));
+        botContext = new BotContext(this);
     }
 
     @Override
@@ -98,14 +93,8 @@ public class Bot extends TelegramLongPollingBot {
         state.onCallback();
     }
 
-
     @Override
     public String getBotUsername() {
         return TelegramConfig.getProperty(TelegramConfig.BOT_USERNAME);
-    }
-
-    @Override
-    public String getBotToken() {
-        return TelegramConfig.getProperty(TelegramConfig.BOT_TOKEN);
     }
 }
