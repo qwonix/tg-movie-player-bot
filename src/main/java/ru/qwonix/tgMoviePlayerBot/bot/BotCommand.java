@@ -1,4 +1,4 @@
-package ru.qwonix.tgMoviePlayerBot.bot.command;
+package ru.qwonix.tgMoviePlayerBot.bot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -7,8 +7,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
-import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.callback.MovieCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.SeasonCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.SeriesCallback;
@@ -16,8 +14,18 @@ import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
 import ru.qwonix.tgMoviePlayerBot.entity.*;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@interface Command {
+    String value();
+}
 
 @Slf4j
 public class BotCommand {
