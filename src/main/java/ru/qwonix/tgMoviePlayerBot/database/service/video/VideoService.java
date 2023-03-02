@@ -1,6 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.database.service.video;
 
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
+import ru.qwonix.tgMoviePlayerBot.entity.Movie;
 import ru.qwonix.tgMoviePlayerBot.entity.Video;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public interface VideoService {
     Optional<Video> find(int id);
 
     Optional<Video> findMaxPriorityByEpisode(Episode episode);
+    Optional<Video> findMaxPriorityByMovie(Movie movie);
 
     List<Video> findAllVideoByVideo(Video video);
 }

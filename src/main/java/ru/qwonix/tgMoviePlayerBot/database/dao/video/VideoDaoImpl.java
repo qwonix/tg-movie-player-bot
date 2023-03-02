@@ -5,6 +5,7 @@ import ru.qwonix.tgMoviePlayerBot.entity.Video;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,19 +81,17 @@ public class VideoDaoImpl implements VideoDao {
 
     }
 
-    @Override
-    public List<Video> findAllByEpisodeId(int episodeId) throws SQLException {
+
+    private List<Video> findAllByEntityIdAndEntityType(int entityId, String entityType) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         List<Video> videos = new ArrayList<>();
-//        try (PreparedStatement preparedStatement
-//                     = connection.prepareStatement("SELECT * FROM video where video_tg_file_id in " +
-//                "(select video_tg_file_id from episode_video where episode_id = ?)")) {
         try (PreparedStatement preparedStatement
                      = connection.prepareStatement("select * from video " +
-                "inner join episode_video ev on video.id = ev.video_id " +
-                "where episode_id = ?")) {
-            preparedStatement.setLong(1, episodeId);
+                "inner join video_entity ve on video.id = ve.video_id " +
+                "where entity_id = ? and entity_type=?")) {
+            preparedStatement.setLong(1, entityId);
+            preparedStatement.setString(2, entityType);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -105,16 +104,48 @@ public class VideoDaoImpl implements VideoDao {
         return videos;
     }
 
+    @Override
+    public List<Video> findAllByEpisodeId(int episodeId) throws SQLException {
+        return findAllByEntityIdAndEntityType(episodeId, "episode");
+    }
 
     @Override
-    public Optional<Video> findMaxPriorityByEpisode(int episodeId) throws SQLException {
+    public List<Video> findAllByMovieId(int movieId) throws SQLException {
+        return findAllByEntityIdAndEntityType(movieId, "movie");
+    }
+
+
+    @Override
+    public Optional<Video> findMaxPriorityByEpisodeId(int episodeId) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("select * from video " +
-                             "inner join episode_video ev on video.id = ev.video_id " +
-                             "where episode_id = ? order by priority limit 1")) {
+                             "inner join video_entity ve on video.id = ve.video_id " +
+                             "where entity_id = ? and entity_type='episode' order by priority limit 1")) {
             preparedStatement.setLong(1, episodeId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Video video = convert(resultSet);
+                return Optional.of(video);
+            }
+        } finally {
+            connectionBuilder.releaseConnection(connection);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Video> findMaxPriorityByMovieId(int movieId) throws SQLException {
+        Connection connection = connectionBuilder.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("select * from video " +
+                             "inner join video_entity ve on video.id = ve.video_id " +
+                             "where entity_id = ? and entity_type='movie' order by priority limit 1")) {
+            preparedStatement.setLong(1, movieId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -132,36 +163,20 @@ public class VideoDaoImpl implements VideoDao {
     public List<Video> findAllVideoByVideoId(int videoId) throws SQLException {
         Connection connection = connectionBuilder.getConnection();
 
-        List<Video> videos = new ArrayList<>();
         try (PreparedStatement preparedStatement
-                     = connection.prepareStatement("select * from video where id in " +
-                "(select video_id from episode_video where episode_id = (select episode_id from episode_video where video_id = ?))")) {
+                     = connection.prepareStatement("select entity_id, entity_type from video_entity where video_id = ?")) {
             preparedStatement.setLong(1, videoId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                Video video = convert(resultSet);
-                videos.add(video);
+            if (resultSet.next()) {
+                int entityId = resultSet.getInt("entity_id");
+                String entityType = resultSet.getString("entity_type");
+
+                return findAllByEntityIdAndEntityType(entityId, entityType);
             }
+            return Collections.emptyList();
         } finally {
             connectionBuilder.releaseConnection(connection);
         }
-
-        if (videos.isEmpty()) {
-            try (PreparedStatement preparedStatement
-                         = connection.prepareStatement("select * from video where id = ?")) {
-                preparedStatement.setLong(1, videoId);
-
-                ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) {
-                    Video video = convert(resultSet);
-                    videos.add(video);
-                }
-            } finally {
-                connectionBuilder.releaseConnection(connection);
-            }
-        }
-
-        return videos;
     }
 }

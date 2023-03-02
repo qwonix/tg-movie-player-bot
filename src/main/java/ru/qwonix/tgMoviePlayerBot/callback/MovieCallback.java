@@ -8,7 +8,7 @@ import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieService;
 import ru.qwonix.tgMoviePlayerBot.entity.Movie;
-import ru.qwonix.tgMoviePlayerBot.exception.NoSuchEpisodeException;
+import ru.qwonix.tgMoviePlayerBot.entity.Video;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchMovieException;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchVideoException;
 
@@ -40,7 +40,7 @@ public class MovieCallback extends Callback {
     }
 
     @Override
-    public void handleCallback(BotContext botContext, ChatContext chatContext) throws  NoSuchMovieException, NoSuchVideoException {
+    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchMovieException, NoSuchVideoException {
         BotUtils botUtils = new BotUtils(botContext);
 
         MovieService movieService = botContext.getDatabaseContext().getMovieService();
@@ -50,6 +50,16 @@ public class MovieCallback extends Callback {
             movie = optionalMovie.get();
         } else {
             throw new NoSuchMovieException("Такого фильма не существует. Попробуйте найти его заново.");
+        }
+
+        Optional<Video> maxPriorityOptionalVideo = botContext.getDatabaseContext().getVideoService()
+                .findMaxPriorityByMovie(movie);
+
+        Video maxPriorityVideo;
+        if (maxPriorityOptionalVideo.isPresent()) {
+            maxPriorityVideo = maxPriorityOptionalVideo.get();
+        } else {
+            throw new NoSuchVideoException("Видео не найдено. Попробуйте заново.");
         }
 
         String movieText = createText(movie);
@@ -81,7 +91,7 @@ public class MovieCallback extends Callback {
             messagesIds.setEpisodeMessageId(movieMessageId);
         }
 
-        new VideoCallback(movie.getVideo()).handleCallback(botContext, chatContext);
+        new VideoCallback(maxPriorityVideo).handleCallback(botContext, chatContext);
 
         botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
         botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());

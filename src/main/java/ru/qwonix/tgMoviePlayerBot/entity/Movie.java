@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.List;
+
 @ToString
 @Builder(toBuilder = true)
 @Data
@@ -12,6 +14,7 @@ public class Movie {
     private String title;
     private String description;
     private String previewTgFileId;
-    private Video video;
     private Show show;
+
+    private List<Video> videos;
 }

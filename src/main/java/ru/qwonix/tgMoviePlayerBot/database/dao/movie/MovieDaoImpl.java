@@ -26,14 +26,14 @@ public class MovieDaoImpl implements MovieDao {
         ShowDao showDao = new ShowDaoImpl(connectionBuilder);
         VideoDao videoDao = new VideoDaoImpl(connectionBuilder);
         Optional<Show> show = showDao.find(resultSet.getInt("show_id"));
-        Optional<Video> video = videoDao.find(resultSet.getInt("video_id"));
+        List<Video> videos = videoDao.findAllByMovieId(resultSet.getInt("id"));
 
         return Movie.builder()
                 .id(resultSet.getInt("id"))
                 .title(resultSet.getString("title"))
                 .description(resultSet.getString("description"))
                 .previewTgFileId(resultSet.getString("preview_tg_file_id"))
-                .video(video.orElse(null))
+                .videos(videos)
                 .show(show.orElse(null))
                 .build();
     }
