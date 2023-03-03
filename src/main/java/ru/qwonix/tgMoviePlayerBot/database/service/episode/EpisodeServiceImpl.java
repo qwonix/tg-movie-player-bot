@@ -34,7 +34,7 @@ public class EpisodeServiceImpl implements EpisodeService {
     @Override
     public Optional<Episode> findNext(Episode episode) {
         try {
-            return episodeDao.findNext(episode.getId(), episode.getSeason().getId());
+            return episodeDao.findNext(episode.getId());
         } catch (SQLException e) {
             log.error("sql exception", e);
         }
