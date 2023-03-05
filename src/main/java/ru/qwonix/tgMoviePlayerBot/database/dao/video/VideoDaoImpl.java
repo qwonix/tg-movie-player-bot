@@ -91,7 +91,7 @@ public class VideoDaoImpl implements VideoDao {
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("select * from video " +
                              "inner join video_entity ve on video.id = ve.video_id " +
-                             "where entity_id = ? and entity_type = ? order by priority limit 1")) {
+                             "where entity_id = ? and entity_type = ? order by priority desc")) {
             preparedStatement.setLong(1, entityId);
             preparedStatement.setString(2, entityType);
 
