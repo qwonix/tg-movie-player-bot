@@ -1,8 +1,8 @@
 package ru.qwonix.tgMoviePlayerBot.database.dao.user;
 
-import ru.qwonix.tgMoviePlayerBot.entity.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
+import ru.qwonix.tgMoviePlayerBot.entity.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.sql.Connection;

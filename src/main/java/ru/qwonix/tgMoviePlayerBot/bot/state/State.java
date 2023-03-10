@@ -16,7 +16,6 @@ import ru.qwonix.tgMoviePlayerBot.exception.NoSuchCallbackException;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public abstract class State {

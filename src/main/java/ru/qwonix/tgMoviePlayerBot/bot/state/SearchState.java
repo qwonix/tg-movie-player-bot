@@ -1,8 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.bot.state;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.qwonix.tgMoviePlayerBot.bot.Bot;
-import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 public class SearchState extends State {

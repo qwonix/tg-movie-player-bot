@@ -12,8 +12,6 @@ import ru.qwonix.tgMoviePlayerBot.callback.SeasonCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.SeriesCallback;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.BasicConnectionPool;
-import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
-import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieService;
 import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
@@ -22,8 +20,6 @@ import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesService;
 import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.database.service.user.UserService;
 import ru.qwonix.tgMoviePlayerBot.database.service.user.UserServiceImpl;
-import ru.qwonix.tgMoviePlayerBot.database.service.video.VideoService;
-import ru.qwonix.tgMoviePlayerBot.database.service.video.VideoServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.*;
 
 import java.lang.annotation.ElementType;

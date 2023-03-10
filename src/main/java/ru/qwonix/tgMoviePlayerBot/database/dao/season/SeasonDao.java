@@ -5,7 +5,6 @@ import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 
 
