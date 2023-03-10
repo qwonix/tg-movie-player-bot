@@ -28,24 +28,24 @@ public class EpisodeDaoImpl implements EpisodeDao {
     }
 
     @Override
-    public Episode convert(ResultSet episodeResultSet) throws SQLException {
+    public Episode convert(ResultSet resultSet) throws SQLException {
         SeasonDao seasonDao = new SeasonDaoImpl(connectionPool);
         VideoDao videoDao = new VideoDaoImpl(connectionPool);
 
-        Optional<Season> season = seasonDao.find(episodeResultSet.getInt("season_id"));
-        List<Video> videos = videoDao.findAllByEpisodeId(episodeResultSet.getInt("id"));
-        PGInterval duration = (PGInterval) episodeResultSet.getObject("duration");
+        Optional<Season> season = seasonDao.find(resultSet.getInt("season_id"));
+        List<Video> videos = videoDao.findAllByEpisodeId(resultSet.getInt("id"));
+        PGInterval duration = (PGInterval) resultSet.getObject("duration");
         return Episode.builder()
-                .id(episodeResultSet.getInt("id"))
-                .number(episodeResultSet.getInt("number"))
-                .productionCode(episodeResultSet.getInt("production_code"))
-                .title(episodeResultSet.getString("title"))
-                .description(episodeResultSet.getString("description"))
-                .releaseDate(episodeResultSet.getObject("release_date", LocalDate.class))
-                .language(episodeResultSet.getString("language"))
-                .country(episodeResultSet.getString("country"))
+                .id(resultSet.getInt("id"))
+                .number(resultSet.getInt("number"))
+                .productionCode(resultSet.getInt("production_code"))
+                .title(resultSet.getString("title"))
+                .description(resultSet.getString("description"))
+                .releaseDate(resultSet.getObject("release_date", LocalDate.class))
+                .language(resultSet.getString("language"))
+                .country(resultSet.getString("country"))
                 .duration(Duration.ofSeconds(duration.getWholeSeconds()))
-                .previewTgFileId(episodeResultSet.getString("preview_tg_file_id"))
+                .previewTgFileId(resultSet.getString("preview_tg_file_id"))
                 .videos(videos)
                 .season(season.orElse(null))
                 .build();

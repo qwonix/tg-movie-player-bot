@@ -1,4 +1,4 @@
-package ru.qwonix.tgMoviePlayerBot.bot;
+package ru.qwonix.tgMoviePlayerBot.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

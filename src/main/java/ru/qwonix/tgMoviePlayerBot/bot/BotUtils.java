@@ -19,6 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.config.TelegramConfig;
+import ru.qwonix.tgMoviePlayerBot.entity.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.util.ArrayList;

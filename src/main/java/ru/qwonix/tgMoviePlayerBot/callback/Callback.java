@@ -26,7 +26,6 @@ public abstract class Callback {
 
     public static JSONObject toCallback(JSONObject callbackData) {
         JSONObject jsonCallback = new JSONObject();
-//        jsonCallback.put("action", Action.SELECT);
         jsonCallback.put("data", callbackData);
 
         return jsonCallback;

@@ -1,6 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.database.dao.user;
 
-import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
+import ru.qwonix.tgMoviePlayerBot.entity.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
@@ -20,13 +20,13 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User convert(ResultSet userResultSet) throws SQLException {
+    public User convert(ResultSet resultSet) throws SQLException {
         return User.builder()
-                .chatId(userResultSet.getLong("chat_id"))
-                .name(userResultSet.getString("name"))
-                .isAdmin(userResultSet.getBoolean("is_admin"))
-                .stateType(State.StateType.valueOf(userResultSet.getString("state")))
-                .messagesIds(MessagesIds.fromJson(userResultSet.getString("tg_messages_ids")))
+                .chatId(resultSet.getLong("chat_id"))
+                .name(resultSet.getString("name"))
+                .isAdmin(resultSet.getBoolean("is_admin"))
+                .stateType(State.StateType.valueOf(resultSet.getString("state")))
+                .messagesIds(MessagesIds.fromJson(resultSet.getString("tg_messages_ids")))
                 .build();
     }
 

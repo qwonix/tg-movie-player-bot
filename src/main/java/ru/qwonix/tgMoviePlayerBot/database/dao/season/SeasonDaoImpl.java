@@ -24,18 +24,18 @@ public class SeasonDaoImpl implements SeasonDao {
     }
 
     @Override
-    public Season convert(ResultSet seasonResultSet) throws SQLException {
+    public Season convert(ResultSet resultSet) throws SQLException {
         SeriesDao seriesDao = new SeriesDaoImpl(connectionPool);
-        Optional<Series> series = seriesDao.find(seasonResultSet.getInt("series_id"));
+        Optional<Series> series = seriesDao.find(resultSet.getInt("series_id"));
 
-        LocalDate premiereReleaseDate = this.findPremiereReleaseDate(seasonResultSet.getInt("id"));
-        LocalDate finalReleaseDate = this.findFinalReleaseDate(seasonResultSet.getInt("id"));
+        LocalDate premiereReleaseDate = this.findPremiereReleaseDate(resultSet.getInt("id"));
+        LocalDate finalReleaseDate = this.findFinalReleaseDate(resultSet.getInt("id"));
         return Season.builder()
-                .id(seasonResultSet.getInt("id"))
-                .number(seasonResultSet.getInt("number"))
-                .description(seasonResultSet.getString("description"))
-                .totalEpisodesCount(seasonResultSet.getInt("total_episodes_count"))
-                .previewTgFileId(seasonResultSet.getString("preview_tg_file_id"))
+                .id(resultSet.getInt("id"))
+                .number(resultSet.getInt("number"))
+                .description(resultSet.getString("description"))
+                .totalEpisodesCount(resultSet.getInt("total_episodes_count"))
+                .previewTgFileId(resultSet.getString("preview_tg_file_id"))
                 .series(series.orElse(null))
                 .premiereReleaseDate(premiereReleaseDate)
                 .finalReleaseDate(finalReleaseDate)
