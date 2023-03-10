@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-            telegramBotsApi.registerBot(new Bot());
+            telegramBotsApi.registerBot(Bot.getInstance());
             log.info("telegram init success");
 
         } catch (TelegramApiRequestException e) {

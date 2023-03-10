@@ -1,6 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.database;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.qwonix.tgMoviePlayerBot.config.DatabaseConfig;
 import ru.qwonix.tgMoviePlayerBot.exception.DaoException;
 
 import java.sql.Connection;
@@ -11,7 +12,9 @@ import java.util.Set;
 import java.util.Stack;
 
 @Slf4j
-public class PoolConnectionBuilder implements ConnectionBuilder {
+public class BasicConnectionPool implements ConnectionPool {
+
+    private static BasicConnectionPool INSTANCE;
 
     private final String dbUrl;
     private final String dbUser;
@@ -22,7 +25,30 @@ public class PoolConnectionBuilder implements ConnectionBuilder {
     private final Stack<Connection> availableConnections = new Stack<>();
     private final Set<Connection> usedConnections = new HashSet<>();
 
-    public PoolConnectionBuilder(String dbUrl, String dbUser, String dbPassword, int maxPoolSize) throws DaoException {
+    public static ConnectionPool getInstance() {
+        if (INSTANCE == null) {
+            try {
+                INSTANCE = new BasicConnectionPool(
+                        DatabaseConfig.getProperty(DatabaseConfig.DB_URL),
+                        DatabaseConfig.getProperty(DatabaseConfig.DB_USER),
+                        DatabaseConfig.getProperty(DatabaseConfig.DB_PASSWORD),
+                        10
+                );
+            } catch (DaoException e) {
+                throw new RuntimeException(e);
+            }
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    INSTANCE.closeConnections();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
+        }
+        return INSTANCE;
+    }
+
+    public BasicConnectionPool(String dbUrl, String dbUser, String dbPassword, int maxPoolSize) throws DaoException {
         if (maxPoolSize < 1) {
             throw new DaoException("pool size should be more than 0");
         }

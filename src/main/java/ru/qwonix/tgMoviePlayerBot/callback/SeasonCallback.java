@@ -4,15 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
-import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
-import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
+import ru.qwonix.tgMoviePlayerBot.database.BasicConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
+import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
+import ru.qwonix.tgMoviePlayerBot.entity.User;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchEpisodeException;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchSeasonException;
 
@@ -23,21 +25,17 @@ public class SeasonCallback extends Callback {
     private final int seasonId;
     private final int page;
 
-    public SeasonCallback(int seasonId, int page) {
+    private final SeasonService seasonService = new SeasonServiceImpl(BasicConnectionPool.getInstance());
+    private final EpisodeService episodeService = new EpisodeServiceImpl(BasicConnectionPool.getInstance());
+
+
+    public SeasonCallback(User user, int seasonId, int page, String callbackId) {
+        super(user, callbackId);
         this.seasonId = seasonId;
         this.page = page;
     }
 
-    public SeasonCallback(Season season, int page) {
-        this(season.getId(), page);
-    }
-
-    public SeasonCallback(JSONObject callbackData) {
-        this(callbackData.getInt("id"), callbackData.getInt("page"));
-    }
-
-    @Override
-    public JSONObject toCallback() {
+    public static JSONObject toJson(int seasonId, int page) {
         JSONObject jsonData = new JSONObject();
         jsonData.put("dataType", DataType.SEASON);
         jsonData.put("id", seasonId);
@@ -47,11 +45,8 @@ public class SeasonCallback extends Callback {
     }
 
     @Override
-    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchSeasonException, NoSuchEpisodeException {
-        BotUtils botUtils = new BotUtils(botContext);
-
-        DatabaseContext databaseContext = botContext.getDatabaseContext();
-        Optional<Season> optionalSeason = databaseContext.getSeasonService().find(seasonId);
+    public void handle() throws NoSuchSeasonException, NoSuchEpisodeException {
+        Optional<Season> optionalSeason = seasonService.find(seasonId);
         Season season;
         if (optionalSeason.isPresent()) {
             season = optionalSeason.get();
@@ -59,7 +54,6 @@ public class SeasonCallback extends Callback {
             throw new NoSuchSeasonException("Такого сезона не существует. Попробуйте найти его заново.");
         }
 
-        EpisodeService episodeService = databaseContext.getEpisodeService();
 
         int totalEpisodesCountInSeason = episodeService.countAllBySeason(season);
         int keyboardPageEpisodesLimit = Integer.parseInt(BotConfig.getProperty(BotConfig.KEYBOARD_PAGE_EPISODES_MAX));
@@ -72,38 +66,37 @@ public class SeasonCallback extends Callback {
         if (seasonEpisodes.isEmpty()) {
             throw new NoSuchEpisodeException("В сезоне отсутствуют серии");
         } else {
-            keyboard = createControlButtons(season, seasonEpisodes, page, pagesCount);
+            keyboard = createControlButtons(season.getId(), seasonEpisodes, page, pagesCount);
         }
 
         String text = createText(season, totalEpisodesCountInSeason);
 
-        MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
+        MessagesIds messagesIds = user.getMessagesIds();
         if (messagesIds.hasEpisodeMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
+            botUtils.deleteMessage(user, messagesIds.getEpisodeMessageId());
             messagesIds.setEpisodeMessageId(null);
         }
         if (messagesIds.hasVideoMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
+            botUtils.deleteMessage(user, messagesIds.getVideoMessageId());
             messagesIds.setVideoMessageId(null);
         }
 
         if (messagesIds.hasSeasonMessageId()) {
-            botUtils.editPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
+            botUtils.editPhotoWithMarkdownTextAndKeyboard(user
                     , messagesIds.getSeasonMessageId()
                     , text
                     , season.getPreviewTgFileId()
                     , keyboard);
 
         } else {
-            Integer seriesMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
+            Integer seriesMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(user
                     , text
                     , season.getPreviewTgFileId()
                     , keyboard);
 
             messagesIds.setSeasonMessageId(seriesMessageId);
         }
-        databaseContext.getUserService().merge(chatContext.getUser());
-        botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());
+        userService.merge(user);
     }
 
     private static String createText(Season season, int episodesCount) {
@@ -116,10 +109,10 @@ public class SeasonCallback extends Callback {
                 + String.format("Финал: `%s`\n", season.getFormattedFinalReleaseDate());
     }
 
-    private static InlineKeyboardMarkup createControlButtons(Season season, List<Episode> seasonEpisodes, int page, int pagesCount) {
+    private static InlineKeyboardMarkup createControlButtons(int seasonId, List<Episode> seasonEpisodes, int page, int pagesCount) {
         Map<String, String> keyboardMap = new LinkedHashMap<>();
         for (Episode episode : seasonEpisodes) {
-            JSONObject episodeCallback = new EpisodeCallback(episode).toCallback();
+            JSONObject episodeCallback = EpisodeCallback.toJson(episode.getId());
             keyboardMap.put(episode.getSeason().getNumber() + "×" + episode.getNumber() + " «" + episode.getTitle() + "»", episodeCallback.toString());
         }
 
@@ -131,26 +124,26 @@ public class SeasonCallback extends Callback {
 
             if (page == 0) {
                 previous = InlineKeyboardButton.builder()
-                        .callbackData("NaN")
+                        .callbackData(EmptyCallback.toJson().toString())
                         .text("×").build();
             } else {
                 previous = InlineKeyboardButton.builder()
-                        .callbackData(new SeasonCallback(season, page - 1).toCallback().toString())
+                        .callbackData(SeasonCallback.toJson(seasonId, page - 1).toString())
                         .text("‹").build();
             }
 
             if (pagesCount == page + 1) {
                 next = InlineKeyboardButton.builder()
-                        .callbackData("NaN")
+                        .callbackData(EmptyCallback.toJson().toString())
                         .text("×").build();
             } else {
                 next = InlineKeyboardButton.builder()
-                        .callbackData(new SeasonCallback(season, page + 1).toCallback().toString())
+                        .callbackData(SeasonCallback.toJson(seasonId, page + 1).toString())
                         .text("›").build();
             }
 
             InlineKeyboardButton current = InlineKeyboardButton.builder()
-                    .callbackData("NaN")
+                    .callbackData(EmptyCallback.toJson().toString())
                     .text(page + 1 + "/" + pagesCount).build();
 
 

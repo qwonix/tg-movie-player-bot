@@ -2,10 +2,9 @@ package ru.qwonix.tgMoviePlayerBot.bot.state;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.qwonix.tgMoviePlayerBot.bot.Bot;
 import ru.qwonix.tgMoviePlayerBot.bot.BotCommand;
-import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
-import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.lang.reflect.InvocationTargetException;
@@ -15,15 +14,12 @@ import java.util.Arrays;
 @Slf4j
 public class DefaultState extends State {
 
-    public DefaultState(ChatContext chatContext, BotContext botContext) {
-        super(chatContext, botContext);
+    public DefaultState(User user, Update update) {
+        super(user, update);
     }
 
     @Override
     public void onText() {
-        User user = chatContext.getUser();
-        Update update = chatContext.getUpdate();
-
         String userMessageText = update.getMessage().getText();
         log.info("user {} send text {}", user, userMessageText);
 
@@ -35,11 +31,11 @@ public class DefaultState extends State {
             Method commandMethod = BotCommand.getMethodForCommand(command);
 
             if (commandMethod != null) {
-                commandMethod.invoke(new BotCommand(botContext), user, commandArgs);
+                commandMethod.invoke(new BotCommand(), user, commandArgs);
                 return;
             }
 
-            new BotUtils(botContext).sendMarkdownText(user, "Используйте команды и кнопки, бот не имеет интерфейса общения");
+            new BotUtils(Bot.getInstance()).sendMarkdownText(user, "Используйте команды и кнопки, бот не имеет интерфейса общения");
         } catch (IllegalAccessException e) {
             log.error("reflective access exception", e);
         } catch (InvocationTargetException e) {

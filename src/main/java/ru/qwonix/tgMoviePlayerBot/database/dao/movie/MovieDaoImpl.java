@@ -1,6 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.database.dao.movie;
 
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.dao.show.ShowDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.show.ShowDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.database.dao.video.VideoDao;
@@ -18,16 +18,16 @@ import java.util.List;
 import java.util.Optional;
 
 public class MovieDaoImpl implements MovieDao {
-    private final ConnectionBuilder connectionBuilder;
+    private final ConnectionPool connectionPool;
 
-    public MovieDaoImpl(ConnectionBuilder connectionBuilder) {
-        this.connectionBuilder = connectionBuilder;
+    public MovieDaoImpl(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     @Override
     public Movie convert(ResultSet resultSet) throws SQLException {
-        ShowDao showDao = new ShowDaoImpl(connectionBuilder);
-        VideoDao videoDao = new VideoDaoImpl(connectionBuilder);
+        ShowDao showDao = new ShowDaoImpl(connectionPool);
+        VideoDao videoDao = new VideoDaoImpl(connectionPool);
         Optional<Show> show = showDao.find(resultSet.getInt("show_id"));
         List<Video> videos = videoDao.findAllByMovieId(resultSet.getInt("id"));
 
@@ -44,7 +44,7 @@ public class MovieDaoImpl implements MovieDao {
 
     @Override
     public Optional<Movie> find(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT * FROM movie WHERE id = ?")) {
@@ -56,7 +56,7 @@ public class MovieDaoImpl implements MovieDao {
                 return Optional.of(movie);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
         return Optional.empty();
@@ -65,7 +65,7 @@ public class MovieDaoImpl implements MovieDao {
 
     @Override
     public List<Movie> findByShowId(int showId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         List<Movie> movies = new ArrayList<>();
         try (PreparedStatement preparedStatement =
@@ -79,7 +79,7 @@ public class MovieDaoImpl implements MovieDao {
                 movies.add(movie);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
         return movies;
     }

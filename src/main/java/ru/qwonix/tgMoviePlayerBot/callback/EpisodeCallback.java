@@ -4,12 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
+import ru.qwonix.tgMoviePlayerBot.bot.Bot;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
-import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
+import ru.qwonix.tgMoviePlayerBot.database.BasicConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
+import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.video.VideoService;
+import ru.qwonix.tgMoviePlayerBot.database.service.video.VideoServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
+import ru.qwonix.tgMoviePlayerBot.entity.User;
 import ru.qwonix.tgMoviePlayerBot.entity.Video;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchEpisodeException;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchVideoException;
@@ -22,20 +28,15 @@ import java.util.*;
 public class EpisodeCallback extends Callback {
     private final int episodeId;
 
-    public EpisodeCallback(JSONObject callbackData) {
-        this(callbackData.getInt("id"));
-    }
+    private final EpisodeService episodeService = new EpisodeServiceImpl(BasicConnectionPool.getInstance());
+    private final VideoService videoService = new VideoServiceImpl(BasicConnectionPool.getInstance());
 
-    public EpisodeCallback(int episodeId) {
+    public EpisodeCallback(User user, int episodeId, String callbackId) {
+        super(user, callbackId);
         this.episodeId = episodeId;
     }
 
-    public EpisodeCallback(Episode episode) {
-        this(episode.getId());
-    }
-
-    @Override
-    public JSONObject toCallback() {
+    public static JSONObject toJson(int episodeId) {
         JSONObject jsonData = new JSONObject();
         jsonData.put("dataType", DataType.EPISODE);
         jsonData.put("id", episodeId);
@@ -43,12 +44,8 @@ public class EpisodeCallback extends Callback {
         return toCallback(jsonData);
     }
 
-
     @Override
-    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchEpisodeException, NoSuchVideoException {
-        BotUtils botUtils = new BotUtils(botContext);
-
-        EpisodeService episodeService = botContext.getDatabaseContext().getEpisodeService();
+    public void handle() throws NoSuchEpisodeException, NoSuchVideoException {
         Optional<Episode> optionalEpisode = episodeService.find(episodeId);
         Episode episode;
         if (optionalEpisode.isPresent()) {
@@ -56,8 +53,7 @@ public class EpisodeCallback extends Callback {
         } else {
             throw new NoSuchEpisodeException("Такого эпизода не существует. Попробуйте найти его заново.");
         }
-        Optional<Video> maxPriorityOptionalVideo = botContext.getDatabaseContext().getVideoService()
-                .findMaxPriorityByEpisode(episode);
+        Optional<Video> maxPriorityOptionalVideo = videoService.findMaxPriorityByEpisode(episode);
 
         Video maxPriorityVideo;
         if (maxPriorityOptionalVideo.isPresent()) {
@@ -76,15 +72,15 @@ public class EpisodeCallback extends Callback {
         String episodeText = createText(episode);
         InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(controlButtons);
 
-        MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
+        MessagesIds messagesIds = user.getMessagesIds();
         if (messagesIds.hasEpisodeMessageId()) {
-            botUtils.editPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
+            botUtils.editPhotoWithMarkdownTextAndKeyboard(user
                     , messagesIds.getEpisodeMessageId()
                     , episodeText
                     , episode.getPreviewTgFileId()
                     , keyboard);
         } else {
-            Integer episodeMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
+            Integer episodeMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(user
                     , episodeText
                     , episode.getPreviewTgFileId()
                     , keyboard
@@ -92,10 +88,9 @@ public class EpisodeCallback extends Callback {
             messagesIds.setEpisodeMessageId(episodeMessageId);
         }
 
-        new VideoCallback(maxPriorityVideo).handleCallback(botContext, chatContext);
+        new VideoCallback(user, maxPriorityVideo.getId(), null).handle();
 
-        botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
-        botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());
+        userService.merge(user);
     }
 
     private static String createText(Episode episode) {
@@ -120,26 +115,26 @@ public class EpisodeCallback extends Callback {
 
         if (nextEpisode.isPresent()) {
             next = InlineKeyboardButton.builder()
-                    .callbackData(new EpisodeCallback(nextEpisode.get()).toCallback().toString())
+                    .callbackData(EpisodeCallback.toJson(nextEpisode.get().getId()).toString())
                     .text("›").build();
         } else {
             next = InlineKeyboardButton.builder()
-                    .callbackData("NaN")
+                    .callbackData(EmptyCallback.toJson().toString())
                     .text("×").build();
         }
 
         if (previousEpisode.isPresent()) {
             previous = InlineKeyboardButton.builder()
-                    .callbackData(new EpisodeCallback(previousEpisode.get()).toCallback().toString())
+                    .callbackData(EpisodeCallback.toJson(previousEpisode.get().getId()).toString())
                     .text("‹").build();
         } else {
             previous = InlineKeyboardButton.builder()
-                    .callbackData("NaN")
+                    .callbackData(EmptyCallback.toJson().toString())
                     .text("×").build();
         }
 
         InlineKeyboardButton current = InlineKeyboardButton.builder()
-                .callbackData("NaN")
+                .callbackData(EmptyCallback.toJson().toString())
                 .text(currentEpisode.getNumber() + "/" + seasonEpisodesCount).build();
 
         return new ArrayList<>(Collections.singletonList(Arrays.asList(previous, current, next)));

@@ -1,7 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.database.service.season;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
@@ -16,8 +16,8 @@ import java.util.Optional;
 public class SeasonServiceImpl implements SeasonService {
     private final SeasonDao seasonDao;
 
-    public SeasonServiceImpl(ConnectionBuilder connectionBuilder) {
-        this.seasonDao = new SeasonDaoImpl(connectionBuilder);
+    public SeasonServiceImpl(ConnectionPool connectionPool) {
+        this.seasonDao = new SeasonDaoImpl(connectionPool);
     }
 
     @Override

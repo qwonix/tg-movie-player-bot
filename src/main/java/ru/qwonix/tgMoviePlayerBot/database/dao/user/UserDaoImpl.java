@@ -2,7 +2,7 @@ package ru.qwonix.tgMoviePlayerBot.database.dao.user;
 
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.sql.Connection;
@@ -13,10 +13,10 @@ import java.util.Optional;
 
 
 public class UserDaoImpl implements UserDao {
-    private final ConnectionBuilder connectionBuilder;
+    private final ConnectionPool connectionPool;
 
-    public UserDaoImpl(ConnectionBuilder connectionBuilder) {
-        this.connectionBuilder = connectionBuilder;
+    public UserDaoImpl(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> find(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM \"user\" WHERE chat_id=?")) {
             preparedStatement.setLong(1, id);
@@ -43,7 +43,7 @@ public class UserDaoImpl implements UserDao {
                 return Optional.of(user);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
         return Optional.empty();
@@ -51,7 +51,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void insert(User user) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("INSERT INTO \"user\" VALUES(?, ?, ?, ?, ?::JSON)")) {
 
@@ -63,14 +63,14 @@ public class UserDaoImpl implements UserDao {
 
             preparedStatement.executeUpdate();
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
     }
 
     @Override
     public void update(long id, User updatedUser) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("UPDATE \"user\" SET name=?, is_admin=?, state=?, tg_messages_ids=?::JSON  WHERE chat_id=?")) {
@@ -83,7 +83,7 @@ public class UserDaoImpl implements UserDao {
 
             preparedStatement.executeUpdate();
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
     }

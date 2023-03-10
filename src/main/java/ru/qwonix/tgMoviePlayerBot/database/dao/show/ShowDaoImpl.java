@@ -1,6 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.database.dao.show;
 
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.entity.Show;
 
 import java.sql.Connection;
@@ -10,10 +10,10 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class ShowDaoImpl implements ShowDao {
-    private final ConnectionBuilder connectionBuilder;
+    private final ConnectionPool connectionPool;
 
-    public ShowDaoImpl(ConnectionBuilder connectionBuilder) {
-        this.connectionBuilder = connectionBuilder;
+    public ShowDaoImpl(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     @Override
@@ -29,7 +29,7 @@ public class ShowDaoImpl implements ShowDao {
 
     @Override
     public Optional<Show> find(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT * FROM show WHERE id=?")) {
@@ -41,7 +41,7 @@ public class ShowDaoImpl implements ShowDao {
                 return Optional.of(show);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
         return Optional.empty();

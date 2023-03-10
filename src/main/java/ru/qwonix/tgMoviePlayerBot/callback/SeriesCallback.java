@@ -4,14 +4,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
-import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
-import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
+import ru.qwonix.tgMoviePlayerBot.database.BasicConnectionPool;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
+import ru.qwonix.tgMoviePlayerBot.entity.User;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchEpisodeException;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchSeriesException;
 
@@ -22,17 +27,16 @@ public class SeriesCallback extends Callback {
     private final int seriesId;
     private final int page;
 
-    public SeriesCallback(int seriesId, int page) {
+    private final SeriesService seriesService = new SeriesServiceImpl(BasicConnectionPool.getInstance());
+    private final SeasonService seasonService = new SeasonServiceImpl(BasicConnectionPool.getInstance());
+
+    public SeriesCallback(User user, int seriesId, int page, String callbackId) {
+        super(user, callbackId);
         this.seriesId = seriesId;
         this.page = page;
     }
 
-    public SeriesCallback(JSONObject callbackData) {
-        this(callbackData.getInt("id"), callbackData.getInt("page"));
-    }
-
-    @Override
-    public JSONObject toCallback() {
+    public static JSONObject toJson(int seriesId, int page) {
         JSONObject jsonData = new JSONObject();
         jsonData.put("dataType", DataType.SERIES);
         jsonData.put("id", seriesId);
@@ -42,11 +46,8 @@ public class SeriesCallback extends Callback {
     }
 
     @Override
-    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchSeriesException, NoSuchEpisodeException {
-        BotUtils botUtils = new BotUtils(botContext);
-
-        DatabaseContext databaseContext = botContext.getDatabaseContext();
-        Optional<Series> optionalSeries = databaseContext.getSeriesService().find(seriesId);
+    public void handle() throws NoSuchSeriesException, NoSuchEpisodeException {
+        Optional<Series> optionalSeries = seriesService.find(seriesId);
         Series series;
         if (optionalSeries.isPresent()) {
             series = optionalSeries.get();
@@ -54,12 +55,12 @@ public class SeriesCallback extends Callback {
             throw new NoSuchSeriesException("Такого сериала не существует. Попробуйте найти его заново.");
         }
 
-        int seasonsCount = databaseContext.getSeasonService().countAllBySeries(series);
+        int seasonsCount = seasonService.countAllBySeries(series);
         int keyboardPageSeasonsLimit = Integer.parseInt(BotConfig.getProperty(BotConfig.KEYBOARD_PAGE_SEASONS_MAX));
         int pagesCount = (int) Math.ceil(seasonsCount / (double) keyboardPageSeasonsLimit);
 
         List<Season> seriesSeasons
-                = databaseContext.getSeasonService().findAllBySeriesOrderByNumberWithLimitAndPage(series, keyboardPageSeasonsLimit, page);
+                = seasonService.findAllBySeriesOrderByNumberWithLimitAndPage(series, keyboardPageSeasonsLimit, page);
 
         InlineKeyboardMarkup keyboard;
         if (seriesSeasons.isEmpty()) {
@@ -67,7 +68,7 @@ public class SeriesCallback extends Callback {
         } else {
             Map<String, String> keyboardMap = new LinkedHashMap<>();
             for (Season season : seriesSeasons) {
-                JSONObject callbackSeason = new SeasonCallback(season, 0).toCallback();
+                JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
                 keyboardMap.put("Сезон " + season.getNumber(), callbackSeason.toString());
             }
             List<List<InlineKeyboardButton>> inlineKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
@@ -81,27 +82,27 @@ public class SeriesCallback extends Callback {
 
         String text = createText(series);
 
-        MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
+        MessagesIds messagesIds = user.getMessagesIds();
         if (messagesIds.hasSeasonMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeasonMessageId());
+            botUtils.deleteMessage(user, messagesIds.getSeasonMessageId());
             messagesIds.setSeasonMessageId(null);
         }
         if (messagesIds.hasEpisodeMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getEpisodeMessageId());
+            botUtils.deleteMessage(user, messagesIds.getEpisodeMessageId());
             messagesIds.setEpisodeMessageId(null);
         }
         if (messagesIds.hasVideoMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getVideoMessageId());
+            botUtils.deleteMessage(user, messagesIds.getVideoMessageId());
             messagesIds.setVideoMessageId(null);
         }
 
         if (messagesIds.hasSeriesMessageId()) {
-            botUtils.editPhotoWithKeyboard(chatContext.getUser()
+            botUtils.editPhotoWithKeyboard(user
                     , messagesIds.getSeriesMessageId()
                     , keyboard
                     , series.getPreviewTgFileId());
         } else {
-            Integer seriesMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(chatContext.getUser()
+            Integer seriesMessageId = botUtils.sendPhotoWithMarkdownTextAndKeyboard(user
                     , text
                     , series.getPreviewTgFileId()
                     , keyboard);
@@ -109,8 +110,7 @@ public class SeriesCallback extends Callback {
             messagesIds.setSeriesMessageId(seriesMessageId);
         }
 
-        databaseContext.getUserService().merge(chatContext.getUser());
-        botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());
+        userService.merge(user);
     }
 
     private static String createText(Series series) {
@@ -125,26 +125,26 @@ public class SeriesCallback extends Callback {
 
         if (page == 0) {
             previous = InlineKeyboardButton.builder()
-                    .callbackData("NaN")
+                    .callbackData(EmptyCallback.toJson().toString())
                     .text("×").build();
         } else {
             previous = InlineKeyboardButton.builder()
-                    .callbackData(new SeriesCallback(seriesId, page - 1).toCallback().toString())
+                    .callbackData(SeriesCallback.toJson(seriesId, page - 1).toString())
                     .text("‹").build();
         }
 
         if (pagesCount == page + 1) {
             next = InlineKeyboardButton.builder()
-                    .callbackData("NaN")
+                    .callbackData(EmptyCallback.toJson().toString())
                     .text("×").build();
         } else {
             next = InlineKeyboardButton.builder()
-                    .callbackData(new SeriesCallback(seriesId, page + 1).toCallback().toString())
+                    .callbackData(SeriesCallback.toJson(seriesId, page + 1).toString())
                     .text("›").build();
         }
 
         InlineKeyboardButton current = InlineKeyboardButton.builder()
-                .callbackData("NaN")
+                .callbackData(EmptyCallback.toJson().toString())
                 .text(page + 1 + "/" + pagesCount).build();
 
         return Arrays.asList(previous, current, next);

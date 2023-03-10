@@ -36,8 +36,8 @@ public class BotUtils {
             + TelegramConfig.getProperty(TelegramConfig.BOT_USERNAME).replaceAll("_", "\\\\_")
             + "*||";
 
-    public BotUtils(BotContext botContext) {
-        this.bot = botContext.getBot();
+    public BotUtils(Bot bot) {
+        this.bot = bot;
     }
 
     public static List<List<InlineKeyboardButton>> createOneRowCallbackKeyboard(Map<String, String> buttons) {
@@ -219,6 +219,15 @@ public class BotUtils {
         AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
                 .callbackQueryId(callbackQueryId)
                 .text(text)
+                .showAlert(showAlert)
+                .build();
+
+        this.executeAlert(answerCallbackQuery);
+    }
+
+    public void executeAlert(String callbackQueryId, Boolean showAlert) {
+        AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
+                .callbackQueryId(callbackQueryId)
                 .showAlert(showAlert)
                 .build();
 

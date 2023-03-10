@@ -1,7 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.database.service.movie;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.dao.movie.MovieDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.movie.MovieDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Movie;
@@ -16,8 +16,8 @@ import java.util.Optional;
 public class MovieServiceImpl implements MovieService {
     private final MovieDao movieDao;
 
-    public MovieServiceImpl(ConnectionBuilder connectionBuilder) {
-        this.movieDao = new MovieDaoImpl(connectionBuilder);
+    public MovieServiceImpl(ConnectionPool connectionPool) {
+        this.movieDao = new MovieDaoImpl(connectionPool);
     }
 
     @Override

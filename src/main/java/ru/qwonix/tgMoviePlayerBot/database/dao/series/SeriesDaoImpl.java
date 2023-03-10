@@ -1,6 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.database.dao.series;
 
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.dao.show.ShowDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.show.ShowDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Series;
@@ -14,15 +14,15 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public class SeriesDaoImpl implements SeriesDao {
-    private final ConnectionBuilder connectionBuilder;
+    private final ConnectionPool connectionPool;
 
-    public SeriesDaoImpl(ConnectionBuilder connectionBuilder) {
-        this.connectionBuilder = connectionBuilder;
+    public SeriesDaoImpl(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     @Override
     public Series convert(ResultSet resultSet) throws SQLException {
-        ShowDao showDao = new ShowDaoImpl(connectionBuilder);
+        ShowDao showDao = new ShowDaoImpl(connectionPool);
         Optional<Show> show = showDao.find(resultSet.getInt("show_id"));
 
         return Series.builder()
@@ -38,7 +38,7 @@ public class SeriesDaoImpl implements SeriesDao {
 
     @Override
     public LocalDate findPremiereReleaseDate(int seriesId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT min(e.release_date) as premiere_date FROM episode e " +
@@ -50,13 +50,13 @@ public class SeriesDaoImpl implements SeriesDao {
 
             return resultSet.getObject("premiere_date", LocalDate.class);
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
     }
 
     @Override
     public Optional<Series> find(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT * FROM series WHERE id=?")) {
@@ -68,7 +68,7 @@ public class SeriesDaoImpl implements SeriesDao {
                 return Optional.of(series);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
         return Optional.empty();

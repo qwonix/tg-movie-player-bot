@@ -1,7 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.database.dao.episode;
 
 import org.postgresql.util.PGInterval;
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.season.SeasonDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.database.dao.video.VideoDao;
@@ -21,16 +21,16 @@ import java.util.List;
 import java.util.Optional;
 
 public class EpisodeDaoImpl implements EpisodeDao {
-    private final ConnectionBuilder connectionBuilder;
+    private final ConnectionPool connectionPool;
 
-    public EpisodeDaoImpl(ConnectionBuilder connectionBuilder) {
-        this.connectionBuilder = connectionBuilder;
+    public EpisodeDaoImpl(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     @Override
     public Episode convert(ResultSet episodeResultSet) throws SQLException {
-        SeasonDao seasonDao = new SeasonDaoImpl(connectionBuilder);
-        VideoDao videoDao = new VideoDaoImpl(connectionBuilder);
+        SeasonDao seasonDao = new SeasonDaoImpl(connectionPool);
+        VideoDao videoDao = new VideoDaoImpl(connectionPool);
 
         Optional<Season> season = seasonDao.find(episodeResultSet.getInt("season_id"));
         List<Video> videos = videoDao.findAllByEpisodeId(episodeResultSet.getInt("id"));
@@ -53,7 +53,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
 
     @Override
     public Optional<Episode> find(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT * FROM episode WHERE id=?")) {
@@ -65,7 +65,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
                 return Optional.of(episode);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
         return Optional.empty();
@@ -73,7 +73,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
 
     @Override
     public Optional<Episode> findNext(long episodeId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("select * " +
@@ -90,7 +90,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
                 return Optional.of(episode);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
         return Optional.empty();
@@ -98,7 +98,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
 
     @Override
     public Optional<Episode> findPrevious(long episodeId, long seasonId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("select * " +
@@ -115,7 +115,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
                 return Optional.of(episode);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
         return Optional.empty();
@@ -123,7 +123,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
 
     @Override
     public List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(long seasonId, int limit, int page) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         List<Episode> episodes = new ArrayList<>();
         try (PreparedStatement preparedStatement =
@@ -138,14 +138,14 @@ public class EpisodeDaoImpl implements EpisodeDao {
                 episodes.add(episode);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
         return episodes;
     }
 
     @Override
     public int countAllBySeasonId(long seasonId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT count(*) as count FROM episode where season_id=?")) {
@@ -155,7 +155,7 @@ public class EpisodeDaoImpl implements EpisodeDao {
             resultSet.next();
             return resultSet.getInt("count");
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
     }
 }

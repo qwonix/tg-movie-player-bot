@@ -11,7 +11,19 @@ import ru.qwonix.tgMoviePlayerBot.callback.MovieCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.SeasonCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.SeriesCallback;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
-import ru.qwonix.tgMoviePlayerBot.database.DatabaseContext;
+import ru.qwonix.tgMoviePlayerBot.database.BasicConnectionPool;
+import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
+import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieService;
+import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.video.VideoService;
+import ru.qwonix.tgMoviePlayerBot.database.service.video.VideoServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.*;
 
 import java.lang.annotation.ElementType;
@@ -40,15 +52,12 @@ public class BotCommand {
         }
     }
 
-    private final DatabaseContext databaseContext;
-    private final BotUtils botUtils;
-    private final BotContext botContext;
+    private final BotUtils botUtils = new BotUtils(Bot.getInstance());
+    private final UserService userService = new UserServiceImpl(BasicConnectionPool.getInstance());
+    private final SeasonService seasonService = new SeasonServiceImpl(BasicConnectionPool.getInstance());
+    private final SeriesService seriesService = new SeriesServiceImpl(BasicConnectionPool.getInstance());
+    private final MovieService movieService = new MovieServiceImpl(BasicConnectionPool.getInstance());
 
-    public BotCommand(BotContext botContext) {
-        this.databaseContext = botContext.getDatabaseContext();
-        this.botUtils = new BotUtils(botContext);
-        this.botContext = botContext;
-    }
 
     public static Method getMethodForCommand(String command) {
         return METHOD_COMMAND.get(command);
@@ -76,22 +85,21 @@ public class BotCommand {
 
     @Command("/all")
     public void all(User user, String[] args) {
-        BotUtils botUtils = new BotUtils(botContext);
         botUtils.deleteMessageIds(user, user.getMessagesIds());
         user.getMessagesIds().reset();
-        databaseContext.getUserService().merge(user);
+        userService.merge(user);
         List<List<InlineKeyboardButton>> moviesKeyboard;
         {
             Map<String, String> keyboardMap = new LinkedHashMap<>();
 
-            for (Movie movie : databaseContext.getMovieService().findByShow(Show.builder().id(1).build())) {
-                JSONObject callbackSeason = new MovieCallback(movie).toCallback();
+            for (Movie movie : movieService.findByShow(Show.builder().id(1).build())) {
+                JSONObject callbackSeason = MovieCallback.toJson(movie.getId());
                 keyboardMap.put(movie.getTitle(), callbackSeason.toString());
             }
             moviesKeyboard = BotUtils.createOneRowCallbackKeyboard(keyboardMap);
         }
 
-        Optional<Series> optionalSeries = botContext.getDatabaseContext().getSeriesService().find(1);
+        Optional<Series> optionalSeries = seriesService.find(1);
         Series series = optionalSeries.get();
         int page = 0;
 
@@ -104,14 +112,13 @@ public class BotCommand {
         {
             Map<String, String> keyboardMap = new LinkedHashMap<>();
 
-            int seasonsCount = botContext.getDatabaseContext().getSeasonService().countAllBySeries(series);
+            int seasonsCount = seasonService.countAllBySeries(series);
             int limit = Integer.parseInt(BotConfig.getProperty(BotConfig.KEYBOARD_PAGE_SEASONS_MAX));
             int pagesCount = (int) Math.ceil(seasonsCount / (double) limit);
-            List<Season> seriesSeasons = botContext.getDatabaseContext().getSeasonService()
-                    .findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
+            List<Season> seriesSeasons = seasonService.findAllBySeriesOrderByNumberWithLimitAndPage(series, limit, page);
 
             for (Season season : seriesSeasons) {
-                JSONObject callbackSeason = new SeasonCallback(season, 0).toCallback();
+                JSONObject callbackSeason = SeasonCallback.toJson(season.getId(), 0);
                 keyboardMap.put("Сезон " + season.getNumber(), callbackSeason.toString());
             }
             seasonsKeyboard = BotUtils.createTwoRowsCallbackKeyboard(keyboardMap);
@@ -179,7 +186,7 @@ public class BotCommand {
         if (args.length == 1) {
             String adminPassword = BotConfig.getProperty(BotConfig.ADMIN_PASSWORD);
             if (args[0].equals(adminPassword)) {
-                user = databaseContext.getUserService().makeAdmin(user);
+                user = userService.makeAdmin(user);
                 botUtils.sendMarkdownText(user, "Вы получили права админа! /admin для доступа в меню");
                 log.warn("became an admin: {}", user);
             } else {

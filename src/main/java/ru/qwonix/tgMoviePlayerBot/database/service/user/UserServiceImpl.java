@@ -1,7 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.database.service.user;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.dao.user.UserDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.user.UserDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
@@ -15,8 +15,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
 
-    public UserServiceImpl(ConnectionBuilder connectionBuilder) {
-        userDao = new UserDaoImpl(connectionBuilder);
+    public UserServiceImpl(ConnectionPool connectionPool) {
+        userDao = new UserDaoImpl(connectionPool);
     }
 
 

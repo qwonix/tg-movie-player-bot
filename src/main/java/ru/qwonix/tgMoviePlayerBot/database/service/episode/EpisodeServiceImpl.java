@@ -1,7 +1,7 @@
 package ru.qwonix.tgMoviePlayerBot.database.service.episode;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.dao.episode.EpisodeDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.episode.EpisodeDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Episode;
@@ -16,8 +16,8 @@ import java.util.Optional;
 public class EpisodeServiceImpl implements EpisodeService {
     private final EpisodeDao episodeDao;
 
-    public EpisodeServiceImpl(ConnectionBuilder connectionBuilder) {
-        this.episodeDao = new EpisodeDaoImpl(connectionBuilder);
+    public EpisodeServiceImpl(ConnectionPool connectionPool) {
+        this.episodeDao = new EpisodeDaoImpl(connectionPool);
     }
 
     @Override

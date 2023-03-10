@@ -2,140 +2,123 @@ package ru.qwonix.tgMoviePlayerBot.bot.state;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Video;
-import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
+import ru.qwonix.tgMoviePlayerBot.bot.Bot;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
-import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.callback.*;
+import ru.qwonix.tgMoviePlayerBot.database.BasicConnectionPool;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.entity.User;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchCallbackException;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public abstract class State {
-    protected final ChatContext chatContext;
-    protected final BotContext botContext;
-
-    public State(ChatContext chatContext, BotContext botContext) {
-        this.chatContext = chatContext;
-        this.botContext = botContext;
+    public enum StateType {
+        DEFAULT, SEARCH
     }
 
-    public static State getState(StateType stateType, ChatContext chatContext, BotContext botContext) {
-        switch (stateType) {
-            case SEARCH:
-                return new SearchState(chatContext, botContext);
-            case DEFAULT:
-            default:
-                return new DefaultState(chatContext, botContext);
-        }
-    }
+    protected final Update update;
+    protected final User user;
 
-    public abstract void onText();
+    protected final BotUtils botUtils = new BotUtils(Bot.getInstance());
+    protected final UserService userService = new UserServiceImpl(BasicConnectionPool.getInstance());
+
+    public State(User user, Update update) {
+        this.update = update;
+        this.user = user;
+    }
 
     public void onVideo() {
-        BotUtils botUtils = new BotUtils(botContext);
-
-        if (!chatContext.getUser().isAdmin()) {
-            botUtils.sendMarkdownText(chatContext.getUser()
+        if (!user.isAdmin()) {
+            botUtils.sendMarkdownText(user
                     , "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
             return;
         }
-        Update update = chatContext.getUpdate();
         Video video = update.getMessage().getVideo();
 
-        log.info("user {} send video {}", chatContext.getUser(), video);
+        log.info("user {} send video {}", user, video);
 
-        if (chatContext.getUser().isAdmin()) {
-            botUtils.sendMarkdownTextWithReplay(chatContext.getUser()
+        if (user.isAdmin()) {
+            botUtils.sendMarkdownTextWithReplay(user
                     , "getFileId: `" + video.getFileId() + "`" + '\n' + "duration (sec): `" + video.getDuration() + "`"
                     , update.getMessage().getMessageId());
         } else {
-            botUtils.sendMarkdownText(chatContext.getUser()
+            botUtils.sendMarkdownText(user
                     , "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
 
         }
     }
 
     public void onPhoto() {
-        BotUtils botUtils = new BotUtils(botContext);
-        if (!chatContext.getUser().isAdmin()) {
-            botUtils.sendMarkdownText(chatContext.getUser()
+        if (!user.isAdmin()) {
+            botUtils.sendMarkdownText(user
                     , "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
             return;
         }
-        Update update = chatContext.getUpdate();
 
         List<PhotoSize> photos = update.getMessage().getPhoto();
-        log.info("user {} send {} photos", chatContext.getUser(), photos.size());
+        log.info("user {} send {} photos", user, photos.size());
         PhotoSize photoSize = photos.stream().max(Comparator.comparingInt(PhotoSize::getFileSize)).get();
 
-        botUtils.sendMarkdownTextWithReplay(chatContext.getUser()
+        botUtils.sendMarkdownTextWithReplay(user
                 , "`" + photoSize.getFileId() + "`"
                 , update.getMessage().getMessageId());
 
     }
 
     public void onCallback() {
-        CallbackQuery callbackQuery = chatContext.getUpdate().getCallbackQuery();
+        String callbackData = update.getCallbackQuery().getData();
+        String callbackId = update.getCallbackQuery().getId();
 
-        String data = callbackQuery.getData();
+        JSONObject data = new JSONObject(callbackData).getJSONObject("data");
+        String dataTypeString = data.getString("dataType");
 
-        if (data.equals("NaN")) {
-            log.info("user {} send empty callback", chatContext.getUser());
-            new BotUtils(botContext).confirmCallback(callbackQuery.getId());
-            return;
-        }
-
-        log.info("user {} callback {}", chatContext.getUser(), data);
-
-        JSONObject jsonObject = Callback.parseCallback(data);
-        DataType dataType = DataType.valueOf(jsonObject.getString("dataType"));
+        Callback.DataType dataType = Callback.DataType.valueOf(dataTypeString);
 
         Callback callback;
         switch (dataType) {
             case VIDEO:
-                callback = new VideoCallback(jsonObject);
+                int videoId = data.getInt("id");
+                callback = new VideoCallback(user, videoId, callbackId);
                 break;
-
             case EPISODE:
-                callback = new EpisodeCallback(jsonObject);
+                int episodeId = data.getInt("id");
+                callback = new EpisodeCallback(user, episodeId, callbackId);
                 break;
-
             case SEASON:
-                callback = new SeasonCallback(jsonObject);
+                int seasonId = data.getInt("id");
+                int seasonPage = data.getInt("page");
+                callback = new SeasonCallback(user, seasonId, seasonPage, callbackId);
                 break;
-
             case SERIES:
-                callback = new SeriesCallback(jsonObject);
+                int seriesId = data.getInt("id");
+                int seriesPage = data.getInt("page");
+                callback = new SeriesCallback(user, seriesId, seriesPage, callbackId);
                 break;
-
             case MOVIE:
-                callback = new MovieCallback(jsonObject);
+                int movieId = data.getInt("id");
+                callback = new MovieCallback(user, movieId, callbackId);
                 break;
-
-            case QUERY:
-//                callback = new QueryCallback(jsonObject);
-
+            case EMPTY:
             default:
-                log.info("no such case for {}", dataType);
-                return;
+                callback = new EmptyCallback(user, update, callbackId);
         }
+
+        log.info("user {} callback {}", user, callback);
         try {
-            callback.handleCallback(botContext, chatContext);
+            callback.handle();
+            callback.confirm();
         } catch (NoSuchCallbackException e) {
-            new BotUtils(botContext).executeAlertWithText(chatContext.getUpdate().getCallbackQuery().getId()
-                    , e.getMessage()
-                    , false);
+            throw new RuntimeException(e);
         }
     }
 
-
-    public enum StateType {
-        DEFAULT, SEARCH
-    }
+    public abstract void onText();
 }

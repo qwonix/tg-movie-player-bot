@@ -2,12 +2,20 @@ package ru.qwonix.tgMoviePlayerBot.callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
-import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
-import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.bot.MessagesIds;
+import ru.qwonix.tgMoviePlayerBot.database.BasicConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieService;
+import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
+import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesService;
+import ru.qwonix.tgMoviePlayerBot.database.service.series.SeriesServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserServiceImpl;
+import ru.qwonix.tgMoviePlayerBot.database.service.video.VideoService;
+import ru.qwonix.tgMoviePlayerBot.database.service.video.VideoServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Movie;
+import ru.qwonix.tgMoviePlayerBot.entity.User;
 import ru.qwonix.tgMoviePlayerBot.entity.Video;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchMovieException;
 import ru.qwonix.tgMoviePlayerBot.exception.NoSuchVideoException;
@@ -18,20 +26,16 @@ import java.util.Optional;
 public class MovieCallback extends Callback {
     private final int movieId;
 
-    public MovieCallback(int movieId) {
+    private final MovieService movieService = new MovieServiceImpl(BasicConnectionPool.getInstance());
+    private final VideoService videoService = new VideoServiceImpl(BasicConnectionPool.getInstance());
+
+
+    public MovieCallback(User user, int movieId, String callbackId) {
+        super(user, callbackId);
         this.movieId = movieId;
     }
 
-    public MovieCallback(Movie movie) {
-        this(movie.getId());
-    }
-
-    public MovieCallback(JSONObject callbackData) {
-        this(callbackData.getInt("id"));
-    }
-
-    @Override
-    public JSONObject toCallback() {
+    public static JSONObject toJson(int movieId) {
         JSONObject jsonData = new JSONObject();
         jsonData.put("dataType", DataType.MOVIE);
         jsonData.put("id", movieId);
@@ -40,10 +44,7 @@ public class MovieCallback extends Callback {
     }
 
     @Override
-    public void handleCallback(BotContext botContext, ChatContext chatContext) throws NoSuchMovieException, NoSuchVideoException {
-        BotUtils botUtils = new BotUtils(botContext);
-
-        MovieService movieService = botContext.getDatabaseContext().getMovieService();
+    public void handle() throws NoSuchMovieException, NoSuchVideoException {
         Optional<Movie> optionalMovie = movieService.find(movieId);
         Movie movie;
         if (optionalMovie.isPresent()) {
@@ -52,8 +53,7 @@ public class MovieCallback extends Callback {
             throw new NoSuchMovieException("Такого фильма не существует. Попробуйте найти его заново.");
         }
 
-        Optional<Video> maxPriorityOptionalVideo = botContext.getDatabaseContext().getVideoService()
-                .findMaxPriorityByMovie(movie);
+        Optional<Video> maxPriorityOptionalVideo = videoService.findMaxPriorityByMovie(movie);
 
         Video maxPriorityVideo;
         if (maxPriorityOptionalVideo.isPresent()) {
@@ -64,32 +64,31 @@ public class MovieCallback extends Callback {
 
         String movieText = createText(movie);
 
-        MessagesIds messagesIds = chatContext.getUser().getMessagesIds();
+        MessagesIds messagesIds = user.getMessagesIds();
         if (messagesIds.hasSeasonMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeasonMessageId());
+            botUtils.deleteMessage(user, messagesIds.getSeasonMessageId());
             messagesIds.setSeasonMessageId(null);
         }
         if (messagesIds.hasSeriesMessageId()) {
-            botUtils.deleteMessage(chatContext.getUser(), messagesIds.getSeriesMessageId());
+            botUtils.deleteMessage(user, messagesIds.getSeriesMessageId());
             messagesIds.setSeriesMessageId(null);
         }
 
         if (messagesIds.hasEpisodeMessageId()) {
-            botUtils.editPhotoWithMarkdownText(chatContext.getUser()
+            botUtils.editPhotoWithMarkdownText(user
                     , messagesIds.getEpisodeMessageId()
                     , movieText
                     , movie.getPreviewTgFileId());
         } else {
-            Integer movieMessageId = botUtils.sendPhotoWithMarkdownText(chatContext.getUser()
+            Integer movieMessageId = botUtils.sendPhotoWithMarkdownText(user
                     , movieText
                     , movie.getPreviewTgFileId());
             messagesIds.setEpisodeMessageId(movieMessageId);
         }
 
-        new VideoCallback(maxPriorityVideo).handleCallback(botContext, chatContext);
+        new VideoCallback(user, maxPriorityVideo.getId(), null).handle();
 
-        botContext.getDatabaseContext().getUserService().merge(chatContext.getUser());
-        botUtils.confirmCallback(chatContext.getUpdate().getCallbackQuery().getId());
+        userService.merge(user);
     }
 
     private static String createText(Movie movie) {

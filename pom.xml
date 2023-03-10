@@ -6,7 +6,7 @@
 
     <groupId>ru.qwonix</groupId>
     <artifactId>tg-movie-player-bot</artifactId>
-    <version>4.2.0</version>
+    <version>5.0.0</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

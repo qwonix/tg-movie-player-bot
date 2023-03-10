@@ -1,23 +1,21 @@
 package ru.qwonix.tgMoviePlayerBot.bot.state;
 
-import ru.qwonix.tgMoviePlayerBot.bot.BotContext;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.qwonix.tgMoviePlayerBot.bot.Bot;
 import ru.qwonix.tgMoviePlayerBot.bot.BotUtils;
-import ru.qwonix.tgMoviePlayerBot.bot.ChatContext;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 public class SearchState extends State {
 
-    public SearchState(ChatContext chatContext, BotContext botContext) {
-        super(chatContext, botContext);
+    public SearchState(User user, Update update) {
+        super(user, update);
     }
 
     @Override
     public void onText() {
-        String query = chatContext.getUpdate().getMessage().getText();
-        new BotUtils(botContext).sendMarkdownText(chatContext.getUser(), String.format("Поиск по запросу: `%s`", query));
-
-        User user = chatContext.getUser();
+        String query = update.getMessage().getText();
+        botUtils.sendMarkdownText(user, String.format("Поиск по запросу: `%s`", query));
         user.setStateType(StateType.DEFAULT);
-        botContext.getDatabaseContext().getUserService().merge(user);
+        userService.merge(user);
     }
 }

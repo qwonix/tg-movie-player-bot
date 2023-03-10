@@ -1,6 +1,6 @@
 package ru.qwonix.tgMoviePlayerBot.database.dao.season;
 
-import ru.qwonix.tgMoviePlayerBot.database.ConnectionBuilder;
+import ru.qwonix.tgMoviePlayerBot.database.ConnectionPool;
 import ru.qwonix.tgMoviePlayerBot.database.dao.series.SeriesDao;
 import ru.qwonix.tgMoviePlayerBot.database.dao.series.SeriesDaoImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.Season;
@@ -17,15 +17,15 @@ import java.util.Optional;
 
 public class SeasonDaoImpl implements SeasonDao {
 
-    private final ConnectionBuilder connectionBuilder;
+    private final ConnectionPool connectionPool;
 
-    public SeasonDaoImpl(ConnectionBuilder connectionBuilder) {
-        this.connectionBuilder = connectionBuilder;
+    public SeasonDaoImpl(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     @Override
     public Season convert(ResultSet seasonResultSet) throws SQLException {
-        SeriesDao seriesDao = new SeriesDaoImpl(connectionBuilder);
+        SeriesDao seriesDao = new SeriesDaoImpl(connectionPool);
         Optional<Series> series = seriesDao.find(seasonResultSet.getInt("series_id"));
 
         LocalDate premiereReleaseDate = this.findPremiereReleaseDate(seasonResultSet.getInt("id"));
@@ -44,7 +44,7 @@ public class SeasonDaoImpl implements SeasonDao {
 
 
     private LocalDate findPremiereReleaseDate(int seasonId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("select min(release_date) as premiere_release_date from episode where season_id = ?")) {
@@ -55,12 +55,12 @@ public class SeasonDaoImpl implements SeasonDao {
 
             return resultSet.getObject("premiere_release_date", LocalDate.class);
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
     }
 
     private LocalDate findFinalReleaseDate(int seasonId) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("select" +
@@ -77,13 +77,13 @@ public class SeasonDaoImpl implements SeasonDao {
             resultSet.next();
             return resultSet.getObject("final_release_date", LocalDate.class);
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
     }
 
     @Override
     public List<Season> findAllBySeriesOrderByNumberWithLimitAndPage(Series series, int limit, int page) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         List<Season> seasons = new ArrayList<>();
         try (PreparedStatement preparedStatement =
@@ -98,14 +98,14 @@ public class SeasonDaoImpl implements SeasonDao {
                 seasons.add(season);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
         return seasons;
     }
 
     @Override
     public int countAllBySeries(Series series) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT count(*) as count FROM season where series_id = ?")) {
@@ -116,13 +116,13 @@ public class SeasonDaoImpl implements SeasonDao {
 
             return resultSet.getInt("count");
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
     }
 
     @Override
     public Optional<Season> find(long id) throws SQLException {
-        Connection connection = connectionBuilder.getConnection();
+        Connection connection = connectionPool.getConnection();
 
         try (PreparedStatement preparedStatement =
                      connection.prepareStatement("SELECT * FROM season WHERE id=?")) {
@@ -134,7 +134,7 @@ public class SeasonDaoImpl implements SeasonDao {
                 return Optional.of(season);
             }
         } finally {
-            connectionBuilder.releaseConnection(connection);
+            connectionPool.releaseConnection(connection);
         }
 
         return Optional.empty();

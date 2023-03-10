@@ -3,18 +3,31 @@ package ru.qwonix.tgMoviePlayerBot.bot;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.qwonix.tgMoviePlayerBot.bot.state.DefaultState;
+import ru.qwonix.tgMoviePlayerBot.bot.state.SearchState;
 import ru.qwonix.tgMoviePlayerBot.bot.state.State;
 import ru.qwonix.tgMoviePlayerBot.config.TelegramConfig;
+import ru.qwonix.tgMoviePlayerBot.database.BasicConnectionPool;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserService;
+import ru.qwonix.tgMoviePlayerBot.database.service.user.UserServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.entity.User;
 
 import java.util.Optional;
 
-public class Bot extends TelegramLongPollingBot {
-    private final BotContext botContext;
 
-    public Bot() {
+public class Bot extends TelegramLongPollingBot {
+    private static Bot INSTANCE;
+    private final UserService userService = new UserServiceImpl(BasicConnectionPool.getInstance());
+
+    private Bot() {
         super(TelegramConfig.getProperty(TelegramConfig.BOT_TOKEN));
-        botContext = new BotContext(this);
+    }
+
+    public static Bot getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new Bot();
+        }
+
+        return INSTANCE;
     }
 
     @Override
@@ -31,8 +44,7 @@ public class Bot extends TelegramLongPollingBot {
             throw new IllegalArgumentException("update has no user");
         }
 
-        Optional<User> optionalUser = botContext.getDatabaseContext().getUserService().
-                findUser(telegramUser.getId());
+        Optional<User> optionalUser = userService.findUser(telegramUser.getId());
         User user;
         if (optionalUser.isPresent()) {
             user = optionalUser.get();
@@ -41,56 +53,35 @@ public class Bot extends TelegramLongPollingBot {
                     .chatId(telegramUser.getId())
                     .name(telegramUser.getFirstName())
                     .build();
-            botContext.getDatabaseContext().getUserService().merge(user);
+            userService.merge(user);
+        }
+
+        State state;
+        switch (user.getStateType()) {
+            case SEARCH:
+                state = new SearchState(user, update);
+                break;
+            case DEFAULT:
+                state = new DefaultState(user, update);
+                break;
+            default:
+                state = new DefaultState(user, update);
+                break;
         }
 
         if (update.hasCallbackQuery()) {
-            this.onCallbackReceived(update, user);
-            return;
-        }
-
-        if (!update.hasMessage()) {
-            return;
+            state.onCallback();
+        } else if (!update.hasMessage()) {
         } else if (update.getMessage().hasText()) {
-            this.onTextMessageReceived(update, user);
+            if (update.getMessage().getText().startsWith("/")) {
+                new DefaultState(user, update).onText();
+            }
+
         } else if (update.getMessage().hasVideo()) {
-            this.onVideoReceived(update, user);
+            state.onVideo();
         } else if (update.getMessage().hasPhoto()) {
-            this.onPhotoReceived(update, user);
+            state.onPhoto();
         }
-    }
-
-    private void onVideoReceived(Update update, User user) {
-        ChatContext chatContext = new ChatContext(user, update);
-        State state = State.getState(user.getStateType(), chatContext, botContext);
-
-        state.onVideo();
-    }
-
-    private void onPhotoReceived(Update update, User user) {
-        ChatContext chatContext = new ChatContext(user, update);
-        State state = State.getState(user.getStateType(), chatContext, botContext);
-
-        state.onPhoto();
-    }
-
-    private void onTextMessageReceived(Update update, User user) {
-        ChatContext chatContext = new ChatContext(user, update);
-        State state = State.getState(user.getStateType(), chatContext, botContext);
-
-        String text = update.getMessage().getText();
-        if (text.startsWith("/")) {
-            state = new DefaultState(chatContext, botContext);
-        }
-
-        state.onText();
-    }
-
-    private void onCallbackReceived(Update update, User user) {
-        ChatContext chatContext = new ChatContext(user, update);
-        State state = State.getState(user.getStateType(), chatContext, botContext);
-
-        state.onCallback();
     }
 
     @Override
