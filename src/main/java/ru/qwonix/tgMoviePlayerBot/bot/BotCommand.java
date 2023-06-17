@@ -12,6 +12,8 @@ import ru.qwonix.tgMoviePlayerBot.callback.SeasonCallback;
 import ru.qwonix.tgMoviePlayerBot.callback.SeriesCallback;
 import ru.qwonix.tgMoviePlayerBot.config.BotConfig;
 import ru.qwonix.tgMoviePlayerBot.database.BasicConnectionPool;
+import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeService;
+import ru.qwonix.tgMoviePlayerBot.database.service.episode.EpisodeServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieService;
 import ru.qwonix.tgMoviePlayerBot.database.service.movie.MovieServiceImpl;
 import ru.qwonix.tgMoviePlayerBot.database.service.season.SeasonService;
@@ -49,6 +51,8 @@ public class BotCommand {
     }
 
     private final BotUtils botUtils = new BotUtils(Bot.getInstance());
+    private final EpisodeService episodeService = new EpisodeServiceImpl(BasicConnectionPool.getInstance());
+
     private final UserService userService = new UserServiceImpl(BasicConnectionPool.getInstance());
     private final SeasonService seasonService = new SeasonServiceImpl(BasicConnectionPool.getInstance());
     private final SeriesService seriesService = new SeriesServiceImpl(BasicConnectionPool.getInstance());
@@ -188,6 +192,17 @@ public class BotCommand {
             } else {
                 log.warn("trying to become an admin: {}", user);
             }
+        }
+    }
+
+    @Command("/set_available")
+    public void set_available(User user, String[] args) {
+        if (!user.isAdmin()) {
+            botUtils.sendMarkdownText(user, "Вы не являетесь администратором. Для получения прав используйте /admin <password>");
+            return;
+        }
+        if (args.length == 2) {
+            episodeService.setAvailableByEpisodeProductionCode(Integer.parseInt(args[0]), Boolean.valueOf(args[1]));
         }
     }
 

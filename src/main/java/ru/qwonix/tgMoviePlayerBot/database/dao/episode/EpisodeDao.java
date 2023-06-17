@@ -16,4 +16,6 @@ public interface EpisodeDao extends DefaultDao<Episode> {
     List<Episode> findAllBySeasonOrderByNumberWithLimitAndPage(long seasonId, int limit, int page) throws SQLException;
 
     int countAllBySeasonId(long seasonId) throws SQLException;
+
+    void setAvailableByEpisodeProductionCode(int episodeProductionCode, Boolean isAvailable) throws SQLException;
 }

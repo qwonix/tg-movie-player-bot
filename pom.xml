@@ -6,14 +6,14 @@
 
     <groupId>ru.qwonix</groupId>
     <artifactId>tg-movie-player-bot</artifactId>
-    <version>5.0.0</version>
+    <version>5.1.0</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <telegrambots.version>6.5.0</telegrambots.version>
+        <telegrambots.version>6.7.0</telegrambots.version>
         <lombok.version>1.18.24</lombok.version>
-        <logback.version>1.2.3</logback.version>
+        <logback.version>1.2.9</logback.version>
         <postgresql.version>42.5.1</postgresql.version>
     </properties>
 
@@ -57,7 +57,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20220924</version>
+            <version>20230227</version>
         </dependency>
     </dependencies>
 

@@ -17,4 +17,5 @@ public interface EpisodeService {
 
     int countAllBySeason(Season season);
 
+    void setAvailableByEpisodeProductionCode(int episodeProductionCode, Boolean isAvailable);
 }

@@ -158,4 +158,19 @@ public class EpisodeDaoImpl implements EpisodeDao {
             connectionPool.releaseConnection(connection);
         }
     }
+
+    @Override
+    public void setAvailableByEpisodeProductionCode(int episodeProductionCode, Boolean isAvailable) throws SQLException {
+        Connection connection = connectionPool.getConnection();
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement("UPDATE episode_all set is_available=? where production_code = ?")) {
+            preparedStatement.setBoolean(1, isAvailable);
+            preparedStatement.setInt(2, episodeProductionCode);
+
+            preparedStatement.executeUpdate();
+        } finally {
+            connectionPool.releaseConnection(connection);
+        }
+    }
 }

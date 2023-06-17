@@ -70,4 +70,13 @@ public class EpisodeServiceImpl implements EpisodeService {
         }
         return -1;
     }
+
+    @Override
+    public void setAvailableByEpisodeProductionCode(int episodeProductionCode, Boolean isAvailable) {
+        try {
+            episodeDao.setAvailableByEpisodeProductionCode(episodeProductionCode, isAvailable);
+        } catch (SQLException e) {
+            log.error("sql exception", e);
+        }
+    }
 }
